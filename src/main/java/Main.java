@@ -20,7 +20,13 @@ public class Main {
             // Wait for connection from client.
             clientSocket = serverSocket.accept();
             OutputStream outputStream = clientSocket.getOutputStream();
-            outputStream.write("+PONG\r\n".getBytes());
+            while (true) {
+                byte[] input = new byte[1024];
+                clientSocket.getInputStream().read(input);
+                String inputString = new String(input);
+                System.out.println("Received: " + inputString);
+                outputStream.write("+PONG\r\n".getBytes());
+            }
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
         } finally {
