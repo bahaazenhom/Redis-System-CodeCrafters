@@ -1,48 +1,46 @@
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Main {
     public static void main(String[] args) {
-        // You can use print statements as follows for debugging, they'll be visible when running tests.
         System.out.println("Logs from your program will appear here!");
 
-        //  Uncomment this block to pass the first stage
-        ServerSocket serverSocket = null;
-        Socket clientSocket = null;
         int port = 6379;
-        try {
-            serverSocket = new ServerSocket(port);
-            // Since the tester restarts your program quite often, setting SO_REUSEADDR
-            // ensures that we don't run into 'Address already in use' errors
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
             serverSocket.setReuseAddress(true);
-            // Wait for connection from client.
-            clientSocket = serverSocket.accept();
-            Socket finalClientSocket = clientSocket;
-            new Thread(()->{ while (true) {
-                byte[] input = new byte[1024];
-                OutputStream outputStream = null;
-                try {
-                    outputStream = finalClientSocket.getOutputStream();
-                    finalClientSocket.getInputStream().read(input);
-                    String inputString = new String(input);
-                    System.out.println("Received: " + inputString);
-                    outputStream.write("+PONG\r\n".getBytes());
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }}).start();
+
+            // Continuously accept new clients
+            while (true) {
+                Socket clientSocket = serverSocket.accept();
+                System.out.println("New client connected: " + clientSocket.getInetAddress());
+
+                // Handle each client in a separate thread
+                new Thread(() -> handleClient(clientSocket)).start();
+            }
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
-        } finally {
-            try {
-                if (clientSocket != null) {
-                    clientSocket.close();
-                }
-            } catch (IOException e) {
-                System.out.println("IOException: " + e.getMessage());
+        }
+    }
+
+    private static void handleClient(Socket clientSocket) {
+        try (
+                Socket socket = clientSocket;
+                InputStream inputStream = socket.getInputStream();
+                OutputStream outputStream = socket.getOutputStream()) {
+
+            byte[] buffer = new byte[1024];
+            int bytesRead;
+
+            while ((bytesRead = inputStream.read(buffer)) != -1) {
+                String inputString = new String(buffer, 0, bytesRead);
+                System.out.println("Received: " + inputString);
+                outputStream.write("+PONG\r\n".getBytes());
             }
+        } catch (IOException e) {
+            System.out.println("Client disconnected: " + e.getMessage());
         }
     }
 }
