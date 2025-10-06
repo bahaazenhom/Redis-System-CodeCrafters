@@ -32,7 +32,7 @@ public class Main {
                 } catch (IOException e) {
                     throw new RuntimeException(e);
                 }
-            }});
+            }}).start();
         } catch (IOException e) {
             System.out.println("IOException: " + e.getMessage());
         } finally {
