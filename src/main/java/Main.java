@@ -5,6 +5,8 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 public class Main {
     public static void main(String[] args) {
@@ -30,8 +32,10 @@ public class Main {
     private static void handleClient(Socket clientSocket) {
         try (
                 BufferedReader clientInput = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                BufferedWriter clientOutput = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));) {
-
+                BufferedWriter clientOutput = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
+                
+                ) {
+            Map<String, String> dataStore = new HashMap<>();
             String content;
             while ((content = clientInput.readLine()) != null) {
                 if(content.equalsIgnoreCase("ping")) {
@@ -41,6 +45,20 @@ public class Main {
                     String numBytes = clientInput.readLine();
                     clientOutput.write(numBytes + "\r\n" + clientInput.readLine() + "\r\n");
                     clientOutput.flush();
+                }
+                else if(content.equalsIgnoreCase("set")){
+                    String key = clientInput.readLine();
+                    String value = clientInput.readLine();
+                    dataStore.put(key, value); 
+                    clientOutput.write("+OK\r\n");
+                    clientOutput.flush();
+
+                }
+                else if(content.equalsIgnoreCase("get")){
+                    String key = clientInput.readLine();
+                    String value = dataStore.get(key);
+                    if(value != null)clientOutput.write(value.length()+"\r\n"+value+"\r\n");
+                    else clientOutput.write("$-1\r\n");
                 }
             }
         } catch (IOException e) {
