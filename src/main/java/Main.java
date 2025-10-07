@@ -1,6 +1,8 @@
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 
@@ -27,17 +29,19 @@ public class Main {
 
     private static void handleClient(Socket clientSocket) {
         try (
-                Socket socket = clientSocket;
-                InputStream inputStream = socket.getInputStream();
-                OutputStream outputStream = socket.getOutputStream()) {
+                BufferedReader clientInput = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+                BufferedWriter clientOutput = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));) {
 
-            byte[] buffer = new byte[1024];
-            int bytesRead;
-
-            while ((bytesRead = inputStream.read(buffer)) != -1) {
-                String inputString = new String(buffer, 0, bytesRead);
-                System.out.println("Received: " + inputString);
-                outputStream.write("+PONG\r\n".getBytes());
+            String content;
+            while ((content = clientInput.readLine()) != null) {
+                if(content.equalsIgnoreCase("ping")) {
+                    clientOutput.write("+PONG\r\n");
+                    clientOutput.flush();
+                } else if(content.equalsIgnoreCase("echo")) {
+                    String numBytes = clientInput.readLine();
+                    clientOutput.write(numBytes + "\r\n" + clientInput.readLine() + "\r\n");
+                    clientOutput.flush();
+                }
             }
         } catch (IOException e) {
             System.out.println("Client disconnected: " + e.getMessage());
