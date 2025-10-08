@@ -18,6 +18,7 @@ public class Main {
 
             // Continuously accept new clients
             while (true) {
+                System.out.println("Waiting for clients to connect...");
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("New client connected: " + clientSocket.getInetAddress());
 
@@ -32,37 +33,49 @@ public class Main {
     private static void handleClient(Socket clientSocket) {
         try (
                 BufferedReader clientInput = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-                BufferedWriter clientOutput = new BufferedWriter(new OutputStreamWriter(clientSocket.getOutputStream()));
-                
-                ) {
+                BufferedWriter clientOutput = new BufferedWriter(
+                        new OutputStreamWriter(clientSocket.getOutputStream()));) {
             Map<String, String> dataStore = new HashMap<>();
-            String content;
-            while ((content = clientInput.readLine()) != null) {
-                if(content.equalsIgnoreCase("ping")) {
-                    clientOutput.write("+PONG\r\n");
-                    clientOutput.flush();
-                } else if(content.equalsIgnoreCase("echo")) {
-                    String numBytes = clientInput.readLine();
-                    clientOutput.write(numBytes + "\r\n" + clientInput.readLine() + "\r\n");
-                    clientOutput.flush();
-                }
-                else if(content.equalsIgnoreCase("set")){
-                    String key = clientInput.readLine();
-                    String value = clientInput.readLine();
-                    dataStore.put(key, value); 
-                    clientOutput.write("+OK\r\n");
-                    clientOutput.flush();
+            while (clientInput.readLine() != null) {
+                    clientInput.readLine();
+                    String current = clientInput.readLine();
+                    if (current.equalsIgnoreCase("ping")) {
+                        clientOutput.write("+PONG\r\n");
+                        clientOutput.flush();
+                    } else if (current.equalsIgnoreCase("echo")) {
+                        String numBytes = clientInput.readLine();
+                        clientOutput.write(numBytes + "\r\n" + clientInput.readLine() + "\r\n");
+                        clientOutput.flush();
+                    } else if (current.equalsIgnoreCase("set")) {
+                        clientInput.readLine();
+                        String key = clientInput.readLine();
+                        clientInput.readLine();
+                        String value = clientInput.readLine();
+                        dataStore.put(key, value);
+                        clientOutput.write("+OK\r\n");
+                        clientOutput.flush();
 
-                }
-                else if(content.equalsIgnoreCase("get")){
-                    String key = clientInput.readLine();
-                    String value = dataStore.get(key);
-                    if(value != null)clientOutput.write(value.length()+"\r\n"+value+"\r\n");
-                    else clientOutput.write("$-1\r\n");
-                }
+                    } else if (current.equalsIgnoreCase("get")) {
+                        clientInput.readLine();
+                        String key = clientInput.readLine();
+                        String value = dataStore.get(key);
+                        if (value != null) {
+                            clientOutput.write("$" + value.length() + "\r\n" + value + "\r\n");
+                            clientOutput.flush();
+                        } else {
+                            clientOutput.write("$-1\r\n");
+                            clientOutput.flush();
+                        }
+                    }
             }
         } catch (IOException e) {
-            System.out.println("Client disconnected: " + e.getMessage());
+            System.out.println("IOException: " + e.getMessage());
+        } finally {
+            try {
+                clientSocket.close();
+            } catch (IOException e) {
+                System.out.println("IOException: " + e.getMessage());
+            }
         }
     }
 }
