@@ -1,32 +1,46 @@
 package storage.impl;
 
 import storage.DataStore;
+import storage.model.RedisValue;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryDataStore implements DataStore {
-    private final Map<String, String> store = new ConcurrentHashMap<>();
+    private final Map<String, RedisValue> store = new ConcurrentHashMap<>();
 
-    public InMemoryDataStore() {}
-
-    @Override
-    public void set(String key, String value) {
-        store.put(key, value);
+    public InMemoryDataStore() {
     }
 
     @Override
-    public void set(String key, String value, long ttlSeconds) {
-        store.put(key, value);
+    public void set(String key, String value) {
+        store.put(key, new RedisValue(value));
     }
 
     @Override
     public String get(String key) {
-        return store.get(key);
+        RedisValue redisValue = store.get(key);
+        if (redisValue == null) {
+            return null;
+        }
+        if (redisValue.isExpired()) {
+            store.remove(key);
+            return null;
+        }
+        return redisValue.getValue();
     }
 
     @Override
     public boolean exists(String key) {
-        return store.containsKey(key);
+        RedisValue redisValue = store.get(key);
+        if (redisValue == null) {
+            return false;
+        }
+        if (redisValue.isExpired()) {
+            store.remove(key);
+            return false;
+        }
+        return true;
     }
 
     @Override
@@ -36,6 +50,29 @@ public class InMemoryDataStore implements DataStore {
 
     @Override
     public void cleanup() {
-        // No-op for in-memory store
+        store.entrySet().removeIf(entry -> entry.getValue().isExpired());
+    }
+
+    @Override
+    public void setWithExpiry(String key, String value, Long ttlSeconds) {
+        RedisValue redisValue = new RedisValue(value, ttlSeconds);
+        store.put(key, redisValue);
+    }
+
+    @Override
+    public long getTTL(String key) {
+        RedisValue redisValue = store.get(key);
+        if (redisValue == null)
+            return -2;
+
+        if (!redisValue.hasExpiry())
+            return -1;
+
+        if (redisValue.hasExpiry()) {
+            store.remove(key);
+            return -2;
+        }
+
+        return redisValue.getExpiryTime() - System.currentTimeMillis();
     }
 }
