@@ -1,6 +1,8 @@
 package storage;
 
 
+import java.util.List;
+
 import storage.model.DataType;
 import storage.model.RedisValue;
 
@@ -21,7 +23,7 @@ public interface DataStore {
 
     long getTTL(String key);
 
-    long addToList(String key, String value);
+    long addToList(String key, List<String> values);
 
 
 }

@@ -24,7 +24,7 @@ public class RPUSHCommand implements CommandStrategy {
             clientOutput.flush();
         }
         String listName = arguments.get(0);
-        String value = arguments.get(1);
+        List<String> values = arguments.subList(1, arguments.size());
 
         if(!dataStore.exists(listName))dataStore.setValue(listName, new ListValue(new ArrayList<>()));
         if(!(dataStore.getValue(listName) instanceof ListValue)){
@@ -32,7 +32,7 @@ public class RPUSHCommand implements CommandStrategy {
             clientOutput.flush();
             return;
         }
-        dataStore.addToList(listName, value);
+        dataStore.addToList(listName, values);
         clientOutput.write(RESPSerializer.integer(((ListValue)dataStore.getValue(listName)).getList().size()));
         clientOutput.flush();
     }

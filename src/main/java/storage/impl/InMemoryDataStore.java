@@ -5,6 +5,7 @@ import storage.model.DataType;
 import storage.model.RedisValue;
 import storage.model.concreteValues.ListValue;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -90,9 +91,9 @@ public class InMemoryDataStore implements DataStore {
     
 
     @Override
-    public long addToList(String key, String value) {
+    public long addToList(String key, List<String> values) {
         ListValue redisValue = (ListValue) store.get(key);
-        redisValue.getList().add(value);
+        redisValue.getList().addAll(values);
         return redisValue.getList().size();
     }
 
