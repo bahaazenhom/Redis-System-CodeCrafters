@@ -19,6 +19,7 @@ public class CommandExecuter {
         register("SET", new SetCommand(dataStore));
         register("GET", new GetCommand(dataStore));
         register("RPUSH", new RPUSHCommand(dataStore));
+        register("LRANGE", new LRANGECommand(dataStore));
     }
 
     public void register(String commandName, CommandStrategy command) {

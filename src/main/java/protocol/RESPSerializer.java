@@ -1,5 +1,7 @@
 package protocol;
 
+import java.util.List;
+
 public class RESPSerializer {
     public static String simpleString(String message) {
         return "+" + message + "\r\n";
@@ -24,5 +26,14 @@ public class RESPSerializer {
         return "$-1\r\n"; // Null bulk string
     }
 
+    public static String array(List<String> values) {
+        if (values == null)
+            return "*0\r\n";
+        StringBuilder respBuilder = new StringBuilder();
+        respBuilder.append("*" + values.size() + "\r\n");
+        for (String value : values)
+            respBuilder.append(bulkString(value));
+        return respBuilder.toString();
+    }
 
 }
