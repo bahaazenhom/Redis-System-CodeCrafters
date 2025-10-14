@@ -27,12 +27,18 @@ public class LRANGECommand implements CommandStrategy {
             int startIndex = Integer.parseInt(arguments.get(1));
             int stopIndex = Integer.parseInt(arguments.get(2));
 
+            
+
             if (!dataStore.exists(listName)) {
                 clientOutput.write(RESPSerializer.array(null));
                 clientOutput.flush();
                 return;
             }
             List<String> values = ((ListValue) dataStore.getValue(listName)).getList();
+
+            startIndex = startIndex < 0 ? Math.max(0, values.size() + startIndex) : startIndex;
+            stopIndex = stopIndex < 0 ? Math.max(0, values.size() + stopIndex) : stopIndex;
+            
             if (startIndex >= values.size() || startIndex > stopIndex) {
                 clientOutput.write(RESPSerializer.array(null));
                 clientOutput.flush();
