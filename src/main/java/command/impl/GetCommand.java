@@ -28,7 +28,7 @@ public class GetCommand implements CommandStrategy {
             var redisValue = dataStore.getValue(key);
             
             if (redisValue == null) {
-                clientOutput.write(RESPSerializer.bulkString(null)); // Null bulk reply
+                clientOutput.write(RESPSerializer.nullBulkString()); // Null bulk reply
                 clientOutput.flush();
                 return;
             }

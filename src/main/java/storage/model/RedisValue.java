@@ -7,7 +7,7 @@ public abstract class RedisValue {
     protected RedisValue(DataType type, Long expiryTime) {
         this.type = type;
         if (expiryTime != null) {
-            this.expiryTime = System.currentTimeMillis() + (expiryTime * 1000);
+            this.expiryTime = expiryTime;
         }
     }
 

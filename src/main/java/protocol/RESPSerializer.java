@@ -15,9 +15,13 @@ public class RESPSerializer {
 
     public static String bulkString(String message) {
         if (message == null) {
-            return "$-1\r\n"; // Null bulk string
+            return nullBulkString();
         }
         return "$" + message.length() + "\r\n" + message + "\r\n";
+    }
+
+    public static String nullBulkString() {
+        return "$-1\r\n"; // Null bulk string
     }
 
 
