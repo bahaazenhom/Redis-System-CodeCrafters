@@ -1,62 +1,27 @@
 package storage.model;
 
-import java.util.List;
+public abstract class RedisValue {
+    protected final DataType type;
+    protected Long expiryTime;
 
-public class RedisValue {
-    public enum DataType {
-    STRING,
-    LIST
-}
-   private final DataType type;    
-    private final String stringValue;
-    private final List<RedisValue> listValue;
-    private final Long expiryTime;
-
-    public RedisValue(String value) {
-        this.type = DataType.STRING;
-        this.stringValue = value;
-        this.listValue = null;
-        this.expiryTime = null;
+    protected RedisValue(DataType type, Long expiryTime) {
+        this.type = type;
+        if (expiryTime != null) {
+            this.expiryTime = System.currentTimeMillis() + (expiryTime * 1000);
+        }
     }
 
-    public RedisValue(String value, Long ttlSeconds) {
-        this.type = DataType.STRING;
-        this.stringValue = value;
-        this.listValue = null;
-        this.expiryTime = ttlSeconds;
+    protected RedisValue(DataType type) {
+        this.type = type;
     }
-    public RedisValue(List<RedisValue> listValue) {
-        this.type = DataType.LIST;
-        this.stringValue = null;
-        this.listValue = listValue;
-        this.expiryTime = null;
-    }
-    public RedisValue(List<RedisValue> listValue, Long ttlSeconds) {
-        this.type = DataType.LIST;
-        this.stringValue = null;
-        this.listValue = listValue;
-        this.expiryTime = ttlSeconds;
-    }
+
+    public abstract Object getValue();
+
     public DataType getType() {
         return type;
     }
 
-    public boolean isList() {
-        return type == DataType.LIST;
-    }
-
-    public List<RedisValue> getListValue() {
-        if(!isList()) {
-            throw new IllegalStateException("Value is not a list");
-        }
-        return listValue;
-    }
-
-    public String getValue() {
-        return stringValue;
-    }
-
-    public Long getExpiryTime() {
+    public long getExpiryTime() {
         return expiryTime;
     }
 
@@ -66,5 +31,16 @@ public class RedisValue {
 
     public boolean hasExpiry() {
         return expiryTime != null;
+    }
+
+    public void setExpiry(Long newExpiryTime) {
+        if (newExpiryTime != null) {
+            this.expiryTime = System.currentTimeMillis() + (newExpiryTime * 1000);
+        }
+    }
+
+    public void removeExpiry() {
+        if (hasExpiry())
+            expiryTime = null;
     }
 }

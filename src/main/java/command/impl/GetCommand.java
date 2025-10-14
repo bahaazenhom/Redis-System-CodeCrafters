@@ -25,12 +25,16 @@ public class GetCommand implements CommandStrategy {
                 return;
             }
             String key = arguments.get(0);
-            String value = ((StringValue) dataStore.getValue(key)).getString();
-            if (value != null) {
-                clientOutput.write(RESPSerializer.bulkString(value));
-            } else {
+            var redisValue = dataStore.getValue(key);
+            
+            if (redisValue == null) {
                 clientOutput.write(RESPSerializer.bulkString(null)); // Null bulk reply
+                clientOutput.flush();
+                return;
             }
+            
+            String value = ((StringValue) redisValue).getString();
+            clientOutput.write(RESPSerializer.bulkString(value));
             clientOutput.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);
