@@ -1,7 +1,9 @@
 package storage.impl;
 
 import storage.DataStore;
+import storage.model.DataType;
 import storage.model.RedisValue;
+import storage.model.concreteValues.ListValue;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -13,12 +15,12 @@ public class InMemoryDataStore implements DataStore {
     }
 
     @Override
-    public void set(String key, String value) {
-        store.put(key, new RedisValue(value));
+    public void setValue(String key, RedisValue redisValue) {
+        store.put(key, redisValue);
     }
 
     @Override
-    public String get(String key) {
+    public RedisValue getValue(String key) {
         RedisValue redisValue = store.get(key);
         if (redisValue == null) {
             return null;
@@ -27,7 +29,7 @@ public class InMemoryDataStore implements DataStore {
             store.remove(key);
             return null;
         }
-        return redisValue.getValue();
+        return redisValue;
     }
 
     @Override
@@ -54,12 +56,6 @@ public class InMemoryDataStore implements DataStore {
     }
 
     @Override
-    public void setWithExpiry(String key, String value, Long ttlSeconds) {
-        RedisValue redisValue = new RedisValue(value, ttlSeconds);
-        store.put(key, redisValue);
-    }
-
-    @Override
     public long getTTL(String key) {
         RedisValue redisValue = store.get(key);
         if (redisValue == null)
@@ -75,4 +71,29 @@ public class InMemoryDataStore implements DataStore {
 
         return redisValue.getExpiryTime() - System.currentTimeMillis();
     }
+
+    @Override
+    public DataType getType(String key) {
+        RedisValue redisValue = store.get(key);
+
+        return redisValue.getType();
+    }
+
+    @Override
+    public boolean isType(String key, DataType dataType) {
+        RedisValue redisValue = store.get(key);
+        if (redisValue == null)
+            return false;
+        return redisValue.getType() == dataType;
+    }
+
+    
+
+    @Override
+    public long addToList(String key, String value) {
+        ListValue redisValue = (ListValue) store.get(key);
+        redisValue.getList().add(value);
+        return redisValue.getList().size();
+    }
+
 }

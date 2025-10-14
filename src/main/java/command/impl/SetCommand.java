@@ -3,6 +3,9 @@ package command.impl;
 import command.CommandStrategy;
 import protocol.RESPSerializer;
 import storage.DataStore;
+import storage.model.RedisValue;
+import storage.model.concreteValues.StringValue;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.List;
@@ -27,12 +30,8 @@ public class SetCommand implements CommandStrategy {
             String value = arguments.get(1);
 
             Long expiryTimeStamp = parseExpiryOptions(arguments);
-            if (expiryTimeStamp != null) {
-                dataStore.setWithExpiry(key, value, expiryTimeStamp);
-            } else {
-                dataStore.set(key, value);
-            }
-
+            RedisValue redisValue = new StringValue(value, expiryTimeStamp);
+            dataStore.setValue(key, redisValue);
             clientOutput.write(RESPSerializer.simpleString("OK"));
             clientOutput.flush();
         } catch (IOException e) {

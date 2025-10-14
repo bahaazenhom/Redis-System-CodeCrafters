@@ -3,6 +3,8 @@ package command.impl;
 import command.CommandStrategy;
 import protocol.RESPSerializer;
 import storage.DataStore;
+import storage.model.concreteValues.StringValue;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.List;
@@ -23,7 +25,7 @@ public class GetCommand implements CommandStrategy {
                 return;
             }
             String key = arguments.get(0);
-            String value = dataStore.get(key);
+            String value = ((StringValue) dataStore.getValue(key)).getString();
             if (value != null) {
                 clientOutput.write(RESPSerializer.bulkString(value));
             } else {
