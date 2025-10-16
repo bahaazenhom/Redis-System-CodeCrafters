@@ -5,6 +5,8 @@ import storage.model.DataType;
 import storage.model.RedisValue;
 import storage.model.concreteValues.ListValue;
 
+import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -113,6 +115,23 @@ public class InMemoryDataStore implements DataStore {
         ListValue listValue = (ListValue) redisValue;
         String value = listValue.getList().pollFirst();
         return value;
+    }
+
+    @Override
+    public List<String> lpop(String key, Long count) {
+        if(count == null)count = 1L;
+        RedisValue redisValue = store.get(key);
+        if (redisValue == null || !(redisValue instanceof ListValue)) {
+            return null;
+        }
+        Deque<String> values = ((ListValue) redisValue).getList();
+        List<String> removedValues = new ArrayList<>();
+        while(count>0){
+            if(values.isEmpty())break;
+            removedValues.add(values.pollFirst());
+            count--;
+        }
+        return removedValues;
     }
 
 }

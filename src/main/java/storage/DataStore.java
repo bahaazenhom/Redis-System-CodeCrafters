@@ -27,6 +27,7 @@ public interface DataStore {
     long rpush(String key, List<String> values);
     long lpush(String key, List<String> values);
     String lpop(String key);
+    List<String> lpop(String key, Long count);
 
 
 
