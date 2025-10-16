@@ -1,19 +1,20 @@
 package storage.model.concreteValues;
 
+import java.util.Deque;
 import java.util.List;
 
 import storage.model.DataType;
 import storage.model.RedisValue;
 
 public class ListValue extends RedisValue {
-    private List<String> list;
+    private Deque<String> list;
 
-    public ListValue(List<String> list){
+    public ListValue(Deque<String> list){
         super(DataType.LIST);
         this.list = list;
     }
 
-    public ListValue(List<String> list, Long expiryTime){
+    public ListValue(Deque<String> list, Long expiryTime){
         super(DataType.LIST, expiryTime);
         this.list = list;
     }
@@ -23,7 +24,7 @@ public class ListValue extends RedisValue {
         return list;
     }
 
-    public List<String> getList(){
+    public Deque<String> getList(){
         return list;
     }
 }

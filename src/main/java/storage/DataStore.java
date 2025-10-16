@@ -23,7 +23,10 @@ public interface DataStore {
 
     long getTTL(String key);
 
-    long addToList(String key, List<String> values);
+    long rpush(String key, List<String> values);
+    
+    long lpush(String key, List<String> values);
+
 
 
 }

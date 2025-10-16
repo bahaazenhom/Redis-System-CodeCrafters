@@ -2,6 +2,9 @@ package command.impl;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Deque;
 import java.util.List;
 
 import command.CommandStrategy;
@@ -34,11 +37,10 @@ public class LRANGECommand implements CommandStrategy {
                 clientOutput.flush();
                 return;
             }
-            List<String> values = ((ListValue) dataStore.getValue(listName)).getList();
+            Deque<String> values = ((ListValue) dataStore.getValue(listName)).getList();
 
             startIndex = startIndex < 0 ? Math.max(0, values.size() + startIndex) : startIndex;
             stopIndex = stopIndex < 0 ? Math.max(0, values.size() + stopIndex) : stopIndex;
-            
             if (startIndex >= values.size() || startIndex > stopIndex) {
                 clientOutput.write(RESPSerializer.array(null));
                 clientOutput.flush();
@@ -47,7 +49,8 @@ public class LRANGECommand implements CommandStrategy {
             if (stopIndex >= values.size())
                 stopIndex = values.size() - 1;
 
-            clientOutput.write(RESPSerializer.array(values.subList(startIndex, stopIndex + 1)));
+            List<String> listValues = new ArrayList<>(values).subList(startIndex, stopIndex + 1);
+            clientOutput.write(RESPSerializer.array(listValues));
             clientOutput.flush();
 
         } catch (IOException e) {

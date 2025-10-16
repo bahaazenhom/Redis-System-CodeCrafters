@@ -91,9 +91,18 @@ public class InMemoryDataStore implements DataStore {
     
 
     @Override
-    public long addToList(String key, List<String> values) {
+    public long rpush(String key, List<String> values) {
         ListValue redisValue = (ListValue) store.get(key);
         redisValue.getList().addAll(values);
+        return redisValue.getList().size();
+    }
+
+    @Override
+    public long lpush(String key, List<String> values) {
+        ListValue redisValue = (ListValue) store.get(key);
+        for (String value : values) {
+            redisValue.getList().addFirst(value);
+        }
         return redisValue.getList().size();
     }
 
