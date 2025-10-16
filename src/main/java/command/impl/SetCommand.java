@@ -21,7 +21,7 @@ public class SetCommand implements CommandStrategy {
     public void execute(List<String> arguments, BufferedWriter clientOutput) {
         try {
             if (arguments.size() < 2) {
-                clientOutput.write(RESPSerializer.error("wrong number of arguments for 'set' command"));
+                clientOutput.write(RESPSerializer.error("Wrong number of arguments for 'set' command"));
                 clientOutput.flush();
                 return;
             }

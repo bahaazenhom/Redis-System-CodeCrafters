@@ -88,8 +88,6 @@ public class InMemoryDataStore implements DataStore {
         return redisValue.getType() == dataType;
     }
 
-    
-
     @Override
     public long rpush(String key, List<String> values) {
         ListValue redisValue = (ListValue) store.get(key);
@@ -104,6 +102,17 @@ public class InMemoryDataStore implements DataStore {
             redisValue.getList().addFirst(value);
         }
         return redisValue.getList().size();
+    }
+
+    @Override
+    public String lpop(String key) {
+        RedisValue redisValue = store.get(key);
+        if (redisValue == null || !(redisValue instanceof ListValue)) {
+            return null;
+        }
+        ListValue listValue = (ListValue) redisValue;
+        String value = listValue.getList().pollFirst();
+        return value;
     }
 
 }

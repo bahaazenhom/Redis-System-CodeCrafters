@@ -23,9 +23,10 @@ public interface DataStore {
 
     long getTTL(String key);
 
+    // List operations
     long rpush(String key, List<String> values);
-    
     long lpush(String key, List<String> values);
+    String lpop(String key);
 
 
 

@@ -22,6 +22,7 @@ public class CommandExecuter {
         register("LRANGE", new LRANGECommand(dataStore));
         register("LPUSH", new LPUSHCommand(dataStore));
         register("LLEN", new LLEN(dataStore));
+        register("LPOP", new LPOP(dataStore));
     }
 
     public void register(String commandName, CommandStrategy command) {
