@@ -21,6 +21,7 @@ public class CommandExecuter {
         register("RPUSH", new RPUSHCommand(dataStore));
         register("LRANGE", new LRANGECommand(dataStore));
         register("LPUSH", new LPUSHCommand(dataStore));
+        register("LLEN", new LLEN(dataStore));
     }
 
     public void register(String commandName, CommandStrategy command) {
