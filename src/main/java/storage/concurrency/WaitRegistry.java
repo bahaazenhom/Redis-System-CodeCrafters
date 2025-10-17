@@ -1,10 +1,8 @@
 package storage.concurrency;
 
-import java.security.Key;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
@@ -38,7 +36,7 @@ public class WaitRegistry {
 
     }
 
-    public String awaitElement(String key, Long timeoutSeconds, Supplier<String> popSupplier)
+    public String awaitElement(String key, double timeoutSeconds, Supplier<String> popSupplier)
             throws InterruptedException {
         KeyWaitQueue queue = waitQueues.computeIfAbsent(key, k -> new KeyWaitQueue());
         WaitToken token = new WaitToken();
@@ -58,10 +56,11 @@ public class WaitRegistry {
                     queue.condition.await();// the client sleep and the lock is released
                 }
             } else {
-                long nano = TimeUnit.SECONDS.toNanos(timeoutSeconds);
-                // wait for a signal or timeout reaced
-                while (!token.isFulfilled() && nano > 0) {
-                    nano = queue.condition.awaitNanos(nano);
+                // Convert fractional seconds to nanoseconds
+                long nanos = (long) (timeoutSeconds * 1_000_000_000);
+                // wait for a signal or timeout reached
+                while (!token.isFulfilled() && nanos > 0) {
+                    nanos = queue.condition.awaitNanos(nanos);
                 }
             }
             // some pushed and we got a signal

@@ -28,7 +28,7 @@ public interface DataStore {
     long lpush(String key, List<String> values);
     String lpop(String key);
     List<String> lpop(String key, Long count);
-    String BLPOP(String key, long timestamp) throws InterruptedException;
+    String BLPOP(String key, double timestamp) throws InterruptedException;
 
 
 

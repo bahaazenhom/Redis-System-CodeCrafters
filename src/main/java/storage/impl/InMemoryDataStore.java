@@ -150,7 +150,7 @@ public class InMemoryDataStore implements DataStore {
     }
 
     @Override
-    public String BLPOP(String key, long timestamp) throws InterruptedException {
+    public String BLPOP(String key, double timestamp) throws InterruptedException {
         String value = lpop(key);
         if (value != null)
             return value;

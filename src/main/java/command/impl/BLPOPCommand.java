@@ -26,7 +26,7 @@ public class BLPOPCommand implements CommandStrategy {
                 return;
             }
             String listKey = arguments.get(0);
-            long timestamp;
+            double timestamp;
             try {
                 timestamp = Long.parseLong(arguments.get(1));
                 if (timestamp < 0) {
