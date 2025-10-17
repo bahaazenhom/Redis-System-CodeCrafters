@@ -28,7 +28,7 @@ public class RESPSerializer {
 
     public static String array(List<String> values) {
         if (values == null)
-            return "*0\r\n";
+            return "*-1\r\n";
         StringBuilder respBuilder = new StringBuilder();
         respBuilder.append("*" + values.size() + "\r\n");
         for (String value : values)
