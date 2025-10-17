@@ -23,6 +23,7 @@ public class CommandExecuter {
         register("LPUSH", new LPUSHCommand(dataStore));
         register("LLEN", new LLEN(dataStore));
         register("LPOP", new LPOP(dataStore));
+        register("BLPOP", new BLPOPCommand(dataStore));
     }
 
     public void register(String commandName, CommandStrategy command) {

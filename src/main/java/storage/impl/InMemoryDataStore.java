@@ -1,6 +1,7 @@
 package storage.impl;
 
 import storage.DataStore;
+import storage.concurrency.WaitRegistry;
 import storage.model.DataType;
 import storage.model.RedisValue;
 import storage.model.concreteValues.ListValue;
@@ -13,6 +14,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryDataStore implements DataStore {
     private final Map<String, RedisValue> store = new ConcurrentHashMap<>();
+    private final WaitRegistry waitRegistry = new WaitRegistry();
 
     public InMemoryDataStore() {
     }
@@ -93,16 +95,27 @@ public class InMemoryDataStore implements DataStore {
     @Override
     public long rpush(String key, List<String> values) {
         ListValue redisValue = (ListValue) store.get(key);
+        boolean wasEmpty = redisValue.getList().isEmpty();
+
         redisValue.getList().addAll(values);
+
+        if (wasEmpty)
+            waitRegistry.signalFirstWaiter(key, () -> lpop(key));
+
         return redisValue.getList().size();
     }
 
     @Override
     public long lpush(String key, List<String> values) {
         ListValue redisValue = (ListValue) store.get(key);
+        boolean wasEmpty = redisValue.getList().isEmpty();
         for (String value : values) {
             redisValue.getList().addFirst(value);
         }
+
+        if (wasEmpty)
+            waitRegistry.signalFirstWaiter(key, () -> lpop(key));
+
         return redisValue.getList().size();
     }
 
@@ -119,19 +132,33 @@ public class InMemoryDataStore implements DataStore {
 
     @Override
     public List<String> lpop(String key, Long count) {
-        if(count == null)count = 1L;
+        if (count == null)
+            count = 1L;
         RedisValue redisValue = store.get(key);
         if (redisValue == null || !(redisValue instanceof ListValue)) {
             return null;
         }
         Deque<String> values = ((ListValue) redisValue).getList();
         List<String> removedValues = new ArrayList<>();
-        while(count>0){
-            if(values.isEmpty())break;
+        while (count > 0) {
+            if (values.isEmpty())
+                break;
             removedValues.add(values.pollFirst());
             count--;
         }
         return removedValues;
+    }
+
+    @Override
+    public String BLPOP(String key, long timestamp) throws InterruptedException {
+        String value = lpop(key);
+        if (value != null)
+            return value;
+
+        value = waitRegistry.awaitElement(key, timestamp, () -> lpop(key));
+
+        return value;
+
     }
 
 }
