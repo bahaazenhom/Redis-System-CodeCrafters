@@ -29,8 +29,8 @@ public class LPUSHCommand implements CommandStrategy {
             List<String> values = arguments.subList(1, arguments.size());
             if (!dataStore.exists(listName))
                 dataStore.setValue(listName, new ListValue(new ArrayDeque<>()));
-            dataStore.lpush(listName, values);
-            clientOutput.write(RESPSerializer.integer(((ListValue) dataStore.getValue(listName)).getList().size()));
+            long size = dataStore.lpush(listName, values);
+            clientOutput.write(RESPSerializer.integer(size));
             clientOutput.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);

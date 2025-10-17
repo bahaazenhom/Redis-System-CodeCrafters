@@ -2,13 +2,12 @@ package command.impl;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.Deque;
+
 import java.util.List;
 
 import command.CommandStrategy;
 import protocol.RESPSerializer;
 import storage.DataStore;
-import storage.model.concreteValues.ListValue;
 
 public class LPOP implements CommandStrategy {
     private final DataStore dataStore;

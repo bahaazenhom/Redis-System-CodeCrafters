@@ -1,7 +1,6 @@
 package storage.model.concreteValues;
 
 import java.util.Deque;
-import java.util.List;
 
 import storage.model.DataType;
 import storage.model.RedisValue;

@@ -3,7 +3,6 @@ package command.impl;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
 import java.util.List;
 import command.CommandStrategy;
 import protocol.RESPSerializer;
@@ -33,8 +32,8 @@ public class RPUSHCommand implements CommandStrategy {
             clientOutput.flush();
             return;
         }
-        dataStore.rpush(listName, values);
-        clientOutput.write(RESPSerializer.integer(((ListValue)dataStore.getValue(listName)).getList().size()));
+        long size = dataStore.rpush(listName, values);
+        clientOutput.write(RESPSerializer.integer(size));
         clientOutput.flush();
     }
     catch(IOException e){
