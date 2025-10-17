@@ -38,8 +38,12 @@ public class LRANGECommand implements CommandStrategy {
             }
             Deque<String> values = ((ListValue) dataStore.getValue(listName)).getList();
 
-            startIndex = startIndex < 0 ? Math.max(0, values.size() + startIndex) : startIndex;
-            stopIndex = stopIndex < 0 ? Math.max(0, values.size() + stopIndex) : stopIndex;
+            int size = values.size();
+            if (startIndex < 0) startIndex += size;
+            if (stopIndex < 0) stopIndex += size;
+            if (startIndex < 0 || startIndex >= size) startIndex = 0;
+            if (stopIndex < 0 || stopIndex >= size) stopIndex = 0;
+
             if (startIndex >= values.size() || startIndex > stopIndex) {
                 clientOutput.write(RESPSerializer.array(null));
                 clientOutput.flush();
