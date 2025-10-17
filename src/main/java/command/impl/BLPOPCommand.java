@@ -47,7 +47,7 @@ public class BLPOPCommand implements CommandStrategy {
             result.add(value);
 
             if (value == null)
-                clientOutput.write("$-1\r\n");
+                clientOutput.write("*-1\r\n");
             else
                 clientOutput.write(RESPSerializer.array(result));
 
