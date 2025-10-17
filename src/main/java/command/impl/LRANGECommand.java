@@ -32,7 +32,7 @@ public class LRANGECommand implements CommandStrategy {
             
 
             if (!dataStore.exists(listName)) {
-                clientOutput.write(RESPSerializer.array(null));
+                clientOutput.write(RESPSerializer.emptyArray());
                 clientOutput.flush();
                 return;
             }
@@ -45,7 +45,7 @@ public class LRANGECommand implements CommandStrategy {
             if (stopIndex < 0) stopIndex = 0;
 
             if (startIndex >= values.size() || startIndex > stopIndex) {
-                clientOutput.write(RESPSerializer.array(null));
+                clientOutput.write(RESPSerializer.emptyArray());
                 clientOutput.flush();
                 return;
             }

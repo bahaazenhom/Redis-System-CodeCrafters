@@ -27,13 +27,19 @@ public class RESPSerializer {
     }
 
     public static String array(List<String> values) {
-        if (values == null)
-            return "*0\r\n";
         StringBuilder respBuilder = new StringBuilder();
         respBuilder.append("*" + values.size() + "\r\n");
         for (String value : values)
             respBuilder.append(bulkString(value));
         return respBuilder.toString();
+    }
+
+    public static String nullArray() {
+        return "*-1\r\n"; // Null array
+    }
+
+    public static String emptyArray() {
+        return "*0\r\n"; // Empty array
     }
 
 }

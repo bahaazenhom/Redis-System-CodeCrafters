@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-
 import command.CommandStrategy;
 import protocol.RESPSerializer;
 import storage.DataStore;
@@ -39,7 +38,7 @@ public class BLPOPCommand implements CommandStrategy {
                 clientOutput.flush();
                 return;
             }
-            
+
             String value = dataStore.BLPOP(listKey, timestamp);
 
             List<String> result = new ArrayList<>();
@@ -47,7 +46,7 @@ public class BLPOPCommand implements CommandStrategy {
             result.add(value);
 
             if (value == null)
-                clientOutput.write("*-1\r\n");
+                clientOutput.write(RESPSerializer.nullArray());
             else
                 clientOutput.write(RESPSerializer.array(result));
 
