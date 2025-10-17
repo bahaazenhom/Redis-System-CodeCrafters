@@ -45,7 +45,7 @@ public class LRANGECommand implements CommandStrategy {
             if (stopIndex < 0 || stopIndex >= size) stopIndex = 0;
 
             if (startIndex >= values.size() || startIndex > stopIndex) {
-                clientOutput.write(RESPSerializer.array(null));
+                clientOutput.write(RESPSerializer.array(new ArrayList<>()));
                 clientOutput.flush();
                 return;
             }
