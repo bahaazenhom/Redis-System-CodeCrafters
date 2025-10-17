@@ -28,14 +28,14 @@ public class BLPOPCommand implements CommandStrategy {
             String listKey = arguments.get(0);
             double timestamp;
             try {
-                timestamp = Long.parseLong(arguments.get(1));
+                timestamp = Double.parseDouble(arguments.get(1));
                 if (timestamp < 0) {
                     clientOutput.write(RESPSerializer.error("timeout is negative"));
                     clientOutput.flush();
                     return;
                 }
             } catch (NumberFormatException e) {
-                clientOutput.write(RESPSerializer.error("timeout is not an integer or out of range"));
+                clientOutput.write(RESPSerializer.error("timeout is not a number or out of range"));
                 clientOutput.flush();
                 return;
             }
