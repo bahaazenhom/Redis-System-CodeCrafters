@@ -98,11 +98,11 @@ public class InMemoryDataStore implements DataStore {
         boolean wasEmpty = redisValue.getList().isEmpty();
 
         redisValue.getList().addAll(values);
-
+        long size = redisValue.getList().size();
         if (wasEmpty)
             waitRegistry.signalFirstWaiter(key, () -> lpop(key));
 
-        return redisValue.getList().size();
+        return size;
     }
 
     @Override
@@ -112,11 +112,11 @@ public class InMemoryDataStore implements DataStore {
         for (String value : values) {
             redisValue.getList().addFirst(value);
         }
-
+        long size = redisValue.getList().size();
         if (wasEmpty)
             waitRegistry.signalFirstWaiter(key, () -> lpop(key));
 
-        return redisValue.getList().size();
+        return size;
     }
 
     @Override
