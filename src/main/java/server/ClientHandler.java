@@ -44,7 +44,6 @@ public class ClientHandler implements Runnable {
             int numElements = Integer.parseInt(line.substring(1));
             List<String> commands = RESPParser.parseRequest(numElements, in);
             
-            System.out.println("Parsed commands: " + commands);
             
             String commandName = commands.get(0);
             List<String> arguments = commands.subList(1, commands.size());
