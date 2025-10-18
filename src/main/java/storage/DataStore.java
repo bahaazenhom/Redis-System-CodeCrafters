@@ -1,6 +1,7 @@
 package storage;
 
 
+import java.util.HashMap;
 import java.util.List;
 
 import storage.model.DataType;
@@ -29,6 +30,9 @@ public interface DataStore {
     String lpop(String key);
     List<String> lpop(String key, Long count);
     String BLPOP(String key, double timestamp) throws InterruptedException;
+
+    //Stream operations
+    String xadd(String streamKey, String entryID, HashMap<String, String> entryValues);
 
 
 

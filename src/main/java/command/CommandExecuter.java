@@ -25,6 +25,7 @@ public class CommandExecuter {
         register("LPOP", new LPOP(dataStore));
         register("BLPOP", new BLPOPCommand(dataStore));
         register("TYPE", new TYPECommand(dataStore));
+        register("XADD", new XADDCommand(dataStore));
     }
 
     public void register(String commandName, CommandStrategy command) {

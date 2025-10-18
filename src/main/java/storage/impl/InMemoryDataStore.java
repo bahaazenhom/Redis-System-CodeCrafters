@@ -5,9 +5,11 @@ import storage.concurrency.WaitRegistry;
 import storage.model.DataType;
 import storage.model.RedisValue;
 import storage.model.concreteValues.ListValue;
+import storage.model.concreteValues.StreamValue;
 
 import java.util.ArrayList;
 import java.util.Deque;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -159,6 +161,17 @@ public class InMemoryDataStore implements DataStore {
 
         return value;
 
+    }
+
+    @Override
+    public String xadd(String streamKey, String entryID, HashMap<String, String> entryValues) {
+        RedisValue stream = store.computeIfAbsent(streamKey, k -> new StreamValue());
+        ((StreamValue)stream).getStream().put(entryID, new HashMap<>());
+        
+        for(Map.Entry<String, String> entry : entryValues.entrySet()){
+            ((StreamValue)stream).getStream().get(entryID).put(entry.getKey(), entry.getValue());
+        }
+        return entryID;
     }
 
 }
