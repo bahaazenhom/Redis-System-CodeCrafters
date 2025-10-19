@@ -7,12 +7,17 @@ import storage.model.RedisValue;
 import storage.model.concreteValues.ListValue;
 import storage.model.concreteValues.StreamValue;
 
+import java.io.BufferedWriter;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+
+import protocol.RESPSerializer;
 
 public class InMemoryDataStore implements DataStore {
     private final Map<String, RedisValue> store = new ConcurrentHashMap<>();
@@ -164,14 +169,46 @@ public class InMemoryDataStore implements DataStore {
     }
 
     @Override
-    public String xadd(String streamKey, String entryID, HashMap<String, String> entryValues) {
+    public String xadd(String streamKey, String entryID, HashMap<String, String> entryValues,
+            BufferedWriter clientOutput) {
         RedisValue stream = store.computeIfAbsent(streamKey, k -> new StreamValue());
-        ((StreamValue)stream).getStream().put(entryID, new HashMap<>());
-        
-        for(Map.Entry<String, String> entry : entryValues.entrySet()){
-            ((StreamValue)stream).getStream().get(entryID).put(entry.getKey(), entry.getValue());
+        HashMap<String, HashMap<String, String>> streamMap = ((StreamValue) stream).getStream();
+        if (!streamMap.isEmpty()) {
+            String lastEntryID = ((StreamValue) stream).getLastEntryID();
+            try {
+                if (!validateStreamEntryID(entryID, lastEntryID)) {
+                    clientOutput.write(RESPSerializer
+                            .error("The ID specified in XADD is equal or smaller than the target stream top item"));
+                    clientOutput.flush();
+                    return null;
+                }
+            } catch (IOException exception) {
+                throw new RuntimeException(exception);
+            }
+        }
+
+        ((StreamValue) stream).put(entryID, new HashMap<>());
+
+        for (Map.Entry<String, String> entry : entryValues.entrySet()) {
+            streamMap.get(entryID).put(entry.getKey(), entry.getValue());
         }
         return entryID;
+    }
+
+    private boolean validateStreamEntryID(String newEntryID, String lastEntryID) {
+        if (newEntryID.equals("0-0")) {
+            return false;
+        }
+        String[] newParts = newEntryID.split("-");
+        String[] lastParts = lastEntryID.split("-");
+
+        if (newParts[0].compareTo(lastParts[0]) < 0) {
+            return false;
+        } else if ((newParts[0].compareTo(lastParts[0]) == 0)
+                && !(newParts[1].compareTo(lastParts[1]) > 0)) {
+            return false;
+        }
+        return true;
     }
 
 }

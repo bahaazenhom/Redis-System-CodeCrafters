@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 
 import command.CommandStrategy;
-import protocol.RESPParser;
 import protocol.RESPSerializer;
 import storage.DataStore;
 
@@ -33,7 +32,7 @@ public class XADDCommand implements CommandStrategy {
                 String value = arguments.get(index+1);
                 entryValues.put(key, value);
             }
-            entryID = dataStore.xadd(streamKey, entryID, entryValues);
+            entryID = dataStore.xadd(streamKey, entryID, entryValues, clientOutput);
             clientOutput.write(RESPSerializer.bulkString(entryID));
             clientOutput.flush();
         }

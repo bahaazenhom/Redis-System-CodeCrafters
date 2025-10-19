@@ -1,6 +1,7 @@
 package storage;
 
 
+import java.io.BufferedWriter;
 import java.util.HashMap;
 import java.util.List;
 
@@ -32,7 +33,7 @@ public interface DataStore {
     String BLPOP(String key, double timestamp) throws InterruptedException;
 
     //Stream operations
-    String xadd(String streamKey, String entryID, HashMap<String, String> entryValues);
+    String xadd(String streamKey, String entryID, HashMap<String, String> entryValues, BufferedWriter clientOutput);
 
 
 
