@@ -3,8 +3,8 @@ package command.impl;
 import command.CommandStrategy;
 import protocol.RESPSerializer;
 import storage.DataStore;
-import storage.model.RedisValue;
-import storage.model.concreteValues.StringValue;
+import storage.core.RedisValue;
+import storage.types.StringValue;
 
 import java.io.BufferedWriter;
 import java.io.IOException;

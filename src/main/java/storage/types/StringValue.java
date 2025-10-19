@@ -1,7 +1,7 @@
-package storage.model.concreteValues;
+package storage.types;
 
-import storage.model.DataType;
-import storage.model.RedisValue;
+import storage.core.DataType;
+import storage.core.RedisValue;
 
 public class StringValue extends RedisValue {
     private String value;

@@ -8,7 +8,7 @@ import java.util.List;
 import command.CommandStrategy;
 import protocol.RESPSerializer;
 import storage.DataStore;
-import storage.model.concreteValues.ListValue;
+import storage.types.ListValue;
 
 public class LPUSHCommand implements CommandStrategy {
     private final DataStore dataStore;

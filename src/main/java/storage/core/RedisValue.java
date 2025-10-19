@@ -1,4 +1,4 @@
-package storage.model;
+package storage.core;
 
 public abstract class RedisValue {
     protected final DataType type;

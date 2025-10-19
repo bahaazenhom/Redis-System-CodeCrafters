@@ -1,9 +1,9 @@
-package storage.model.concreteValues;
+package storage.types;
 
 import java.util.Deque;
 
-import storage.model.DataType;
-import storage.model.RedisValue;
+import storage.core.DataType;
+import storage.core.RedisValue;
 
 public class ListValue extends RedisValue {
     private Deque<String> list;

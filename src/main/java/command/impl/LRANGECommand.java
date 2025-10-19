@@ -9,7 +9,7 @@ import java.util.List;
 import command.CommandStrategy;
 import protocol.RESPSerializer;
 import storage.DataStore;
-import storage.model.concreteValues.ListValue;
+import storage.types.ListValue;
 
 public class LRANGECommand implements CommandStrategy {
     private final DataStore dataStore;

@@ -1,4 +1,4 @@
-package storage.model;
+package storage.core;
 
 public enum DataType {
     STRING,
