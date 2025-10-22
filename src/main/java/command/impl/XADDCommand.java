@@ -8,6 +8,7 @@ import java.util.List;
 import command.CommandStrategy;
 import protocol.RESPSerializer;
 import storage.DataStore;
+import storage.exception.InvalidStreamEntryException;
 
 public class XADDCommand implements CommandStrategy {
     private final DataStore dataStore;
@@ -32,9 +33,18 @@ public class XADDCommand implements CommandStrategy {
                 String value = arguments.get(index+1);
                 entryValues.put(key, value);
             }
-            entryID = dataStore.xadd(streamKey, entryID, entryValues, clientOutput);
+
+            entryID = dataStore.xadd(streamKey, entryID, entryValues);
             clientOutput.write(RESPSerializer.bulkString(entryID));
             clientOutput.flush();
+        }
+        catch(InvalidStreamEntryException e){
+            try {
+                clientOutput.write(RESPSerializer.error(e.getMessage()));
+                clientOutput.flush();
+            } catch (IOException ioException) {
+                throw new RuntimeException(ioException);
+            }
         }
         catch(IOException exception){
             throw new RuntimeException(exception);

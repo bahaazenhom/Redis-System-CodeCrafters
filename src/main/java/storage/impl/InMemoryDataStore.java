@@ -2,22 +2,19 @@ package storage.impl;
 
 import storage.DataStore;
 import storage.concurrency.WaitRegistry;
-import storage.model.DataType;
-import storage.model.RedisValue;
-import storage.model.concreteValues.ListValue;
-import storage.model.concreteValues.StreamValue;
+import storage.core.DataType;
+import storage.core.RedisValue;
+import storage.exception.InvalidStreamEntryException;
+import storage.types.ListValue;
+import storage.types.StreamValue;
 
-import java.io.BufferedWriter;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
-
-import protocol.RESPSerializer;
 
 public class InMemoryDataStore implements DataStore {
     private final Map<String, RedisValue> store = new ConcurrentHashMap<>();
@@ -169,25 +166,21 @@ public class InMemoryDataStore implements DataStore {
     }
 
     @Override
-    public String xadd(String streamKey, String entryID, HashMap<String, String> entryValues,
-            BufferedWriter clientOutput) {
+    public String xadd(String streamKey, String entryID, HashMap<String, String> entryValues)
+            throws InvalidStreamEntryException {
         RedisValue stream = store.computeIfAbsent(streamKey, k -> new StreamValue());
-        TreeMap<String, HashMap<String, String>> streamMap = ((StreamValue) stream).getStream();
-
+        LinkedHashMap<String, HashMap<String, String>> streamMap = ((StreamValue) stream).getStream();
         if (!streamMap.isEmpty()) {
-            String lastEntryID = streamMap.lastKey();
-            try {
+            String lastEntryID = ((StreamValue) stream).getLastEntryID();
+            if (lastEntryID != null) {
                 if (!validateStreamEntryID(entryID, lastEntryID)) {
-                    clientOutput.write(RESPSerializer
-                            .error("The ID specified in XADD is equal or smaller than the target stream top item"));
-                    clientOutput.flush();
-                    return null;
+                    throw new InvalidStreamEntryException(
+                            "The ID specified in XADD is equal or smaller than the target stream top item");
                 }
-            } catch (IOException exception) {
-                throw new RuntimeException(exception);
             }
         }
-        streamMap.put(entryID, new HashMap<>());
+
+        ((StreamValue) stream).put(entryID, new HashMap<>());
 
         for (Map.Entry<String, String> entry : entryValues.entrySet()) {
             streamMap.get(entryID).put(entry.getKey(), entry.getValue());
@@ -202,11 +195,19 @@ public class InMemoryDataStore implements DataStore {
         String[] newParts = newEntryID.split("-");
         String[] lastParts = lastEntryID.split("-");
 
-        if (newParts[0].compareTo(lastParts[0]) < 0) {
+        if (newParts.length != 2 || lastParts.length != 2) {
             return false;
-        } else if ((newParts[0].compareTo(lastParts[0]) == 0)
-                && !(newParts[1].compareTo(lastParts[1]) > 0)) {
+        }
+
+        long newMs = Long.parseLong(newParts[0]);
+        long lastMs = Long.parseLong(lastParts[0]);
+        long newSeq = Long.parseLong(newParts[1]);
+        long lastSeq = Long.parseLong(lastParts[1]);
+
+        if (newMs < lastMs) {
             return false;
+        } else if (newMs == lastMs) {
+            return newSeq > lastSeq;
         }
         return true;
     }
