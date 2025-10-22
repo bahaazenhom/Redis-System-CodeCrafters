@@ -187,7 +187,9 @@ public class InMemoryDataStore implements DataStore {
             }
         }
         else{
+            if(entryID.charAt(entryID.length()-1)=='*')
             entryID = generateNewEntryId(entryID, null, "empty");
+            else validateStreamEntryID(entryID, null);
         }
 
         ((StreamValue) stream).put(entryID, new HashMap<>());
@@ -226,6 +228,7 @@ public class InMemoryDataStore implements DataStore {
     }
 
     private String validateStreamEntryID(String newEntryID, String lastEntryID) {
+        if(lastEntryID == null)return null;
         if (newEntryID.equals("0-0")) {
             return "The ID specified in XADD must be greater than 0-0";
         }
