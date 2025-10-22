@@ -9,10 +9,10 @@ import command.CommandStrategy;
 import protocol.RESPSerializer;
 import storage.DataStore;
 
-public class LPOP implements CommandStrategy {
+public class LPOPCommand implements CommandStrategy {
     private final DataStore dataStore;
 
-    public LPOP(DataStore dataStore) {
+    public LPOPCommand(DataStore dataStore) {
         this.dataStore = dataStore;
     }
 

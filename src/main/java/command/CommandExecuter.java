@@ -21,8 +21,8 @@ public class CommandExecuter {
         register("RPUSH", new RPUSHCommand(dataStore));
         register("LRANGE", new LRANGECommand(dataStore));
         register("LPUSH", new LPUSHCommand(dataStore));
-        register("LLEN", new LLEN(dataStore));
-        register("LPOP", new LPOP(dataStore));
+        register("LLEN", new LLENCommand(dataStore));
+        register("LPOP", new LPOPCommand(dataStore));
         register("BLPOP", new BLPOPCommand(dataStore));
         register("TYPE", new TYPECommand(dataStore));
         register("XADD", new XADDCommand(dataStore));

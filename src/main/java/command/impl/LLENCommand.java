@@ -9,10 +9,10 @@ import protocol.RESPSerializer;
 import storage.DataStore;
 import storage.types.ListValue;
 
-public class LLEN implements CommandStrategy {
+public class LLENCommand implements CommandStrategy {
     private final DataStore dataStore;
 
-    public LLEN(DataStore dataStore) {
+    public LLENCommand(DataStore dataStore) {
         this.dataStore = dataStore;
     }
 
