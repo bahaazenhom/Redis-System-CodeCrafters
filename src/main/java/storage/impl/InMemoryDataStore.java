@@ -211,6 +211,9 @@ public class InMemoryDataStore implements DataStore {
                 long newSeqPart = Long.parseLong(lastSeqPart)+1;
                 entryID = newTimePart + "-" + newSeqPart;
             }
+            else{
+                entryID = newTimePart + "-0";
+            }
         }
         else if(generatingMechanism.equals("empty")){
             if(newTimePart.equals("0"))entryID = "0-1";
