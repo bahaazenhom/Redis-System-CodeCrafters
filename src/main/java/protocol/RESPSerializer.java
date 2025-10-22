@@ -8,7 +8,7 @@ public class RESPSerializer {
     }
 
     public static String error(String message) {
-        return "-" + message + "\r\n";
+        return "-ERR" + message + "\r\n";
     }
 
     public static String integer(long number) {

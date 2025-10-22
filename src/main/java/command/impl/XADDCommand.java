@@ -40,7 +40,6 @@ public class XADDCommand implements CommandStrategy {
         }
         catch(InvalidStreamEntryException e){
             try {
-                System.out.println(e.getMessage());
                 clientOutput.write(RESPSerializer.error(e.getMessage()));
                 clientOutput.flush();
             } catch (IOException ioException) {
