@@ -174,9 +174,9 @@ public class InMemoryDataStore implements DataStore {
         if (!streamMap.isEmpty()) {
             String lastEntryID = ((StreamValue) stream).getLastEntryID();
             if (lastEntryID != null) {
-                if (lastEntryID.equals("*"))
+                if (entryID.equals("*"))
                     entryID = generateNewEntryId(entryID, lastEntryID, "full");
-                else if (lastEntryID.charAt(lastEntryID.length() - 1) == '*')
+                else if (entryID.charAt(entryID.length() - 1) == '*')
                     entryID = generateNewEntryId(entryID, lastEntryID, "part");
                 else {
                     String validation = validateStreamEntryID(entryID, lastEntryID);
