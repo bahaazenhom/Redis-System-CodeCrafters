@@ -199,6 +199,7 @@ public class InMemoryDataStore implements DataStore {
     }
 
     private String generateNewEntryId(String entryID, String lastEntryID, String generatingMechanism) throws InvalidStreamEntryException {
+        System.out.println("Generating new entry ID based on: " + entryID);
         String newTimePart = entryID.split("-")[0];
 
         if(generatingMechanism.equals("part")){
