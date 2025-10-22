@@ -170,14 +170,24 @@ public class InMemoryDataStore implements DataStore {
             throws InvalidStreamEntryException {
         RedisValue stream = store.computeIfAbsent(streamKey, k -> new StreamValue());
         LinkedHashMap<String, HashMap<String, String>> streamMap = ((StreamValue) stream).getStream();
+
         if (!streamMap.isEmpty()) {
             String lastEntryID = ((StreamValue) stream).getLastEntryID();
             if (lastEntryID != null) {
-                String validation = validateStreamEntryID(entryID, lastEntryID);
-                if (validation != null) {
-                    throw new InvalidStreamEntryException(validation);
+                if (lastEntryID.equals("*"))
+                    entryID = generateNewEntryId(entryID, lastEntryID, "full");
+                else if (lastEntryID.charAt(lastEntryID.length() - 1) == '*')
+                    entryID = generateNewEntryId(entryID, lastEntryID, "part");
+                else {
+                    String validation = validateStreamEntryID(entryID, lastEntryID);
+                    if (validation != null) {
+                        throw new InvalidStreamEntryException(validation);
+                    }
                 }
             }
+        }
+        else{
+            entryID = generateNewEntryId(entryID, null, "empty");
         }
 
         ((StreamValue) stream).put(entryID, new HashMap<>());
@@ -185,6 +195,29 @@ public class InMemoryDataStore implements DataStore {
         for (Map.Entry<String, String> entry : entryValues.entrySet()) {
             streamMap.get(entryID).put(entry.getKey(), entry.getValue());
         }
+        return entryID;
+    }
+
+    private String generateNewEntryId(String entryID, String lastEntryID, String generatingMechanism) throws InvalidStreamEntryException {
+        String newTimePart = entryID.split("-")[0];
+
+        if(generatingMechanism.equals("part")){
+            String lastTimePart = lastEntryID.split("-")[0];
+            String lastSeqPart = lastEntryID.split("-")[1];
+            if(newTimePart.compareTo(lastEntryID.split("-")[0])<0){
+                throw new InvalidStreamEntryException("Invalid stream entry ID");
+            }
+            if(lastTimePart.equals(newTimePart)){
+                long newSeqPart = Long.parseLong(lastSeqPart)+1;
+                entryID = newTimePart + "-" + newSeqPart;
+            }
+        }
+        else if(generatingMechanism.equals("empty")){
+            if(newTimePart.equals("0"))entryID = "0-1";
+            else entryID = newTimePart + "-0";
+        }
+        else if(generatingMechanism.equals("full")){}
+
         return entryID;
     }
 
@@ -200,10 +233,14 @@ public class InMemoryDataStore implements DataStore {
         long newSeq = Long.parseLong(newParts[1]);
         long lastSeq = Long.parseLong(lastParts[1]);
 
+        if (lastSeq == '*')
+            return "The ID specified in XADD is equal or smaller than the target stream top item";
+
         if (newMs < lastMs) {
             return "The ID specified in XADD is equal or smaller than the target stream top item";
         } else if (newMs == lastMs) {
-            if(newSeq <= lastSeq)return "The ID specified in XADD is equal or smaller than the target stream top item";
+            if (newSeq <= lastSeq)
+                return "The ID specified in XADD is equal or smaller than the target stream top item";
         }
         return null;
     }
