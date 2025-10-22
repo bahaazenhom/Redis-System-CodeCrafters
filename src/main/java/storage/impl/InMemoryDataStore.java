@@ -186,10 +186,10 @@ public class InMemoryDataStore implements DataStore {
                 }
             }
         } else {
-            if (entryID.charAt(entryID.length() - 1) == '*')
-                entryID = generateNewEntryId(entryID, null, "empty");
-            else if (entryID.equals("*"))
+            if (entryID.equals("*"))
                 entryID = generateNewEntryId(entryID, null, "fullEmpty");
+            else if (entryID.charAt(entryID.length() - 1) == '*' )
+                entryID = generateNewEntryId(entryID, null, "empty");
             else
                 validateStreamEntryID(entryID, null);
         }
