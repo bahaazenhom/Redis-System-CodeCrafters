@@ -185,11 +185,13 @@ public class InMemoryDataStore implements DataStore {
                     }
                 }
             }
-        }
-        else{
-            if(entryID.charAt(entryID.length()-1)=='*')
-            entryID = generateNewEntryId(entryID, null, "empty");
-            else validateStreamEntryID(entryID, null);
+        } else {
+            if (entryID.charAt(entryID.length() - 1) == '*')
+                entryID = generateNewEntryId(entryID, null, "empty");
+            else if (entryID.equals("*"))
+                entryID = generateNewEntryId(entryID, null, "fullEmpty");
+            else
+                validateStreamEntryID(entryID, null);
         }
 
         ((StreamValue) stream).put(entryID, new HashMap<>());
@@ -200,35 +202,48 @@ public class InMemoryDataStore implements DataStore {
         return entryID;
     }
 
-    private String generateNewEntryId(String entryID, String lastEntryID, String generatingMechanism) throws InvalidStreamEntryException {
-        System.out.println("Generating new entry ID based on: " + entryID+" in case of "+generatingMechanism);
+    private String generateNewEntryId(String entryID, String lastEntryID, String generatingMechanism)
+            throws InvalidStreamEntryException {
         String newTimePart = entryID.split("-")[0];
 
-        if(generatingMechanism.equals("part")){
+        if (generatingMechanism.equals("part")) {
             String lastTimePart = lastEntryID.split("-")[0];
             String lastSeqPart = lastEntryID.split("-")[1];
-            if(newTimePart.compareTo(lastEntryID.split("-")[0])<0){
+            if (newTimePart.compareTo(lastEntryID.split("-")[0]) < 0) {
                 throw new InvalidStreamEntryException("Invalid stream entry ID");
             }
-            if(lastTimePart.equals(newTimePart)){
-                long newSeqPart = Long.parseLong(lastSeqPart)+1;
+            if (lastTimePart.equals(newTimePart)) {
+                long newSeqPart = Long.parseLong(lastSeqPart) + 1;
                 entryID = newTimePart + "-" + newSeqPart;
-            }
-            else{
+            } else {
                 entryID = newTimePart + "-0";
             }
+        } else if (generatingMechanism.equals("empty")) {
+            if (newTimePart.equals("0"))
+                entryID = "0-1";
+            else
+                entryID = newTimePart + "-0";
+        } else if (generatingMechanism.equals("full")) {
+            String lastTimePart = lastEntryID.split("-")[0];
+            String lastSeqPart = lastEntryID.split("-")[1];
+            Long currentMillisSeconds = System.currentTimeMillis();
+            if (lastTimePart.equals(currentMillisSeconds + "")) {
+                long newSeqPart = Long.parseLong(lastSeqPart) + 1;
+                entryID = currentMillisSeconds + "-" + newSeqPart;
+            } else {
+                entryID = currentMillisSeconds + "-0";
+            }
+        } else if (generatingMechanism.equals("fullEmpty")) {
+            Long currentMillisSeconds = System.currentTimeMillis();
+            entryID = currentMillisSeconds + "-0";
         }
-        else if(generatingMechanism.equals("empty")){
-            if(newTimePart.equals("0"))entryID = "0-1";
-            else entryID = newTimePart + "-0";
-        }
-        else if(generatingMechanism.equals("full")){}
 
         return entryID;
     }
 
     private String validateStreamEntryID(String newEntryID, String lastEntryID) {
-        if(lastEntryID == null)return null;
+        if (lastEntryID == null)
+            return null;
         if (newEntryID.equals("0-0")) {
             return "The ID specified in XADD must be greater than 0-0";
         }
