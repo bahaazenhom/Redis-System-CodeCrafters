@@ -9,6 +9,7 @@ import storage.types.ListValue;
 import storage.types.StreamValue;
 
 import java.util.ArrayList;
+import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -17,11 +18,19 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class InMemoryDataStore implements DataStore {
+    
+    // ============================================
+    // FIELDS
+    // ============================================
     private final Map<String, RedisValue> store = new ConcurrentHashMap<>();
     private final WaitRegistry waitRegistry = new WaitRegistry();
 
     public InMemoryDataStore() {
     }
+
+    // ============================================
+    // COMMON OPERATIONS
+    // ============================================
 
     @Override
     public void setValue(String key, RedisValue redisValue) {
@@ -67,15 +76,17 @@ public class InMemoryDataStore implements DataStore {
     @Override
     public long getTTL(String key) {
         RedisValue redisValue = store.get(key);
-        if (redisValue == null)
-            return -2;
+        if (redisValue == null) {
+            return -2; // Key doesn't exist
+        }
 
-        if (!redisValue.hasExpiry())
-            return -1;
+        if (!redisValue.hasExpiry()) {
+            return -1; // Key exists but has no expiry
+        }
 
-        if (redisValue.hasExpiry()) {
+        if (redisValue.isExpired()) {
             store.remove(key);
-            return -2;
+            return -2; // Key expired
         }
 
         return redisValue.getExpiryTime() - System.currentTimeMillis();
@@ -84,17 +95,21 @@ public class InMemoryDataStore implements DataStore {
     @Override
     public DataType getType(String key) {
         RedisValue redisValue = store.get(key);
-
-        return redisValue.getType();
+        return redisValue != null ? redisValue.getType() : null;
     }
 
     @Override
     public boolean isType(String key, DataType dataType) {
         RedisValue redisValue = store.get(key);
-        if (redisValue == null)
+        if (redisValue == null) {
             return false;
+        }
         return redisValue.getType() == dataType;
     }
+
+    // ============================================
+    // LIST OPERATIONS
+    // ============================================
 
     @Override
     public long rpush(String key, List<String> values) {
@@ -103,8 +118,10 @@ public class InMemoryDataStore implements DataStore {
 
         redisValue.getList().addAll(values);
         long size = redisValue.getList().size();
-        if (wasEmpty)
+        
+        if (wasEmpty) {
             waitRegistry.signalFirstWaiter(key, () -> lpop(key));
+        }
 
         return size;
     }
@@ -113,12 +130,15 @@ public class InMemoryDataStore implements DataStore {
     public long lpush(String key, List<String> values) {
         ListValue redisValue = (ListValue) store.get(key);
         boolean wasEmpty = redisValue.getList().isEmpty();
+        
         for (String value : values) {
             redisValue.getList().addFirst(value);
         }
         long size = redisValue.getList().size();
-        if (wasEmpty)
+        
+        if (wasEmpty) {
             waitRegistry.signalFirstWaiter(key, () -> lpop(key));
+        }
 
         return size;
     }
@@ -130,141 +150,187 @@ public class InMemoryDataStore implements DataStore {
             return null;
         }
         ListValue listValue = (ListValue) redisValue;
-        String value = listValue.getList().pollFirst();
-        return value;
+        return listValue.getList().pollFirst();
     }
 
     @Override
     public List<String> lpop(String key, Long count) {
-        if (count == null)
+        if (count == null) {
             count = 1L;
+        }
+        
         RedisValue redisValue = store.get(key);
         if (redisValue == null || !(redisValue instanceof ListValue)) {
             return null;
         }
+        
         Deque<String> values = ((ListValue) redisValue).getList();
         List<String> removedValues = new ArrayList<>();
-        while (count > 0) {
-            if (values.isEmpty())
-                break;
+        
+        while (count > 0 && !values.isEmpty()) {
             removedValues.add(values.pollFirst());
             count--;
         }
+        
         return removedValues;
     }
 
     @Override
     public String BLPOP(String key, double timestamp) throws InterruptedException {
         String value = lpop(key);
-        if (value != null)
+        if (value != null) {
             return value;
+        }
 
-        value = waitRegistry.awaitElement(key, timestamp, () -> lpop(key));
-
-        return value;
-
+        return waitRegistry.awaitElement(key, timestamp, () -> lpop(key));
     }
+
+    // ============================================
+    // STREAM OPERATIONS
+    // ============================================
 
     @Override
     public String xadd(String streamKey, String entryID, HashMap<String, String> entryValues)
             throws InvalidStreamEntryException {
-        RedisValue stream = store.computeIfAbsent(streamKey, k -> new StreamValue());
-        LinkedHashMap<String, HashMap<String, String>> streamMap = ((StreamValue) stream).getStream();
+        
+        StreamValue stream = getOrCreateStream(streamKey);
+        LinkedHashMap<String, HashMap<String, String>> streamMap = stream.getStream();
 
+        // Handle entry ID generation and validation
         if (!streamMap.isEmpty()) {
-            String lastEntryID = ((StreamValue) stream).getLastEntryID();
-            if (lastEntryID != null) {
-                if (entryID.equals("*"))
-                    entryID = generateNewEntryId(entryID, lastEntryID, "full");
-                else if (entryID.charAt(entryID.length() - 1) == '*')
-                    entryID = generateNewEntryId(entryID, lastEntryID, "part");
-                else {
-                    String validation = validateStreamEntryID(entryID, lastEntryID);
-                    if (validation != null) {
-                        throw new InvalidStreamEntryException(validation);
-                    }
-                }
-            }
+            String lastEntryID = stream.getLastEntryID();
+            entryID = processEntryID(entryID, lastEntryID, false);
         } else {
-            if (entryID.equals("*"))
-                entryID = generateNewEntryId(entryID, null, "fullEmpty");
-            else if (entryID.charAt(entryID.length() - 1) == '*' )
-                entryID = generateNewEntryId(entryID, null, "empty");
-            else
-                validateStreamEntryID(entryID, null);
+            entryID = processEntryID(entryID, null, true);
         }
 
-        ((StreamValue) stream).put(entryID, new HashMap<>());
+        // Add entry to stream
+        stream.put(entryID, new HashMap<>());
+        streamMap.get(entryID).putAll(entryValues);
 
-        for (Map.Entry<String, String> entry : entryValues.entrySet()) {
-            streamMap.get(entryID).put(entry.getKey(), entry.getValue());
-        }
         return entryID;
     }
 
-    private String generateNewEntryId(String entryID, String lastEntryID, String generatingMechanism)
+    // ============================================
+    // PRIVATE HELPER METHODS - List Operations
+    // ============================================
+
+    private ListValue getOrCreateList(String key) {
+        RedisValue value = store.get(key);
+        if (value == null) {
+            value = new ListValue(new ArrayDeque<>());
+            store.put(key, value);
+        }
+        if (!(value instanceof ListValue)) {
+            throw new IllegalStateException("WRONGTYPE Operation against a key holding the wrong kind of value");
+        }
+        return (ListValue) value;
+    }
+
+    // ============================================
+    // PRIVATE HELPER METHODS - Stream Operations
+    // ============================================
+
+    private StreamValue getOrCreateStream(String key) {
+        return (StreamValue) store.computeIfAbsent(key, k -> new StreamValue());
+    }
+
+    /**
+     * Process and validate entry ID for XADD command.
+     * Handles auto-generation with * and partial generation with timestamp-*
+     */
+    private String processEntryID(String entryID, String lastEntryID, boolean isEmptyStream) 
             throws InvalidStreamEntryException {
-        String newTimePart = entryID.split("-")[0];
-
-        if (generatingMechanism.equals("part")) {
-            String lastTimePart = lastEntryID.split("-")[0];
-            String lastSeqPart = lastEntryID.split("-")[1];
-            if (newTimePart.compareTo(lastEntryID.split("-")[0]) < 0) {
-                throw new InvalidStreamEntryException("Invalid stream entry ID");
-            }
-            if (lastTimePart.equals(newTimePart)) {
-                long newSeqPart = Long.parseLong(lastSeqPart) + 1;
-                entryID = newTimePart + "-" + newSeqPart;
-            } else {
-                entryID = newTimePart + "-0";
-            }
-        } else if (generatingMechanism.equals("empty")) {
-            if (newTimePart.equals("0"))
-                entryID = "0-1";
-            else
-                entryID = newTimePart + "-0";
-        } else if (generatingMechanism.equals("full")) {
-            String lastTimePart = lastEntryID.split("-")[0];
-            String lastSeqPart = lastEntryID.split("-")[1];
-            Long currentMillisSeconds = System.currentTimeMillis();
-            if (lastTimePart.equals(currentMillisSeconds + "")) {
-                long newSeqPart = Long.parseLong(lastSeqPart) + 1;
-                entryID = currentMillisSeconds + "-" + newSeqPart;
-            } else {
-                entryID = currentMillisSeconds + "-0";
-            }
-        } else if (generatingMechanism.equals("fullEmpty")) {
-            Long currentMillisSeconds = System.currentTimeMillis();
-            entryID = currentMillisSeconds + "-0";
+        
+        if (entryID.equals("*")) {
+            return generateFullEntryID(lastEntryID, isEmptyStream);
+        } else if (entryID.endsWith("-*")) {
+            return generatePartialEntryID(entryID, lastEntryID, isEmptyStream);
+        } else {
+            validateEntryID(entryID, lastEntryID);
+            return entryID;
         }
-
-        return entryID;
     }
 
-    private String validateStreamEntryID(String newEntryID, String lastEntryID) {
-        if (lastEntryID == null)
-            return null;
-        if (newEntryID.equals("0-0")) {
-            return "The ID specified in XADD must be greater than 0-0";
+    /**
+     * Generate a complete entry ID (both timestamp and sequence)
+     */
+    private String generateFullEntryID(String lastEntryID, boolean isEmptyStream) 
+            throws InvalidStreamEntryException {
+        
+        long currentMillis = System.currentTimeMillis();
+        
+        if (isEmptyStream) {
+            return currentMillis + "-0";
         }
+        
+        String[] lastParts = lastEntryID.split("-");
+        long lastMs = Long.parseLong(lastParts[0]);
+        long lastSeq = Long.parseLong(lastParts[1]);
+        
+        if (currentMillis == lastMs) {
+            return currentMillis + "-" + (lastSeq + 1);
+        } else {
+            return currentMillis + "-0";
+        }
+    }
+
+    /**
+     * Generate sequence number when timestamp is provided (format: timestamp-*)
+     */
+    private String generatePartialEntryID(String entryID, String lastEntryID, boolean isEmptyStream) 
+            throws InvalidStreamEntryException {
+        
+        String newTimePart = entryID.substring(0, entryID.length() - 2); // Remove "-*"
+        
+        if (isEmptyStream) {
+            return newTimePart.equals("0") ? "0-1" : newTimePart + "-0";
+        }
+        
+        String[] lastParts = lastEntryID.split("-");
+        long lastMs = Long.parseLong(lastParts[0]);
+        long lastSeq = Long.parseLong(lastParts[1]);
+        long newMs = Long.parseLong(newTimePart);
+        
+        if (newMs < lastMs) {
+            throw new InvalidStreamEntryException(
+                "The ID specified in XADD is equal or smaller than the target stream top item");
+        }
+        
+        if (newMs == lastMs) {
+            return newTimePart + "-" + (lastSeq + 1);
+        } else {
+            return newTimePart + "-0";
+        }
+    }
+
+    /**
+     * Validate that the new entry ID is greater than the last entry ID
+     */
+    private void validateEntryID(String newEntryID, String lastEntryID) 
+            throws InvalidStreamEntryException {
+        
+        if (newEntryID.equals("0-0")) {
+            throw new InvalidStreamEntryException(
+                "The ID specified in XADD must be greater than 0-0");
+        }
+        
+        if (lastEntryID == null) {
+            return; // First entry in stream
+        }
+        
         String[] newParts = newEntryID.split("-");
         String[] lastParts = lastEntryID.split("-");
-
+        
         long newMs = Long.parseLong(newParts[0]);
         long lastMs = Long.parseLong(lastParts[0]);
         long newSeq = Long.parseLong(newParts[1]);
         long lastSeq = Long.parseLong(lastParts[1]);
-
-        if (lastSeq == '*')
-            return "The ID specified in XADD is equal or smaller than the target stream top item";
-
-        if (newMs < lastMs) {
-            return "The ID specified in XADD is equal or smaller than the target stream top item";
-        } else if (newMs == lastMs) {
-            if (newSeq <= lastSeq)
-                return "The ID specified in XADD is equal or smaller than the target stream top item";
+        
+        if (newMs < lastMs || (newMs == lastMs && newSeq <= lastSeq)) {
+            throw new InvalidStreamEntryException(
+                "The ID specified in XADD is equal or smaller than the target stream top item");
         }
-        return null;
     }
 
 }
