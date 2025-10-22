@@ -173,9 +173,9 @@ public class InMemoryDataStore implements DataStore {
         if (!streamMap.isEmpty()) {
             String lastEntryID = ((StreamValue) stream).getLastEntryID();
             if (lastEntryID != null) {
-                if (!validateStreamEntryID(entryID, lastEntryID)) {
-                    throw new InvalidStreamEntryException(
-                            "The ID specified in XADD is equal or smaller than the target stream top item");
+                String validation = validateStreamEntryID(entryID, lastEntryID);
+                if (validation != null) {
+                    throw new InvalidStreamEntryException(validation);
                 }
             }
         }
@@ -188,16 +188,12 @@ public class InMemoryDataStore implements DataStore {
         return entryID;
     }
 
-    private boolean validateStreamEntryID(String newEntryID, String lastEntryID) {
+    private String validateStreamEntryID(String newEntryID, String lastEntryID) {
         if (newEntryID.equals("0-0")) {
-            return false;
+            return "The ID specified in XADD must be greater than 0-0";
         }
         String[] newParts = newEntryID.split("-");
         String[] lastParts = lastEntryID.split("-");
-
-        if (newParts.length != 2 || lastParts.length != 2) {
-            return false;
-        }
 
         long newMs = Long.parseLong(newParts[0]);
         long lastMs = Long.parseLong(lastParts[0]);
@@ -205,11 +201,11 @@ public class InMemoryDataStore implements DataStore {
         long lastSeq = Long.parseLong(lastParts[1]);
 
         if (newMs < lastMs) {
-            return false;
+            return "The ID specified in XADD is equal or smaller than the target stream top item";
         } else if (newMs == lastMs) {
-            return newSeq > lastSeq;
+            if(newSeq <= lastSeq)return "The ID specified in XADD is equal or smaller than the target stream top item";
         }
-        return true;
+        return null;
     }
 
 }
