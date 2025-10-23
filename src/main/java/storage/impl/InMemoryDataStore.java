@@ -214,32 +214,51 @@ public class InMemoryDataStore implements DataStore {
     }
 
     @Override
-    public int[][] XRANGE(String streamKey, String startEntryId, String endEntryId) {
+    public List<List<Object>> XRANGE(String streamKey, String startEntryId, String endEntryId) {
         RedisValue stream = store.get(streamKey);
-        NavigableMap<String, HashMap<String, String>> streamMap = ((StreamValue) stream).getStream();
-        startEntryId = startEntryId + "-0";
-        endEntryId = endEntryId.split("-")[0] + "-" + (Long.parseLong(endEntryId.split("-")[1]) + 1);
-        streamMap = streamMap.tailMap(startEntryId, true);
-        streamMap = streamMap.headMap(streamKey, false);
-
-        List<List<Object>> values = new ArrayList<>();//[]
-        // Collect results
-        int entryIndex = 0;
-        for (Map.Entry<String, HashMap<String, String>> entry : streamMap.entrySet()) {
-            HashMap<String, String> idValues = entry.getValue();
-            values.add(new ArrayList<>());//[[],[]]
-            values.get(values.size()-1).add(entry.getKey());
-            List<List<String>> entryValues = new ArrayList<>();
-            for(Map.Entry<String, String> field : idValues.entrySet()) {
-                List<String> entries = new ArrayList<>();
-                entries.add(field.getKey());
-                entries.add(field.getValue());
-                entryValues.add(entries);
-            }
-            values.get(values.size()-1).add(entryValues);
+        if (stream == null || !(stream instanceof StreamValue)) {
+            return new ArrayList<>(); // Empty result if stream doesn't exist
         }
 
-        return new int[][] {};
+        NavigableMap<String, HashMap<String, String>> streamMap = ((StreamValue) stream).getStream();
+
+        // Handle special values and normalize IDs
+        if (startEntryId.equals("-")) {
+            startEntryId = "0-0";
+        } else if (!startEntryId.contains("-")) {
+            // For start ID, sequence defaults to 0
+            startEntryId = startEntryId + "-0";
+        }
+
+        if (endEntryId.equals("+")) {
+            endEntryId = Long.MAX_VALUE + "-" + Long.MAX_VALUE;
+        } else if (!endEntryId.contains("-")) {
+            // For end ID, sequence defaults to maximum
+            endEntryId = endEntryId + "-" + Long.MAX_VALUE;
+        }
+
+        // Get the submap for the range
+        NavigableMap<String, HashMap<String, String>> rangeMap = streamMap.subMap(startEntryId, true, endEntryId, true);
+
+        List<List<Object>> values = new ArrayList<>();
+        // Collect results
+        for (Map.Entry<String, HashMap<String, String>> entry : rangeMap.entrySet()) {
+            HashMap<String, String> idValues = entry.getValue();
+            List<Object> entryData = new ArrayList<>();
+            entryData.add(entry.getKey()); // Entry ID
+
+            List<List<String>> entryValues = new ArrayList<>();
+            for (Map.Entry<String, String> field : idValues.entrySet()) {
+                List<String> fieldPair = new ArrayList<>();
+                fieldPair.add(field.getKey());
+                fieldPair.add(field.getValue());
+                entryValues.add(fieldPair);
+            }
+            entryData.add(entryValues); // Field-value pairs
+            values.add(entryData);
+        }
+
+        return values;
     }
 
     // ============================================
