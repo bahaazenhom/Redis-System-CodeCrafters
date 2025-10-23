@@ -26,7 +26,7 @@ public class XRANGECommand implements CommandStrategy {
             String streamKey = arguments.get(0);
             String startEntryId = arguments.get(1);
             String endEntryId = arguments.get(2);
-            List<List<Object>> result = dataStore.XRANGE(streamKey, startEntryId, endEntryId);
+            List<List<Object>> result = dataStore.XRANGE(streamKey, startEntryId, endEntryId, true);
             clientOutput.write(RESPSerializer.xRangeArray(result));
             clientOutput.flush();
         } catch (IOException e) {

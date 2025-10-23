@@ -214,7 +214,7 @@ public class InMemoryDataStore implements DataStore {
     }
 
     @Override
-    public List<List<Object>> XRANGE(String streamKey, String startEntryId, String endEntryId) {
+    public List<List<Object>> XRANGE(String streamKey, String startEntryId, String endEntryId, boolean inclusion) {
         RedisValue stream = store.get(streamKey);
         if (stream == null || !(stream instanceof StreamValue)) {
             return new ArrayList<>(); // Empty result if stream doesn't exist
@@ -225,20 +225,21 @@ public class InMemoryDataStore implements DataStore {
         // Handle special values and normalize IDs
         if (startEntryId.equals("-")) {
             startEntryId = "0-0";
-        } else if (!startEntryId.contains("-")) {
+        } else if (!startEntryId.contains("-") && inclusion) {
             // For start ID, sequence defaults to 0
             startEntryId = startEntryId + "-0";
         }
 
         if (endEntryId.equals("+")) {
             endEntryId = Long.MAX_VALUE + "-" + Long.MAX_VALUE;
-        } else if (!endEntryId.contains("-")) {
+        } else if (!endEntryId.contains("-") && inclusion) {
             // For end ID, sequence defaults to maximum
             endEntryId = endEntryId + "-" + Long.MAX_VALUE;
         }
 
         // Get the submap for the range
-        NavigableMap<String, HashMap<String, String>> rangeMap = streamMap.subMap(startEntryId, true, endEntryId, true);
+        NavigableMap<String, HashMap<String, String>> rangeMap = streamMap.subMap(startEntryId, inclusion, endEntryId,
+                inclusion);
 
         List<List<Object>> values = new ArrayList<>();
         // Collect results
@@ -259,6 +260,21 @@ public class InMemoryDataStore implements DataStore {
         }
 
         return values;
+    }
+
+    @Override
+    public List<List<Object>> XREAD(List<String> streamsKeys, List<String> streamsStartEntriesIDs) {
+        List<List<Object>> streamsReads = new ArrayList<>();
+        for (int index = 0; index < streamsKeys.size(); index++) {
+            String streamKey = streamsKeys.get(index);
+            String startEntryId = streamsStartEntriesIDs.get(index);
+            String endEntryId = Long.MAX_VALUE + "-" + Long.MAX_VALUE;
+            List<Object> streamRead = new ArrayList<>();
+            streamRead.add(streamKey);
+            streamRead.add(XRANGE(streamKey, startEntryId, endEntryId, false));
+            streamsReads.add(streamRead); // Add the stream read to results
+        }
+        return streamsReads;
     }
 
     // ============================================
