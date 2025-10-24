@@ -213,6 +213,8 @@ public class InMemoryDataStore implements DataStore {
         streamMap.get(entryID).putAll(entryValues);
 
         if (wasEmpty) {
+          //  System.out.println("Signaling waiter for stream " + streamKey + " with entryID " + entryID + 
+            //        "\n entries are: " + streamMap.get(entryID).toString());
             streamWaitRegistry.signalFirstWaiter(streamKey, entryID,
                     createStreamReadSupplier(streamKey, entryID));
         }
@@ -280,11 +282,14 @@ public class InMemoryDataStore implements DataStore {
 
             // if the stream doesn't exist or the last entryId is smaller than the startEntryId:
             // then => block and wait.
+            System.out.println("block=" + block + " streamKey=" + streamKey + " startEntryId=" + startEntryId);
             if ((exists(streamKey) == false
                     || ((StreamValue) store.get(streamKey)).getLastEntryID().compareTo(startEntryId) < 0)
-                    && block)
+                    && block) {
+                System.out.println("Blocking read on stream " + streamKey + " from entryID " + startEntryId);
                 streamWaitRegistry.awaitElement(streamKey, startEntryId, timeoutSeconds,
                         createStreamReadSupplier(streamKey, startEntryId));
+                    }
 
             String endEntryId = Long.MAX_VALUE + "-" + Long.MAX_VALUE;
             List<Object> streamRead = new ArrayList<>();

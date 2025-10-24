@@ -26,9 +26,9 @@ public class XREADCommand implements CommandStrategy {
 
             Long timestamp = 0L;
             boolean block = false;
-            if (arguments.contains("BLOCK")) {
+            if (arguments.contains("block")) {
                 block = true;
-                int blockIndex = arguments.indexOf("BLOCK");
+                int blockIndex = arguments.indexOf("block");
                 timestamp = Long.parseLong(arguments.get(blockIndex + 1));
             }
 

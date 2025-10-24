@@ -90,7 +90,9 @@ public class StreamWaitRegistry {
     }
 
     public void signalFirstWaiter(String key, String entryID,Supplier<List<List<Object>>> streamSupplier) {
+       // System.out.println("Signaling waiters for stream " + key + " with entryID " + entryID);
         KeyWaitQueue queue = streamWaitQueues.get(key);
+        System.out.println(queue);
         if (queue == null)
             return;// there's no any waiting clients
         queue.lock.lock();
@@ -98,6 +100,7 @@ public class StreamWaitRegistry {
             while (!queue.waiters.isEmpty()) {// we go through all the waiting clients to give them their values
                 StreamWaitToken token = queue.waiters.peek();
                 List<List<Object>> entries = streamSupplier.get();
+                System.out.println("Checking waiter for stream " + key + " with entryID " + token.getEntryID()+"\n"+entries.toString());
                 if (entries == null || entries.isEmpty()) {
                     return;// no more elements to read
                 }
