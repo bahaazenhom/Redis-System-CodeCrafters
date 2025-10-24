@@ -23,22 +23,31 @@ public class XREADCommand implements CommandStrategy {
                 clientOutput.flush();
                 return;
             }
-            int streamsIndex = arguments.indexOf("STREAMS");
-            if (streamsIndex == -1)
-                streamsIndex = arguments.indexOf("streams");
 
-            if (streamsIndex == -1 || streamsIndex + 1 >= arguments.size()) {
-                clientOutput.write(RESPSerializer.error("Missing STREAMS keyword or stream keys"));
+            Long timestamp = 0L;
+            boolean block = false;
+            if (arguments.contains("BLOCK")) {
+                block = true;
+                int blockIndex = arguments.indexOf("BLOCK");
+                timestamp = Long.parseLong(arguments.get(blockIndex + 1));
+            }
+
+            int streamsIndexStart = arguments.indexOf("streams");
+            int numStreams = (arguments.size() - streamsIndexStart - 1) / 2;
+
+            int IDsIndexStart = streamsIndexStart + 1 + numStreams;
+            List<String> streamsKeys = arguments.subList(streamsIndexStart + 1, streamsIndexStart + 1 + numStreams);
+            List<String> streamsStartEntriesIDs = arguments.subList(IDsIndexStart, arguments.size());
+
+            try {
+                List<List<Object>> result = dataStore.XREAD(streamsKeys, streamsStartEntriesIDs, block, timestamp);
+                clientOutput.write(RESPSerializer.XReadArray(result));
+                clientOutput.flush();
+            } catch (InterruptedException e) {
+                clientOutput.write(RESPSerializer.error(e.getMessage()));
                 clientOutput.flush();
                 return;
             }
-            int numStreams = (arguments.size() - streamsIndex - 1) / 2;
-            List<String> streamsKeys = arguments.subList(streamsIndex + 1, streamsIndex + 1 + numStreams);
-            List<String> streamsStartEntriesIDs = arguments.subList(streamsIndex + 1 + numStreams, arguments.size());
-
-            List<List<Object>> result = dataStore.XREAD(streamsKeys, streamsStartEntriesIDs);
-            clientOutput.write(RESPSerializer.XReadArray(result));
-            clientOutput.flush();
         } catch (IOException exception) {
             throw new RuntimeException(exception);
         }

@@ -1,7 +1,8 @@
 package storage.impl;
 
 import storage.DataStore;
-import storage.concurrency.WaitRegistry;
+import storage.concurrency.ListWaitRegistry;
+import storage.concurrency.StreamWaitRegistry;
 import storage.core.DataType;
 import storage.core.RedisValue;
 import storage.exception.InvalidStreamEntryException;
@@ -9,7 +10,6 @@ import storage.types.ListValue;
 import storage.types.StreamValue;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
@@ -18,6 +18,7 @@ import java.util.Map;
 import java.util.NavigableMap;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 public class InMemoryDataStore implements DataStore {
 
@@ -25,7 +26,8 @@ public class InMemoryDataStore implements DataStore {
     // FIELDS
     // ============================================
     private final Map<String, RedisValue> store = new ConcurrentHashMap<>();
-    private final WaitRegistry waitRegistry = new WaitRegistry();
+    private final ListWaitRegistry listWaitRegistry = new ListWaitRegistry();
+    private final StreamWaitRegistry streamWaitRegistry = new StreamWaitRegistry();
 
     public InMemoryDataStore() {
     }
@@ -122,7 +124,7 @@ public class InMemoryDataStore implements DataStore {
         long size = redisValue.getList().size();
 
         if (wasEmpty) {
-            waitRegistry.signalFirstWaiter(key, () -> lpop(key));
+            listWaitRegistry.signalFirstWaiter(key, () -> lpop(key));
         }
 
         return size;
@@ -139,7 +141,7 @@ public class InMemoryDataStore implements DataStore {
         long size = redisValue.getList().size();
 
         if (wasEmpty) {
-            waitRegistry.signalFirstWaiter(key, () -> lpop(key));
+            listWaitRegistry.signalFirstWaiter(key, () -> lpop(key));
         }
 
         return size;
@@ -184,7 +186,7 @@ public class InMemoryDataStore implements DataStore {
             return value;
         }
 
-        return waitRegistry.awaitElement(key, timestamp, () -> lpop(key));
+        return listWaitRegistry.awaitElement(key, timestamp, () -> lpop(key));
     }
 
     // ============================================
@@ -197,7 +199,7 @@ public class InMemoryDataStore implements DataStore {
 
         StreamValue stream = getOrCreateStream(streamKey);
         TreeMap<String, HashMap<String, String>> streamMap = stream.getStream();
-
+        boolean wasEmpty = streamMap.isEmpty();
         // Handle entry ID generation and validation
         if (!streamMap.isEmpty()) {
             String lastEntryID = stream.getLastEntryID();
@@ -207,8 +209,13 @@ public class InMemoryDataStore implements DataStore {
         }
 
         // Add entry to stream
-        stream.put(entryID, new HashMap<>());
+        streamMap.put(entryID, new HashMap<>());
         streamMap.get(entryID).putAll(entryValues);
+
+        if (wasEmpty) {
+            streamWaitRegistry.signalFirstWaiter(streamKey, entryID,
+                    createStreamReadSupplier(streamKey, entryID));
+        }
 
         return entryID;
     }
@@ -263,11 +270,22 @@ public class InMemoryDataStore implements DataStore {
     }
 
     @Override
-    public List<List<Object>> XREAD(List<String> streamsKeys, List<String> streamsStartEntriesIDs) {
+    public List<List<Object>> XREAD(List<String> streamsKeys, List<String> streamsStartEntriesIDs, boolean block,
+            double timeoutSeconds)
+            throws InterruptedException {
         List<List<Object>> streamsReads = new ArrayList<>();
         for (int index = 0; index < streamsKeys.size(); index++) {
             String streamKey = streamsKeys.get(index);
             String startEntryId = streamsStartEntriesIDs.get(index);
+
+            // if the stream doesn't exist or the last entryId is smaller than the startEntryId:
+            // then => block and wait.
+            if ((exists(streamKey) == false
+                    || ((StreamValue) store.get(streamKey)).getLastEntryID().compareTo(startEntryId) < 0)
+                    && block)
+                streamWaitRegistry.awaitElement(streamKey, startEntryId, timeoutSeconds,
+                        createStreamReadSupplier(streamKey, startEntryId));
+
             String endEntryId = Long.MAX_VALUE + "-" + Long.MAX_VALUE;
             List<Object> streamRead = new ArrayList<>();
             streamRead.add(streamKey);
@@ -296,6 +314,13 @@ public class InMemoryDataStore implements DataStore {
     // ============================================
     // PRIVATE HELPER METHODS - Stream Operations
     // ============================================
+
+    private Supplier<List<List<Object>>> createStreamReadSupplier(String streamKey, String startEntryId) {
+        return () -> {
+            String endEntryId = Long.MAX_VALUE + "-" + Long.MAX_VALUE;
+            return XRANGE(streamKey, startEntryId, endEntryId, false);
+        };
+    }
 
     private StreamValue getOrCreateStream(String key) {
         return (StreamValue) store.computeIfAbsent(key, k -> new StreamValue());

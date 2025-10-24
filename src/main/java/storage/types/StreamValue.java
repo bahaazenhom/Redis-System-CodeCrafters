@@ -14,14 +14,6 @@ public class StreamValue extends RedisValue {
         this.stream = new TreeMap<>();
     }
 
-    public void put(String key, HashMap<String, String> value) {
-        stream.put(key, value);
-    }
-
-    public void remove(String key) {
-        stream.remove(key);
-    }
-
     public String getLastEntryID() {
         return stream.lastKey();
     }

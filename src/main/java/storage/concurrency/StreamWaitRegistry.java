@@ -1,27 +1,37 @@
 package storage.concurrency;
 
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.locks.Condition;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
-public class WaitRegistry {
+public class StreamWaitRegistry {
 
-    private final ConcurrentHashMap<String, KeyWaitQueue> waitQueues = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, KeyWaitQueue> streamWaitQueues = new ConcurrentHashMap<>();
 
     private static class KeyWaitQueue {
         private final ReentrantLock lock = new ReentrantLock(true);// true: to ensure fair FIFO ordering
         private final Condition condition = lock.newCondition();
-        private final Queue<WaitToken> waiters = new LinkedList<>();
+        private final Queue<StreamWaitToken> waiters = new LinkedList<>();
     }
 
-    private static class WaitToken {
+    private static class StreamWaitToken {
         private volatile boolean fulfilled = false;
-        private volatile String result = null;
+        private volatile List<List<Object>> result = null;
+        private String entryID = null;
 
-        void fulfill(String value) {
+        public String getEntryID() {
+            return entryID;
+        }
+
+        public void setEntryID(String entryID) {
+            this.entryID = entryID;
+        }
+
+        void fulfill(List<List<Object>> value) {
             this.result = value;
             this.fulfilled = true;
         }
@@ -30,20 +40,22 @@ public class WaitRegistry {
             return this.fulfilled;
         }
 
-        String getResult() {
+        List<List<Object>> getResult() {
             return this.result;
         }
 
     }
 
-    public String awaitElement(String key, double timeoutSeconds, Supplier<String> popSupplier)
+    public List<List<Object>> awaitElement(String key, String entryId, double timeoutSeconds,
+            Supplier<List<List<Object>>> readSupplier)
             throws InterruptedException {
-        KeyWaitQueue queue = waitQueues.computeIfAbsent(key, k -> new KeyWaitQueue());
-        WaitToken token = new WaitToken();
+        KeyWaitQueue queue = streamWaitQueues.computeIfAbsent(key, k -> new KeyWaitQueue());
+        StreamWaitToken token = new StreamWaitToken();
+        token.setEntryID(entryId);
 
         queue.lock.lock();
         try {
-            String value = popSupplier.get();
+            List<List<Object>> value = readSupplier.get();
             if (value != null)
                 return value;// double checking before waiting
 
@@ -77,20 +89,25 @@ public class WaitRegistry {
 
     }
 
-    public void signalFirstWaiter(String key, Supplier<String> popSupplier) {
-        KeyWaitQueue queue = waitQueues.get(key);
+    public void signalFirstWaiter(String key, String entryID,Supplier<List<List<Object>>> streamSupplier) {
+        KeyWaitQueue queue = streamWaitQueues.get(key);
         if (queue == null)
             return;// there's no any waiting clients
         queue.lock.lock();
         try {
             while (!queue.waiters.isEmpty()) {// we go through all the waiting clients to give them their values
-                WaitToken token = queue.waiters.poll();
-                String value = popSupplier.get();
-                if (value == null)
-                    return;// no more elements to pop
-                token.fulfill(value);//
+                StreamWaitToken token = queue.waiters.peek();
+                List<List<Object>> entries = streamSupplier.get();
+                if (entries == null || entries.isEmpty()) {
+                    return;// no more elements to read
+                }
+                if (entryID.compareTo(token.getEntryID()) < 0)
+                    continue;// not the entryID we're looking for
 
-                queue.condition.signal();// signal the most waiting client
+                queue.waiters.poll();
+                token.fulfill(entries);
+
+                queue.condition.signal(); // signal the most waiting client
             }
         } finally {
             queue.lock.unlock();

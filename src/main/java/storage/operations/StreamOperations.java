@@ -12,5 +12,6 @@ public interface StreamOperations {
 
     List<List<Object>> XRANGE(String streamKey, String startEntryId, String endEntryId, boolean inclusion);
 
-    List<List<Object>> XREAD(List<String> streamsKeys, List<String> streamsStartEntriesIDs);
+    List<List<Object>> XREAD(List<String> streamsKeys, List<String> streamsStartEntriesIDs, boolean block, double timeoutSeconds)
+        throws InterruptedException;
 }
