@@ -56,8 +56,9 @@ public class StreamWaitRegistry {
         queue.lock.lock();
         try {
             List<List<Object>> value = readSupplier.get();
-            if (value != null)
+            if (value.size() > 0) {
                 return value;// double checking before waiting
+            }
 
             // add client to the waiting list
             queue.waiters.add(token);
@@ -89,10 +90,8 @@ public class StreamWaitRegistry {
 
     }
 
-    public void signalFirstWaiter(String key, String entryID,Supplier<List<List<Object>>> streamSupplier) {
-       // System.out.println("Signaling waiters for stream " + key + " with entryID " + entryID);
+    public void signalFirstWaiter(String key, String entryID, Supplier<List<List<Object>>> streamSupplier) {
         KeyWaitQueue queue = streamWaitQueues.get(key);
-        System.out.println(queue);
         if (queue == null)
             return;// there's no any waiting clients
         queue.lock.lock();
@@ -100,14 +99,12 @@ public class StreamWaitRegistry {
             while (!queue.waiters.isEmpty()) {// we go through all the waiting clients to give them their values
                 StreamWaitToken token = queue.waiters.peek();
                 List<List<Object>> entries = streamSupplier.get();
-                System.out.println("Checking waiter for stream " + key + " with entryID " + token.getEntryID()+"\n"+entries.toString());
                 if (entries == null || entries.isEmpty()) {
                     return;// no more elements to read
                 }
                 if (entryID.compareTo(token.getEntryID()) < 0)
                     continue;// not the entryID we're looking for
 
-                System.out.println("Signaling waiter for stream " + key + " with entryID " + token.getEntryID()+"\n"+entries.toString());
                 queue.waiters.poll();
                 token.fulfill(entries);
 
