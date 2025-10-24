@@ -104,6 +104,7 @@ public class StreamWaitRegistry {
                 if (entryID.compareTo(token.getEntryID()) < 0)
                     continue;// not the entryID we're looking for
 
+                System.out.println("Signaling waiter for stream " + key + " with entryID " + token.getEntryID()+"\n"+entries.toString());
                 queue.waiters.poll();
                 token.fulfill(entries);
 
