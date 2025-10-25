@@ -81,8 +81,8 @@ public class StreamWaitRegistry {
 
                 }
             } else {
-                // Convert fractional seconds to nanoseconds
-                long nanos = (long) (timeoutSeconds * 1_000_000_000);
+                // timeoutSeconds actually contains milliseconds — convert ms to nanoseconds
+                long nanos = (long) (timeoutSeconds * 1_000_000L);
                 // wait for a signal or timeout reached
                 while (!token.isFulfilled() && nanos > 0) {
                     nanos = queue.condition.awaitNanos(nanos);
