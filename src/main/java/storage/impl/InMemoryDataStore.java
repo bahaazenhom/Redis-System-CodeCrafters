@@ -199,7 +199,7 @@ public class InMemoryDataStore implements DataStore {
 
         StreamValue stream = getOrCreateStream(streamKey);
         TreeMap<String, HashMap<String, String>> streamMap = stream.getStream();
-        boolean wasEmpty = streamMap.isEmpty();
+        
         // Handle entry ID generation and validation
         if (!streamMap.isEmpty()) {
             String lastEntryID = stream.getLastEntryID();
@@ -212,9 +212,8 @@ public class InMemoryDataStore implements DataStore {
         streamMap.put(entryID, new HashMap<>());
         streamMap.get(entryID).putAll(entryValues);
 
-        if (wasEmpty) {
-            streamWaitRegistry.signalFirstWaiter(streamKey, entryID);
-        }
+        // Always signal waiting clients when a new entry is added
+        streamWaitRegistry.signalFirstWaiter(streamKey, entryID);
 
         return entryID;
     }
