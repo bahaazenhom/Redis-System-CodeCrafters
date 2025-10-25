@@ -276,11 +276,11 @@ public class InMemoryDataStore implements DataStore {
             String streamKey = streamsKeys.get(index);
             String startEntryId = streamsStartEntriesIDs.get(index);
 
-            // if the stream doesn't exist or the last entryId is smaller than the
+            // if the stream doesn't exist or the last entryId is smaller than or equal to the
             // startEntryId:
             // then => block and wait.
             if ((exists(streamKey) == false
-                    || ((StreamValue) store.get(streamKey)).getLastEntryID().compareTo(startEntryId) < 0)
+                    || ((StreamValue) store.get(streamKey)).getLastEntryID().compareTo(startEntryId) <= 0)
                     && block) {
                 return streamWaitRegistry.awaitElement(streamKey, startEntryId, timeoutSeconds,
                         createStreamReadSupplier(streamKey, startEntryId));

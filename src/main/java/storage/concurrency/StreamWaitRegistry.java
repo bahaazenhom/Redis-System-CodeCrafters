@@ -114,12 +114,15 @@ public class StreamWaitRegistry {
                 if (entries == null || entries.isEmpty()) {
                     return;// no more elements to read
                 }
-                if (entryID.compareTo(token.getEntryID()) < 0)
-                    continue;// not the entryID we're looking for
+                // Check if the new entry is greater than the token's waiting entry
+                // If new entry <= token entry, it means this isn't the data the client is waiting for
+                if (entryID.compareTo(token.getEntryID()) <= 0) {
+                    return;// the new entry is not after what this client is waiting for
+                }
 
                 queue.waiters.poll();
                 token.fulfill(entries);
-                queue.condition.signal(); // signal the most waiting client
+                queue.condition.signal(); // signal the waiting client
             }
         } finally {
             queue.lock.unlock();
