@@ -62,20 +62,18 @@ public class StreamWaitRegistry {
 
         KeyWaitQueue queue = streamWaitQueues.computeIfAbsent(key, k -> new KeyWaitQueue());
         StreamWaitToken token = new StreamWaitToken();
-        
+
         token.setEntryID(entryId);
         token.setReadSupplier(readSupplier);
 
         queue.lock.lock();
         try {
             List<List<Object>> value = readSupplier.get();
-            if (value.size() > 0) {
+            if (value != null && !value.isEmpty()) {
                 return value;// double checking before waiting
             }
-
             // add client to the waiting list
             queue.waiters.add(token);
-
             if (timeoutSeconds == 0) {
                 while (!token.isFulfilled()) {
                     // wait forever for a signal (as the timeout is 0)

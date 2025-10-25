@@ -41,7 +41,7 @@ public class XREADCommand implements CommandStrategy {
 
             try {
                 List<List<Object>> result = dataStore.XREAD(streamsKeys, streamsStartEntriesIDs, block, timestamp);
-                clientOutput.write(RESPSerializer.XReadArray(result));
+                clientOutput.write(RESPSerializer.xReadArray(result));
                 clientOutput.flush();
             } catch (InterruptedException e) {
                 clientOutput.write(RESPSerializer.error(e.getMessage()));

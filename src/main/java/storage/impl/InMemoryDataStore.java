@@ -215,6 +215,7 @@ public class InMemoryDataStore implements DataStore {
         if (wasEmpty) {
             streamWaitRegistry.signalFirstWaiter(streamKey, entryID);
         }
+
         return entryID;
     }
 
@@ -224,9 +225,9 @@ public class InMemoryDataStore implements DataStore {
         if (stream == null || !(stream instanceof StreamValue)) {
             return new ArrayList<>(); // Empty result if stream doesn't exist
         }
-        
+
         NavigableMap<String, HashMap<String, String>> streamMap = ((StreamValue) stream).getStream();
-        
+
         // Handle special values and normalize IDs
         if (startEntryId.equals("-")) {
             startEntryId = "0-0";
@@ -234,18 +235,18 @@ public class InMemoryDataStore implements DataStore {
             // For start ID, sequence defaults to 0
             startEntryId = startEntryId + "-0";
         }
-        
+
         if (endEntryId.equals("+")) {
             endEntryId = Long.MAX_VALUE + "-" + Long.MAX_VALUE;
         } else if (!endEntryId.contains("-") && inclusion) {
             // For end ID, sequence defaults to maximum
             endEntryId = endEntryId + "-" + Long.MAX_VALUE;
         }
-        
+
         // Get the submap for the range
         NavigableMap<String, HashMap<String, String>> rangeMap = streamMap.subMap(startEntryId, inclusion, endEntryId,
-        inclusion);
-        
+                inclusion);
+
         List<List<Object>> values = new ArrayList<>();
         // Collect results
         for (Map.Entry<String, HashMap<String, String>> entry : rangeMap.entrySet()) {
@@ -276,7 +277,8 @@ public class InMemoryDataStore implements DataStore {
             String streamKey = streamsKeys.get(index);
             String startEntryId = streamsStartEntriesIDs.get(index);
 
-            // if the stream doesn't exist or the last entryId is smaller than the startEntryId:
+            // if the stream doesn't exist or the last entryId is smaller than the
+            // startEntryId:
             // then => block and wait.
             if ((exists(streamKey) == false
                     || ((StreamValue) store.get(streamKey)).getLastEntryID().compareTo(startEntryId) < 0)
@@ -284,7 +286,7 @@ public class InMemoryDataStore implements DataStore {
                 return streamWaitRegistry.awaitElement(streamKey, startEntryId, timeoutSeconds,
                         createStreamReadSupplier(streamKey, startEntryId));
 
-                    }
+            }
 
             String endEntryId = Long.MAX_VALUE + "-" + Long.MAX_VALUE;
             List<Object> streamRead = new ArrayList<>();
@@ -318,7 +320,17 @@ public class InMemoryDataStore implements DataStore {
     private Supplier<List<List<Object>>> createStreamReadSupplier(String streamKey, String startEntryId) {
         return () -> {
             String endEntryId = Long.MAX_VALUE + "-" + Long.MAX_VALUE;
-            return XRANGE(streamKey, startEntryId, endEntryId, false);
+            List<List<Object>> xrangeResult = XRANGE(streamKey, startEntryId, endEntryId, false);
+            if (xrangeResult.isEmpty()) {
+                return null;
+            }
+            // Wrap the XRANGE result in XREAD format: [[streamKey, xrangeResult]]
+            List<List<Object>> xreadResult = new ArrayList<>();
+            List<Object> streamEntry = new ArrayList<>();
+            streamEntry.add(streamKey);
+            streamEntry.add(xrangeResult);
+            xreadResult.add(streamEntry);
+            return xreadResult;
         };
     }
 
