@@ -16,13 +16,15 @@ public class TYPECommand implements CommandStrategy {
     }
 
     @Override
+    public void validateArguments(List<String> arguments) throws IllegalArgumentException {
+        if (arguments.size() != 1) {
+            throw new IllegalArgumentException("Wrong number of arguments for 'TYPE' command");
+        }
+    }
+
+    @Override
     public void execute(List<String> arguments, BufferedWriter clientOutput) {
         try {
-            if (arguments.size() != 1) {
-                clientOutput.write(RESPSerializer.error("Wrong number of arguments for 'TYPE' command"));
-                clientOutput.flush();
-                return;
-            }
             String key = arguments.get(0);
             if (!dataStore.exists(key))
                 clientOutput.write(RESPSerializer.bulkString("none"));

@@ -19,17 +19,24 @@ public class LRANGECommand implements CommandStrategy {
     }
 
     @Override
+    public void validateArguments(List<String> arguments) throws IllegalArgumentException {
+        if (arguments.size() < 3) {
+            throw new IllegalArgumentException("Wrong number of arguments for 'LRANGE' command");
+        }
+        try {
+            Integer.parseInt(arguments.get(1));
+            Integer.parseInt(arguments.get(2));
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("value is not an integer or out of range");
+        }
+    }
+
+    @Override
     public void execute(List<String> arguments, BufferedWriter clientOutput) {
         try {
-            if (arguments.size() < 3) {
-                clientOutput.write(RESPSerializer.error("Wrong number of arguments for 'LRANGE' command"));
-                clientOutput.flush();
-            }
             String listName = arguments.get(0);
             int startIndex = Integer.parseInt(arguments.get(1));
             int stopIndex = Integer.parseInt(arguments.get(2));
-
-            
 
             if (!dataStore.exists(listName)) {
                 clientOutput.write(RESPSerializer.emptyArray());

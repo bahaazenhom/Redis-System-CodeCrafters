@@ -10,13 +10,15 @@ import java.util.List;
 public class EchoCommand implements CommandStrategy {
 
     @Override
+    public void validateArguments(List<String> arguments) throws IllegalArgumentException {
+        if (arguments.size() != 1) {
+            throw new IllegalArgumentException("wrong number of arguments for 'echo' command");
+        }
+    }
+
+    @Override
     public void execute(List<String> arguments, BufferedWriter clientOutput) {
         try {
-            if (arguments.size() != 1) {
-                clientOutput.write(RESPSerializer.error("wrong number of arguments for 'echo' command"));
-                clientOutput.flush();
-                return;
-            }
             String message = arguments.get(0);
             clientOutput.write(RESPSerializer.bulkString(message));
             clientOutput.flush();

@@ -16,14 +16,29 @@ public class XREADCommand implements CommandStrategy {
     }
 
     @Override
+    public void validateArguments(List<String> arguments) throws IllegalArgumentException {
+        if (arguments.size() < 3) {
+            throw new IllegalArgumentException("Wrong number of arguments for 'XREAD' Command");
+        }
+        if (!arguments.contains("streams")) {
+            throw new IllegalArgumentException("Missing 'streams' keyword in 'XREAD' command");
+        }
+        if (arguments.contains("block")) {
+            int blockIndex = arguments.indexOf("block");
+            if (blockIndex + 1 >= arguments.size()) {
+                throw new IllegalArgumentException("Missing timeout value for 'block' option");
+            }
+            try {
+                Long.parseLong(arguments.get(blockIndex + 1));
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("timeout is not an integer or out of range");
+            }
+        }
+    }
+
+    @Override
     public void execute(List<String> arguments, BufferedWriter clientOutput) {
         try {
-            if (arguments.size() < 3) {
-                clientOutput.write(RESPSerializer.error("Wrong number of arguments for 'XREAD' Command"));
-                clientOutput.flush();
-                return;
-            }
-
             Long timestamp = 0L;
             boolean block = false;
             if (arguments.contains("block")) {

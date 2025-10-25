@@ -18,13 +18,15 @@ public class LPUSHCommand implements CommandStrategy {
     }
 
     @Override
+    public void validateArguments(List<String> arguments) throws IllegalArgumentException {
+        if (arguments.size() < 2) {
+            throw new IllegalArgumentException("Wrong number of arguments for 'LPUSH' command");
+        }
+    }
+
+    @Override
     public void execute(List<String> arguments, BufferedWriter clientOutput) {
         try {
-            if (arguments.size() < 2) {
-                clientOutput.write(RESPSerializer.error("Wrong number of arguments for 'LPUSH' command"));
-                clientOutput.flush();
-                return;
-            }
             String listName = arguments.get(0);
             List<String> values = arguments.subList(1, arguments.size());
             if (!dataStore.exists(listName))

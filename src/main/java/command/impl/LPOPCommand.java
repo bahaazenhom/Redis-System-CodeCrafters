@@ -17,13 +17,22 @@ public class LPOPCommand implements CommandStrategy {
     }
 
     @Override
+    public void validateArguments(List<String> arguments) throws IllegalArgumentException {
+        if (arguments.size() < 1) {
+            throw new IllegalArgumentException("Wrong number of arguments for 'LPOP' command");
+        }
+        if (arguments.size() > 1) {
+            try {
+                Long.parseLong(arguments.get(1));
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("value is not an integer or out of range");
+            }
+        }
+    }
+
+    @Override
     public void execute(List<String> arguments, BufferedWriter clientOutput) {
         try {
-            if (arguments.size() < 1) {
-                clientOutput.write(RESPSerializer.error("Wrong number of arguments for 'LPOP' command"));
-                clientOutput.flush();
-                return;
-            }
             String listName = arguments.get(0);
             Long counter = arguments.size() > 1 ? Long.parseLong(arguments.get(1)) : null;
             if (!dataStore.exists(listName)) {

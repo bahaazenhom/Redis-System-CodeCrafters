@@ -17,27 +17,25 @@ public class BLPOPCommand implements CommandStrategy {
     }
 
     @Override
+    public void validateArguments(List<String> arguments) throws IllegalArgumentException {
+        if (arguments.size() != 2) {
+            throw new IllegalArgumentException("Wrong number of arguments for 'BLPOP' command");
+        }
+        try {
+            double timestamp = Double.parseDouble(arguments.get(1));
+            if (timestamp < 0) {
+                throw new IllegalArgumentException("timeout is negative");
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("timeout is not a number or out of range");
+        }
+    }
+
+    @Override
     public void execute(List<String> arguments, BufferedWriter clientOutput) {
         try {
-            if (arguments.size() != 2) {
-                clientOutput.write(RESPSerializer.error("Wrong number of arguments for 'BLPOP' command"));
-                clientOutput.flush();
-                return;
-            }
             String listKey = arguments.get(0);
-            double timestamp;
-            try {
-                timestamp = Double.parseDouble(arguments.get(1));
-                if (timestamp < 0) {
-                    clientOutput.write(RESPSerializer.error("timeout is negative"));
-                    clientOutput.flush();
-                    return;
-                }
-            } catch (NumberFormatException e) {
-                clientOutput.write(RESPSerializer.error("timeout is not a number or out of range"));
-                clientOutput.flush();
-                return;
-            }
+            double timestamp = Double.parseDouble(arguments.get(1));
 
             String value = dataStore.BLPOP(listKey, timestamp);
 

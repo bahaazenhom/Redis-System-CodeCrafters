@@ -18,14 +18,27 @@ public class SetCommand implements CommandStrategy {
     }
 
     @Override
+    public void validateArguments(List<String> arguments) throws IllegalArgumentException {
+        if (arguments.size() < 2) {
+            throw new IllegalArgumentException("Wrong number of arguments for 'set' command");
+        }
+        // Validate expiry options if present
+        if (arguments.size() >= 4) {
+            String option = arguments.get(2).toUpperCase();
+            if (!option.equals("EX") && !option.equals("PX")) {
+                throw new IllegalArgumentException("Invalid expiry option: " + option + " in the 'set' command");
+            }
+            try {
+                Long.parseLong(arguments.get(3));
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Invalid time value for expiry option in the 'set' command");
+            }
+        }
+    }
+
+    @Override
     public void execute(List<String> arguments, BufferedWriter clientOutput) {
         try {
-            if (arguments.size() < 2) {
-                clientOutput.write(RESPSerializer.error("Wrong number of arguments for 'set' command"));
-                clientOutput.flush();
-                return;
-            }
-
             String key = arguments.get(0);
             String value = arguments.get(1);
 
@@ -44,23 +57,15 @@ public class SetCommand implements CommandStrategy {
             return null;
 
         String option = arguments.get(2).toUpperCase();
+        long timeValue = Long.parseLong(arguments.get(3));
 
-        try {
-            long timeValue = Long.parseLong(arguments.get(3));
-
-            switch (option) {
-                case "EX":
-                    return System.currentTimeMillis() + (timeValue * 1000);
-                case "PX":
-                    return System.currentTimeMillis() + timeValue;
-
-                default:
-                    throw new IllegalArgumentException("Invalid expiry option: " + option + " in the 'set' command");
-            }
-        } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("Invalid time value for expiry option in the 'set' command");
-        } catch (IndexOutOfBoundsException e) {
-            throw new IllegalArgumentException("Syntax error in the 'set' command");
+        switch (option) {
+            case "EX":
+                return System.currentTimeMillis() + (timeValue * 1000);
+            case "PX":
+                return System.currentTimeMillis() + timeValue;
+            default:
+                return null;
         }
     }
 

@@ -16,13 +16,15 @@ public class XRANGECommand implements CommandStrategy {
     }
 
     @Override
+    public void validateArguments(List<String> arguments) throws IllegalArgumentException {
+        if (arguments.size() != 3) {
+            throw new IllegalArgumentException("Wrong number of arguments for 'XRANGE' Command");
+        }
+    }
+
+    @Override
     public void execute(List<String> arguments, BufferedWriter clientOutput) {
         try {
-            if (arguments.size() != 3) {
-                clientOutput.write(RESPSerializer.error("Wrong number of arguments for 'XRANGE' Command"));
-                clientOutput.flush();
-                return;
-            }
             String streamKey = arguments.get(0);
             String startEntryId = arguments.get(1);
             String endEntryId = arguments.get(2);

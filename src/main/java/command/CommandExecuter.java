@@ -37,7 +37,17 @@ public class CommandExecuter {
     public void execute(String commandName, List<String> arguments, BufferedWriter clientOutput) {
         CommandStrategy command = commandMap.get(commandName.toUpperCase());
         if (command != null) {
-            command.execute(arguments, clientOutput);
+            try {
+                command.validateArguments(arguments);
+                command.execute(arguments, clientOutput);
+            } catch (IllegalArgumentException e) {
+                try {
+                    clientOutput.write(RESPSerializer.error(e.getMessage()));
+                    clientOutput.flush();
+                } catch (IOException ioException) {
+                    throw new RuntimeException(ioException);
+                }
+            }
         } else {
             try {
                 clientOutput.write(RESPSerializer.error("unknown command '" + commandName + "'"));
