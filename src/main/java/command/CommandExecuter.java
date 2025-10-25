@@ -12,22 +12,10 @@ import java.util.Map;
 
 public class CommandExecuter {
     private final Map<String, CommandStrategy> commandMap = new HashMap<>();
+    private final CommandFactory commandFactory;
 
     public CommandExecuter(DataStore dataStore) {
-        register("PING", new PingCommand());
-        register("ECHO", new EchoCommand());
-        register("SET", new SetCommand(dataStore));
-        register("GET", new GetCommand(dataStore));
-        register("RPUSH", new RPUSHCommand(dataStore));
-        register("LRANGE", new LRANGECommand(dataStore));
-        register("LPUSH", new LPUSHCommand(dataStore));
-        register("LLEN", new LLENCommand(dataStore));
-        register("LPOP", new LPOPCommand(dataStore));
-        register("BLPOP", new BLPOPCommand(dataStore));
-        register("TYPE", new TYPECommand(dataStore));
-        register("XADD", new XADDCommand(dataStore));
-        register("XRANGE", new XRANGECommand(dataStore));
-        register("XREAD", new XREADCommand(dataStore));
+        this.commandFactory = new CommandFactory(dataStore);
     }
 
     public void register(String commandName, CommandStrategy command) {
@@ -35,7 +23,7 @@ public class CommandExecuter {
     }
 
     public void execute(String commandName, List<String> arguments, BufferedWriter clientOutput) {
-        CommandStrategy command = commandMap.get(commandName.toUpperCase());
+        CommandStrategy command = commandFactory.getCommandStrategy(commandName);
         if (command != null) {
             try {
                 command.validateArguments(arguments);
