@@ -213,12 +213,8 @@ public class InMemoryDataStore implements DataStore {
         streamMap.get(entryID).putAll(entryValues);
 
         if (wasEmpty) {
-          //  System.out.println("Signaling waiter for stream " + streamKey + " with entryID " + entryID + 
-            //        "\n entries are: " + streamMap.get(entryID).toString());
-            streamWaitRegistry.signalFirstWaiter(streamKey, entryID,
-                    createStreamReadSupplier(streamKey, entryID));
+            streamWaitRegistry.signalFirstWaiter(streamKey, entryID);
         }
-
         return entryID;
     }
 
@@ -228,9 +224,9 @@ public class InMemoryDataStore implements DataStore {
         if (stream == null || !(stream instanceof StreamValue)) {
             return new ArrayList<>(); // Empty result if stream doesn't exist
         }
-
+        
         NavigableMap<String, HashMap<String, String>> streamMap = ((StreamValue) stream).getStream();
-
+        
         // Handle special values and normalize IDs
         if (startEntryId.equals("-")) {
             startEntryId = "0-0";
@@ -238,18 +234,18 @@ public class InMemoryDataStore implements DataStore {
             // For start ID, sequence defaults to 0
             startEntryId = startEntryId + "-0";
         }
-
+        
         if (endEntryId.equals("+")) {
             endEntryId = Long.MAX_VALUE + "-" + Long.MAX_VALUE;
         } else if (!endEntryId.contains("-") && inclusion) {
             // For end ID, sequence defaults to maximum
             endEntryId = endEntryId + "-" + Long.MAX_VALUE;
         }
-
+        
         // Get the submap for the range
         NavigableMap<String, HashMap<String, String>> rangeMap = streamMap.subMap(startEntryId, inclusion, endEntryId,
-                inclusion);
-
+        inclusion);
+        
         List<List<Object>> values = new ArrayList<>();
         // Collect results
         for (Map.Entry<String, HashMap<String, String>> entry : rangeMap.entrySet()) {
@@ -282,13 +278,12 @@ public class InMemoryDataStore implements DataStore {
 
             // if the stream doesn't exist or the last entryId is smaller than the startEntryId:
             // then => block and wait.
-            System.out.println("block=" + block + " streamKey=" + streamKey + " startEntryId=" + startEntryId);
             if ((exists(streamKey) == false
                     || ((StreamValue) store.get(streamKey)).getLastEntryID().compareTo(startEntryId) < 0)
                     && block) {
-                System.out.println("Blocking read on stream " + streamKey + " from entryID " + startEntryId);
-                streamWaitRegistry.awaitElement(streamKey, startEntryId, timeoutSeconds,
+                return streamWaitRegistry.awaitElement(streamKey, startEntryId, timeoutSeconds,
                         createStreamReadSupplier(streamKey, startEntryId));
+
                     }
 
             String endEntryId = Long.MAX_VALUE + "-" + Long.MAX_VALUE;

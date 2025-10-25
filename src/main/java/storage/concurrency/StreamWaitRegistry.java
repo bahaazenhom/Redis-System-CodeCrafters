@@ -21,6 +21,16 @@ public class StreamWaitRegistry {
     private static class StreamWaitToken {
         private volatile boolean fulfilled = false;
         private volatile List<List<Object>> result = null;
+        private Supplier<List<List<Object>>> readSupplier = null;
+
+        public Supplier<List<List<Object>>> getReadSupplier() {
+            return readSupplier;
+        }
+
+        public void setReadSupplier(Supplier<List<List<Object>>> readSupplier) {
+            this.readSupplier = readSupplier;
+        }
+
         private String entryID = null;
 
         public String getEntryID() {
@@ -49,9 +59,12 @@ public class StreamWaitRegistry {
     public List<List<Object>> awaitElement(String key, String entryId, double timeoutSeconds,
             Supplier<List<List<Object>>> readSupplier)
             throws InterruptedException {
+
         KeyWaitQueue queue = streamWaitQueues.computeIfAbsent(key, k -> new KeyWaitQueue());
         StreamWaitToken token = new StreamWaitToken();
+        
         token.setEntryID(entryId);
+        token.setReadSupplier(readSupplier);
 
         queue.lock.lock();
         try {
@@ -67,6 +80,7 @@ public class StreamWaitRegistry {
                 while (!token.isFulfilled()) {
                     // wait forever for a signal (as the timeout is 0)
                     queue.condition.await();// the client sleep and the lock is released
+
                 }
             } else {
                 // Convert fractional seconds to nanoseconds
@@ -90,7 +104,7 @@ public class StreamWaitRegistry {
 
     }
 
-    public void signalFirstWaiter(String key, String entryID, Supplier<List<List<Object>>> streamSupplier) {
+    public void signalFirstWaiter(String key, String entryID) {
         KeyWaitQueue queue = streamWaitQueues.get(key);
         if (queue == null)
             return;// there's no any waiting clients
@@ -98,7 +112,7 @@ public class StreamWaitRegistry {
         try {
             while (!queue.waiters.isEmpty()) {// we go through all the waiting clients to give them their values
                 StreamWaitToken token = queue.waiters.peek();
-                List<List<Object>> entries = streamSupplier.get();
+                List<List<Object>> entries = token.getReadSupplier().get();
                 if (entries == null || entries.isEmpty()) {
                     return;// no more elements to read
                 }
@@ -107,7 +121,6 @@ public class StreamWaitRegistry {
 
                 queue.waiters.poll();
                 token.fulfill(entries);
-
                 queue.condition.signal(); // signal the most waiting client
             }
         } finally {

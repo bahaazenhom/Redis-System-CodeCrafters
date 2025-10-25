@@ -35,6 +35,9 @@ public class RESPSerializer {
     }
 
     public static String xRangeArray(List<List<Object>> values) {
+        if (values == null) {
+            return nullArray();
+        }
         StringBuilder respBuilder = new StringBuilder();
         respBuilder.append("*").append(values.size()).append("\r\n");
 
@@ -60,8 +63,11 @@ public class RESPSerializer {
         return respBuilder.toString();
     }
 
-    @SuppressWarnings("unchecked")// tells the compiler to ignore warnings about unchecked type casts
+    @SuppressWarnings("unchecked") // tells the compiler to ignore warnings about unchecked type casts
     public static String XReadArray(List<List<Object>> values) {
+        if (values == null) {
+            return nullArray();
+        }
         StringBuilder respBuilder = new StringBuilder();
         respBuilder.append("*").append(values.size()).append("\r\n");
         for (List<Object> entry : values) {
