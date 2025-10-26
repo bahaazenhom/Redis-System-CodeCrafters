@@ -117,29 +117,25 @@ public class InMemoryDataStore implements DataStore {
     // ============================================
 
     @Override
-    public long incr(String key){
+    public long incr(String key) {
         RedisValue redisValue = store.get(key);
-        if(redisValue == null){
-            return 0;
+        if (redisValue == null) {
+            RedisValue newRedisValue = new StringValue("1");
+            store.put(key, newRedisValue);
+            return 1;
         }
-        String stringValue = ((StringValue)redisValue.getValue()).getString();
+        String stringValue = ((StringValue) redisValue).getString();
         long value;
-        try{
+        try {
             value = Long.parseLong(stringValue);
             value++;
             RedisValue newRedisValue = new StringValue(String.valueOf(value));
             store.put(key, newRedisValue);
         } catch (NumberFormatException e) {
-            return 0;
+            throw new IllegalArgumentException("ERR value is not an integer or out of range");
         }
         return value;
     }
-
-
-
-
-
-    
 
     // ============================================
     // LIST OPERATIONS
