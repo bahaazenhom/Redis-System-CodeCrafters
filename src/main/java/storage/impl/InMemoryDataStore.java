@@ -132,7 +132,7 @@ public class InMemoryDataStore implements DataStore {
             RedisValue newRedisValue = new StringValue(String.valueOf(value));
             store.put(key, newRedisValue);
         } catch (NumberFormatException e) {
-            throw new IllegalArgumentException("ERR value is not an integer or out of range");
+            throw new IllegalArgumentException("value is not an integer or out of range");
         }
         return value;
     }

@@ -24,7 +24,7 @@ public class INCRCommand implements CommandStrategy {
             clientOutput.flush();
         } catch (NumberFormatException nfe) {
             try {
-                clientOutput.write(RESPSerializer.error("value is not an integer or out of range"));
+                clientOutput.write(RESPSerializer.error(nfe.getMessage()));
                 clientOutput.flush();
             } catch (IOException ioException) {
                 throw new RuntimeException(ioException);
