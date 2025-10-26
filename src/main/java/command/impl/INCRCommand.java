@@ -17,23 +17,28 @@ public class INCRCommand implements CommandStrategy {
 
     @Override
     public void execute(List<String> arguments, BufferedWriter clientOutput) {
-        try{
+        try {
             String key = arguments.get(0);
             long newValue = dataStore.incr(key);
             clientOutput.write(RESPSerializer.integer(newValue));
             clientOutput.flush();
-        }
-        catch(IOException exception){
+        } catch (NumberFormatException nfe) {
+            try {
+                clientOutput.write(RESPSerializer.error("value is not an integer or out of range"));
+                clientOutput.flush();
+            } catch (IOException ioException) {
+                throw new RuntimeException(ioException);
+            }
+        } catch (IOException exception) {
             throw new RuntimeException(exception);
         }
     }
 
     @Override
     public void validateArguments(List<String> arguments) throws IllegalArgumentException {
-        if(arguments.size() != 1) {
+        if (arguments.size() != 1) {
             throw new IllegalArgumentException("INCR command requires exactly one argument.");
         }
     }
 
-    
 }
