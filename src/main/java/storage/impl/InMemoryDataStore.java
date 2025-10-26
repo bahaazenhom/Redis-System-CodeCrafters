@@ -6,6 +6,7 @@ import storage.concurrency.StreamWaitRegistry;
 import storage.core.DataType;
 import storage.core.RedisValue;
 import storage.exception.InvalidStreamEntryException;
+import storage.types.StringValue;
 import storage.types.ListValue;
 import storage.types.StreamValue;
 
@@ -110,6 +111,35 @@ public class InMemoryDataStore implements DataStore {
         }
         return redisValue.getType() == dataType;
     }
+
+    // ============================================
+    // STRING OPERATIONS
+    // ============================================
+
+    @Override
+    public long incr(String key){
+        RedisValue redisValue = store.get(key);
+        if(redisValue == null){
+            return 0;
+        }
+        String stringValue = ((StringValue)redisValue.getValue()).getString();
+        long value;
+        try{
+            value = Long.parseLong(stringValue);
+            value++;
+            RedisValue newRedisValue = new StringValue(String.valueOf(value));
+            store.put(key, newRedisValue);
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+        return value;
+    }
+
+
+
+
+
+    
 
     // ============================================
     // LIST OPERATIONS

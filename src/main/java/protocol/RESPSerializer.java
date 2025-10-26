@@ -89,7 +89,6 @@ public class RESPSerializer {
             if (entriesObj == null || (entriesObj instanceof List && ((List<?>) entriesObj).isEmpty())) {
                 respBuilder.append(emptyArray());
             } else {
-                @SuppressWarnings("unchecked")
                 List<List<Object>> entriesList = (List<List<Object>>) entriesObj;
                 respBuilder.append(xRangeArray(entriesList));
             }

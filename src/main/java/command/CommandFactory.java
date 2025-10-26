@@ -3,20 +3,7 @@ package command;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import command.impl.BLPOPCommand;
-import command.impl.EchoCommand;
-import command.impl.GetCommand;
-import command.impl.LLENCommand;
-import command.impl.LPOPCommand;
-import command.impl.LPUSHCommand;
-import command.impl.LRANGECommand;
-import command.impl.PingCommand;
-import command.impl.RPUSHCommand;
-import command.impl.SetCommand;
-import command.impl.TYPECommand;
-import command.impl.XADDCommand;
-import command.impl.XRANGECommand;
-import command.impl.XREADCommand;
+import command.impl.*;
 import storage.DataStore;
 
 public class CommandFactory {
@@ -47,6 +34,7 @@ public class CommandFactory {
             case "XADD" -> new XADDCommand(dataStore);
             case "XRANGE" -> new XRANGECommand(dataStore);
             case "XREAD" -> new XREADCommand(dataStore);
+            case "INCR" -> new INCRCommand(dataStore);
             default -> null;
         };
     }
