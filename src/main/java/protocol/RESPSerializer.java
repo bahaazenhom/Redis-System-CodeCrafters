@@ -105,6 +105,7 @@ public class RESPSerializer {
             return emptyArray();
         }
         StringBuilder respBuilder = new StringBuilder();
+        respBuilder.append("*").append(values.size()).append("\r\n");
         for (String value : values) {
             respBuilder.append(value);
         }
