@@ -84,7 +84,7 @@ public class TransactionCoordinator {
         } catch (IllegalArgumentException e) {
             // Validation error during queuing - discard transaction
             transactionManager.discardTransaction(clientId);
-            clientOutput.write(RESPSerializer.error("ERR " + e.getMessage()));
+            clientOutput.write(RESPSerializer.error(e.getMessage()));
             clientOutput.flush();
         }
     }
@@ -97,7 +97,7 @@ public class TransactionCoordinator {
             BufferedWriter clientOutput) throws IOException {
         // Check if already in MULTI mode
         if (transactionManager.isInMultiMode(clientId)) {
-            clientOutput.write(RESPSerializer.error("ERR MULTI calls can not be nested"));
+            clientOutput.write(RESPSerializer.error("MULTI calls can not be nested"));
             clientOutput.flush();
             return;
         }
@@ -114,7 +114,7 @@ public class TransactionCoordinator {
     private void handleExec(String clientId, BufferedWriter clientOutput) throws IOException {
         // Check if in MULTI mode
         if (!transactionManager.isInMultiMode(clientId)) {
-            clientOutput.write(RESPSerializer.error("ERR EXEC without MULTI"));
+            clientOutput.write(RESPSerializer.error("EXEC without MULTI"));
             clientOutput.flush();
             return;
         }
@@ -126,7 +126,7 @@ public class TransactionCoordinator {
     private void handleDiscard(String clientId, BufferedWriter clientOutput) throws IOException {
         // Check if in MULTI mode
         if (!transactionManager.isInMultiMode(clientId)) {
-            clientOutput.write(RESPSerializer.error("ERR DISCARD without MULTI"));
+            clientOutput.write(RESPSerializer.error("DISCARD without MULTI"));
             clientOutput.flush();
             return;
         }
@@ -158,11 +158,11 @@ public class TransactionCoordinator {
                     tempWriter.flush();
                     replies.add(stringWriter.toString());
                 } else {
-                    replies.add(RESPSerializer.error("ERR unknown command '" + request.getCommandName() + "'"));
+                    replies.add(RESPSerializer.error("unknown command '" + request.getCommandName() + "'"));
                 }
             } catch (Exception e) {
                 // If a command fails during execution, return the error for that command
-                replies.add(RESPSerializer.error("ERR " + e.getMessage()));
+                replies.add(RESPSerializer.error(e.getMessage()));
             }
         }
 
