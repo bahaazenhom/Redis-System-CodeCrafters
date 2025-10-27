@@ -1,32 +1,23 @@
 package replication;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import command.CommandExecuter;
 import server.ServerInstance;
 
-public class MasterNode extends ServerInstance {
-    private final String role = "master";
-    private final List<SlaveNode> connectedSlaves = new ArrayList<>();
+public class SlaveNode extends ServerInstance {
+    private MasterNode masterNode;
+    private String role = "slave";
     private final String replicationId = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb";
     private long replicationOffset = 0L;
 
-    public MasterNode(int port, CommandExecuter commandExecuter, String serverRole) throws IOException {
-        super(port, commandExecuter, serverRole);
-    }
-
-    public void addSlave(SlaveNode slave) {
-        connectedSlaves.add(slave);
+    public SlaveNode(int port, CommandExecuter commandExecuter, String role, MasterNode masterNode) throws IOException {
+        super(port, commandExecuter, role);
+        this.masterNode = masterNode;
     }
 
     public String getRole() {
         return role;
-    }
-
-    public List<SlaveNode> getConnectedSlaves() {
-        return connectedSlaves;
     }
 
     public String getReplicationId() {
@@ -35,6 +26,14 @@ public class MasterNode extends ServerInstance {
 
     public long getReplicationOffset() {
         return replicationOffset;
+    }
+
+    public void setReplicationOffset(long replicationOffset) {
+        this.replicationOffset = replicationOffset;
+    }
+
+    public MasterNode getMasterNode() {
+        return masterNode;
     }
 
     public String getInfo() {

@@ -6,22 +6,19 @@ import java.util.List;
 
 import command.CommandStrategy;
 import protocol.RESPSerializer;
-import server.ServerManager;
-
+import replication.ReplicationManager;
 public class INFOCommand implements CommandStrategy {
-    private final ServerManager serverManager;
+    private final ReplicationManager replicationManager;
 
-    public INFOCommand(ServerManager serverManager) {
-        this.serverManager = serverManager;
+    public INFOCommand(ReplicationManager replicationManager) {
+        this.replicationManager = replicationManager;
     }
 
     @Override
     public void execute(List<String> arguments, BufferedWriter clientOutput) {
         try {
             if (arguments.get(0).equals("replication")) {
-                int port = Integer.parseInt(Thread.currentThread().getName().split("-")[1]);
-                String role = serverManager.getServerRole(port);
-                clientOutput.write(RESPSerializer.bulkString("role:" + role));
+                clientOutput.write(RESPSerializer.bulkString(replicationManager.getReplicaInfo()));
                 clientOutput.flush();
             }
         } catch (NumberFormatException e) {

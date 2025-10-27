@@ -2,6 +2,8 @@
 import java.io.IOException;
 
 import command.CommandExecuter;
+import replication.ReplicationManager;
+import server.ServerInstance;
 import server.ServerManager;
 import storage.impl.InMemoryDataStore;
 
@@ -12,9 +14,11 @@ public class Main {
 
         CommandExecuter commandExecuter = new CommandExecuter(new InMemoryDataStore());
         ServerManager serverManager = ServerManager.create(commandExecuter);
-        int port = parsePort(args); // Default Redis port
-        String serverRole= parseServerRole(args);
-        serverManager.startServer(port, serverRole);
+        int port = parsePort(args);
+        String serverRole = parseServerRole(args);
+        ReplicationManager replicationManager = ReplicationManager.create();
+        ServerInstance serverInstance = replicationManager.createReplica(port, commandExecuter, serverRole);
+        serverManager.startServer(serverInstance);
     }
 
     private static String parseServerRole(String[] args) {

@@ -1,6 +1,7 @@
 package command;
 
 import protocol.RESPSerializer;
+import replication.ReplicationManager;
 import server.ServerManager;
 import storage.DataStore;
 
@@ -24,7 +25,7 @@ public class CommandExecuter {
     
 
     public CommandExecuter(DataStore dataStore) {
-        this.commandFactory = new CommandFactory(dataStore, ServerManager.create(this));
+        this.commandFactory = new CommandFactory(dataStore, ReplicationManager.create());
         TransactionManager transactionManager = new TransactionManager();
         this.transactionCoordinator = new TransactionCoordinator(transactionManager, commandFactory);
     }
