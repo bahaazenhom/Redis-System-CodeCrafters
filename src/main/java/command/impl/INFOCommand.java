@@ -12,12 +12,8 @@ public class INFOCommand implements CommandStrategy {
     @Override
     public void execute(List<String> arguments, BufferedWriter clientOutput) {
         try {
-            int port = Integer.parseInt(arguments.get(0));
-            if (arguments.size() == 1) {
-                clientOutput.write("Server is running on port: " + port + "\n");
-                clientOutput.flush();
-            } else if (arguments.get(1).equals("replication")) {
-                clientOutput.write(RESPSerializer.bulkString("roler:master"));
+            if (arguments.get(0).equals("replication")) {
+                clientOutput.write(RESPSerializer.bulkString("role:master"));
                 clientOutput.flush();
             }
         } catch (NumberFormatException e) {
@@ -35,7 +31,7 @@ public class INFOCommand implements CommandStrategy {
     @Override
     public void validateArguments(List<String> arguments) throws IllegalArgumentException {
         try {
-            if (arguments.size() < 1 || arguments.size() > 2) {
+            if (arguments.size() != 1) {
                 throw new IllegalArgumentException("Wrong number of arguments for 'INFO' command");
             }
         } catch (Exception e) {

@@ -52,14 +52,14 @@ public class ClientHandler implements Runnable {
 
             String commandName = commands.get(0);
 
-            if (commandName.equals("-p")) {
-                List<String> arguments2 = new ArrayList<>();
-                commandName = commands.get(2);// second arg is actual command
-                arguments2.add(commandName);
-                arguments2.add(commands.get(1));// first arg is port
-                arguments2.addAll(commands.subList(3, commands.size()));// rest are args
-                commands = arguments2; // update arguments
-            }
+            // if (commandName.equals("-p")) {
+            //     List<String> arguments2 = new ArrayList<>();
+            //     commandName = commands.get(2);// second arg is actual command
+            //     arguments2.add(commandName);
+            //     arguments2.add(commands.get(1));// first arg is port
+            //     arguments2.addAll(commands.subList(3, commands.size()));// rest are args
+            //     commands = arguments2; // update arguments
+            // }
 
             List<String> arguments = commands.subList(1, commands.size());
             System.out.println("Received command: " + commandName + " with arguments: " + arguments);
