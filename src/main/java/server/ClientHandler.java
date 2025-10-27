@@ -30,7 +30,8 @@ public class ClientHandler implements Runnable {
                 new InputStreamReader(socket.getInputStream()));
              BufferedWriter out = new BufferedWriter(
                 new OutputStreamWriter(socket.getOutputStream()))) {
-            
+
+            System.out.println("server port is: " + socket.getLocalPort());
             processCommands(in, out);
             
         } catch (IOException e) {
