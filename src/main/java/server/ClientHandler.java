@@ -50,7 +50,7 @@ public class ClientHandler implements Runnable {
             
             String commandName = commands.get(0);
             List<String> arguments = commands.subList(1, commands.size());
-            
+            System.out.println("Received command: " + commandName + " with arguments: " + arguments);
             commandExecuter.execute(clientId, commandName, arguments, out);
         }
     }
