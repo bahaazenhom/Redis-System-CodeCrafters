@@ -15,6 +15,7 @@ public class MasterNode extends ServerInstance {
 
     public MasterNode(int port, CommandExecuter commandExecuter, String serverRole) throws IOException {
         super(port, commandExecuter, serverRole);
+        System.out.println("Initializing Master Node on port " + port);
     }
 
     public void addSlave(SlaveNode slave) {
