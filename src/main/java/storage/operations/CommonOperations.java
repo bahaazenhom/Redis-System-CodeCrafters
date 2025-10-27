@@ -18,6 +18,10 @@ public interface CommonOperations {
     boolean isType(String key, DataType dataType);
     
     long getTTL(String key);
+
+    String multi(String command);
+
+    boolean isInMultiMode();
     
     void cleanup();
 }

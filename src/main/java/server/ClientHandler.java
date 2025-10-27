@@ -7,6 +7,7 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.List;
+import java.util.UUID;
 
 import command.CommandExecuter;
 import protocol.RESPParser;
@@ -15,10 +16,12 @@ public class ClientHandler implements Runnable {
 
     private final Socket socket;
     private final CommandExecuter commandExecuter;
+    private final String clientId;
 
     public ClientHandler(Socket socket, CommandExecuter commandExecuter) {
         this.socket = socket;
         this.commandExecuter = commandExecuter;
+        this.clientId = UUID.randomUUID().toString();
     }
 
     @Override
@@ -48,7 +51,7 @@ public class ClientHandler implements Runnable {
             String commandName = commands.get(0);
             List<String> arguments = commands.subList(1, commands.size());
             
-            commandExecuter.execute(commandName, arguments, out);
+            commandExecuter.execute(clientId, commandName, arguments, out);
         }
     }
     

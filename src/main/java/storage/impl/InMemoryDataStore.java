@@ -6,6 +6,7 @@ import storage.concurrency.StreamWaitRegistry;
 import storage.core.DataType;
 import storage.core.RedisValue;
 import storage.exception.InvalidStreamEntryException;
+import storage.transaction.MULTICommandsRegisters;
 import storage.types.StringValue;
 import storage.types.ListValue;
 import storage.types.StreamValue;
@@ -29,6 +30,7 @@ public class InMemoryDataStore implements DataStore {
     private final Map<String, RedisValue> store = new ConcurrentHashMap<>();
     private final ListWaitRegistry listWaitRegistry = new ListWaitRegistry();
     private final StreamWaitRegistry streamWaitRegistry = new StreamWaitRegistry();
+    private final MULTICommandsRegisters multiCommandsRegisters = new MULTICommandsRegisters();
 
     public InMemoryDataStore() {
     }
@@ -110,6 +112,18 @@ public class InMemoryDataStore implements DataStore {
             return false;
         }
         return redisValue.getType() == dataType;
+    }
+
+    @Override
+    public String multi(String command) {
+        multiCommandsRegisters.setInMulti(true);
+        multiCommandsRegisters.enqueueCommand(command);
+        return "OK";
+    }
+
+    @Override
+    public boolean isInMultiMode() {
+        return multiCommandsRegisters.isInMulti();
     }
 
     // ============================================
