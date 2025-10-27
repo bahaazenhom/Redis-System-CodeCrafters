@@ -5,6 +5,7 @@ import storage.DataStore;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -33,12 +34,13 @@ public class CommandExecuter {
 
     public void execute(String clientId, String commandName, List<String> arguments, BufferedWriter clientOutput) {
         CommandStrategy command = commandFactory.getCommandStrategy(commandName);
-        
+
         if (command != null) {
             try {
                 // Delegate transaction control commands to TransactionCoordinator
                 if (transactionCoordinator.isTransactionControlCommand(commandName)) {
-                    transactionCoordinator.handleTransactionControlCommand(clientId, commandName, arguments, command, clientOutput);
+                    transactionCoordinator.handleTransactionControlCommand(clientId, commandName, arguments, command,
+                            clientOutput);
                     return;
                 }
 
@@ -51,7 +53,7 @@ public class CommandExecuter {
                 // Normal execution path: validate and execute
                 command.validateArguments(arguments);
                 command.execute(arguments, clientOutput);
-                
+
             } catch (IllegalArgumentException e) {
                 try {
                     clientOutput.write(RESPSerializer.error(e.getMessage()));
