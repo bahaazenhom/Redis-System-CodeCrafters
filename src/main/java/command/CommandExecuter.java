@@ -9,15 +9,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import command.transactions.TransactionCoordinator;
 import command.transactions.TransactionManager;
 
+/**
+ * CommandExecuter is responsible for executing commands.
+ * Transaction logic is delegated to TransactionCoordinator.
+ */
 public class CommandExecuter {
     private final Map<String, CommandStrategy> commandMap = new HashMap<>();
     private final CommandFactory commandFactory;
-    private final TransactionManager transactionManager = new TransactionManager();
+    private final TransactionCoordinator transactionCoordinator;
 
     public CommandExecuter(DataStore dataStore) {
-        this.commandFactory = new CommandFactory(dataStore, transactionManager);
+        this.commandFactory = new CommandFactory(dataStore);
+        TransactionManager transactionManager = new TransactionManager();
+        this.transactionCoordinator = new TransactionCoordinator(transactionManager, commandFactory);
     }
 
     public void register(String commandName, CommandStrategy command) {
@@ -26,35 +33,25 @@ public class CommandExecuter {
 
     public void execute(String clientId, String commandName, List<String> arguments, BufferedWriter clientOutput) {
         CommandStrategy command = commandFactory.getCommandStrategy(commandName);
+        
         if (command != null) {
             try {
-                if (transactionManager.isInMultiMode(clientId)) {
-                    try {
-                        command.validateArguments(arguments);
-                    } catch (IllegalArgumentException e) {
-                        try {
-                            clientOutput.write(RESPSerializer
-                                    .error("ERR EXECABORT Transaction discarded because of previous errors."));
-                            clientOutput.flush();
-                        } catch (IOException ioException) {
-                            throw new RuntimeException(ioException);
-                        }
-                        return;
-                    }
-                    transactionManager.enqueueCommand(clientId, new CommandRequest(commandName, arguments));
-                    try{
-                    clientOutput.write(RESPSerializer.bulkString("QUEUED"));
-                    clientOutput.flush();
+                // Delegate transaction control commands to TransactionCoordinator
+                if (transactionCoordinator.isTransactionControlCommand(commandName)) {
+                    transactionCoordinator.handleTransactionControlCommand(clientId, commandName, arguments, command, clientOutput);
                     return;
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
                 }
-                if(commandName.equalsIgnoreCase("MULTI")) {
-                    arguments.add(clientId);
+
+                // If client is in MULTI mode, queue the command instead of executing
+                if (transactionCoordinator.isInMultiMode(clientId)) {
+                    transactionCoordinator.queueCommand(clientId, commandName, arguments, command, clientOutput);
+                    return;
                 }
+
+                // Normal execution path: validate and execute
                 command.validateArguments(arguments);
                 command.execute(arguments, clientOutput);
+                
             } catch (IllegalArgumentException e) {
                 try {
                     clientOutput.write(RESPSerializer.error(e.getMessage()));
@@ -62,8 +59,11 @@ public class CommandExecuter {
                 } catch (IOException ioException) {
                     throw new RuntimeException(ioException);
                 }
+            } catch (IOException e) {
+                throw new RuntimeException(e);
             }
         } else {
+            // Unknown command
             try {
                 clientOutput.write(RESPSerializer.error("unknown command '" + commandName + "'"));
                 clientOutput.flush();

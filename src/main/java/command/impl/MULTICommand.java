@@ -1,33 +1,28 @@
 package command.impl;
 
-import java.io.IOException;
+import java.io.BufferedWriter;
+import java.util.List;
 
 import command.CommandStrategy;
-import command.transactions.TransactionManager;
-import protocol.RESPSerializer;
 
+/**
+ * MULTI command implementation.
+ * Note: The actual transaction logic is handled in CommandExecuter.
+ * This class only provides validation - execution is intercepted by CommandExecuter.
+ */
 public class MULTICommand implements CommandStrategy {
 
-    private final TransactionManager transactionManager;
-    public MULTICommand(TransactionManager transactionManager) {
-        this.transactionManager = transactionManager;
-    }
     @Override
-    public void validateArguments(java.util.List<String> arguments) throws IllegalArgumentException {
-        if (arguments.size() != 1) {
-            throw new IllegalArgumentException("Wrong number of arguments for 'MULTI' command");
+    public void validateArguments(List<String> arguments) throws IllegalArgumentException {
+        if (arguments.size() != 0) {
+            throw new IllegalArgumentException("ERR wrong number of arguments for 'multi' command");
         }
     }
 
     @Override
-    public void execute(java.util.List<String> arguments, java.io.BufferedWriter clientOutput) {
-        String clientId = arguments.get(0);
-        transactionManager.beginTransactionContext(clientId);
-        try{
-        clientOutput.write(RESPSerializer.simpleString("OK"));
-        clientOutput.flush();
-    } catch (IOException e) {
-        throw new RuntimeException(e);
+    public void execute(List<String> arguments, BufferedWriter clientOutput) {
+        // This method should never be called because MULTI is intercepted
+        // in CommandExecuter.handleTransactionControlCommand()
+        throw new UnsupportedOperationException("MULTI command should be handled by CommandExecuter");
     }
-}
 }

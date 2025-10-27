@@ -4,17 +4,14 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import command.impl.*;
-import command.transactions.TransactionManager;
 import storage.DataStore;
 
 public class CommandFactory {
     private final DataStore dataStore;
-    private final TransactionManager transactionManager;
     private final Map<String, CommandStrategy> commandMapCache = new ConcurrentHashMap<>();
 
-    public CommandFactory(DataStore dataStore, TransactionManager transactionManager) {
+    public CommandFactory(DataStore dataStore) {
         this.dataStore = dataStore;
-        this.transactionManager = transactionManager;
     }
 
     public CommandStrategy getCommandStrategy(String commandName) {
@@ -38,7 +35,9 @@ public class CommandFactory {
             case "XRANGE" -> new XRANGECommand(dataStore);
             case "XREAD" -> new XREADCommand(dataStore);
             case "INCR" -> new INCRCommand(dataStore);
-            case "MULTI" -> new MULTICommand(transactionManager);
+            case "MULTI" -> new MULTICommand();
+            case "EXEC" -> new EXECCommand();
+            case "DISCARD" -> new DISCARDCommand();
             default -> null;
         };
     }

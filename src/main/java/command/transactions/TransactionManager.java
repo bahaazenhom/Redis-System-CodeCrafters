@@ -21,4 +21,15 @@ public class TransactionManager {
         contexts.computeIfAbsent(clientId, id -> new TransactionContext())
                 .enqueueCommand(commandRequest);
     }
+
+    public TransactionContext getTransactionContextAndClear(String clientId) {
+        return contexts.remove(clientId);
+    }
+
+    public void discardTransaction(String clientId) {
+        TransactionContext context = contexts.remove(clientId);
+        if (context != null) {
+            context.discard();
+        }
+    }
 }
