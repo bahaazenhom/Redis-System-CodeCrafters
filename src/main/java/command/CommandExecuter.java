@@ -1,11 +1,11 @@
 package command;
 
 import protocol.RESPSerializer;
+import server.ServerManager;
 import storage.DataStore;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -21,9 +21,10 @@ public class CommandExecuter {
     private final Map<String, CommandStrategy> commandMap = new HashMap<>();
     private final CommandFactory commandFactory;
     private final TransactionCoordinator transactionCoordinator;
+    
 
     public CommandExecuter(DataStore dataStore) {
-        this.commandFactory = new CommandFactory(dataStore);
+        this.commandFactory = new CommandFactory(dataStore, ServerManager.create(this));
         TransactionManager transactionManager = new TransactionManager();
         this.transactionCoordinator = new TransactionCoordinator(transactionManager, commandFactory);
     }

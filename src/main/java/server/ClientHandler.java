@@ -18,11 +18,13 @@ public class ClientHandler implements Runnable {
     private final Socket socket;
     private final CommandExecuter commandExecuter;
     private final String clientId;
+    private final String serverState;
 
-    public ClientHandler(Socket socket, CommandExecuter commandExecuter) {
+    public ClientHandler(Socket socket, CommandExecuter commandExecuter, String serverState) {
         this.socket = socket;
         this.commandExecuter = commandExecuter;
         this.clientId = UUID.randomUUID().toString();
+        this.serverState = serverState;
     }
 
     @Override

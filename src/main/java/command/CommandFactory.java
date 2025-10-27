@@ -4,14 +4,17 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import command.impl.*;
+import server.ServerManager;
 import storage.DataStore;
 
 public class CommandFactory {
     private final DataStore dataStore;
     private final Map<String, CommandStrategy> commandMapCache = new ConcurrentHashMap<>();
+    private final ServerManager serverManager;
 
-    public CommandFactory(DataStore dataStore) {
+    public CommandFactory(DataStore dataStore, ServerManager serverManager) {
         this.dataStore = dataStore;
+        this.serverManager = serverManager;
     }
 
     public CommandStrategy getCommandStrategy(String commandName) {
@@ -38,7 +41,7 @@ public class CommandFactory {
             case "MULTI" -> new MULTICommand();
             case "EXEC" -> new EXECCommand();
             case "DISCARD" -> new DISCARDCommand();
-            case "INFO" -> new INFOCommand();
+            case "INFO" -> new INFOCommand(serverManager);
             default -> null;
         };
     }
