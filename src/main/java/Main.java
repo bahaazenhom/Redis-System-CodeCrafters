@@ -20,7 +20,7 @@ public class Main {
     private static String parseServerRole(String[] args) {
         for (String arg : args) {
             if (arg.equals("--replicaof")) {
-                return "replica";
+                return "slave";
             }
         }
         return "master"; // default state
