@@ -55,7 +55,7 @@ public class RESPSerializer {
                 respBuilder.append(emptyArray());
                 continue;
             }
-            
+
             @SuppressWarnings("unchecked")
             List<List<String>> fields = (List<List<String>>) fieldsObj;
             respBuilder.append("*").append(fields.size() * 2).append("\r\n");
@@ -94,6 +94,20 @@ public class RESPSerializer {
             }
         }
 
+        return respBuilder.toString();
+    }
+
+    public static String execArray(List<String> values) {
+        if (values == null) {
+            return nullArray();
+        }
+        else if(values.isEmpty()) {
+            return emptyArray();
+        }
+        StringBuilder respBuilder = new StringBuilder();
+        for (String value : values) {
+            respBuilder.append(value);
+        }
         return respBuilder.toString();
     }
 

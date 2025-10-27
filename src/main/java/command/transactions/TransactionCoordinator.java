@@ -167,7 +167,7 @@ public class TransactionCoordinator {
         }
 
         // Send all replies as a RESP array
-        clientOutput.write(RESPSerializer.array(replies));
+        clientOutput.write(RESPSerializer.execArray(replies));
         clientOutput.flush();
     }
 }
