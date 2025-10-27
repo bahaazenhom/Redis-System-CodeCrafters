@@ -11,7 +11,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
         CommandExecuter commandExecuter = new CommandExecuter(new InMemoryDataStore());
         System.out.println("Logs from your program will appear here!");
-        int port = 6379;
+        int port = 6379; // Default Redis port
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             serverSocket.setReuseAddress(true);
 

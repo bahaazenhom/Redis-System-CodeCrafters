@@ -2,3 +2,4 @@
 target/
 .idea/
 .vscode/
+src/main/java/server/ServerManager.java

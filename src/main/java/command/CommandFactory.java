@@ -38,6 +38,7 @@ public class CommandFactory {
             case "MULTI" -> new MULTICommand();
             case "EXEC" -> new EXECCommand();
             case "DISCARD" -> new DISCARDCommand();
+            case "PORT" -> new PORTCommand();
             default -> null;
         };
     }
