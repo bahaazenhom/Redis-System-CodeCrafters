@@ -26,8 +26,6 @@ public class PSYNCCommand implements CommandStrategy {
              "UkVESVMwMDEx+glyZWRpcy12ZXIFNy4yLjD6CnJlZGlzLWJpdHPAQPoFY3RpbWXCbQi8ZfoIdXNlZC1tZW3CsMQQAPoIYW9mLWJhc2XAAP/wbjv+wP9aog==";
             byte[] rdbData = Base64.getDecoder().decode(emptyRdbBase64);
             String header = "$" + rdbData.length + "\r\n";
-            System.out.println("header is: " + header);
-            System.out.println("binary data is: " + Arrays.toString(rdbData));
             clientOutput.write(header);
             clientOutput.writeBytes(rdbData);
             clientOutput.flush();

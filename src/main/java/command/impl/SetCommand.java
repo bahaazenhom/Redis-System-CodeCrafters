@@ -46,7 +46,8 @@ public class SetCommand implements CommandStrategy {
             Long expiryTimeStamp = parseExpiryOptions(arguments);
             RedisValue redisValue = new StringValue(value, expiryTimeStamp);
             dataStore.setValue(key, redisValue);
-            clientOutput.writeText(RESPSerializer.simpleString("OK"));
+            clientOutput.write(RESPSerializer.simpleString("OK"));
+            clientOutput.flush();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -41,10 +41,12 @@ public class XADDCommand implements CommandStrategy {
             }
 
             entryID = dataStore.xadd(streamKey, entryID, entryValues);
-            clientOutput.writeText(RESPSerializer.bulkString(entryID));
+            clientOutput.write(RESPSerializer.bulkString(entryID));
+            clientOutput.flush();
         } catch (InvalidStreamEntryException e) {
             try {
-                clientOutput.writeText(RESPSerializer.error(e.getMessage()));
+                clientOutput.write(RESPSerializer.error(e.getMessage()));
+                clientOutput.flush();
             } catch (IOException ioException) {
                 throw new RuntimeException(ioException);
             }
