@@ -4,13 +4,21 @@ import java.io.BufferedWriter;
 import java.util.List;
 
 import command.CommandStrategy;
+import protocol.RESPSerializer;
+import replication.ReplicationManager;
 
 public class PSYNCCommand implements CommandStrategy {
+    private final ReplicationManager replicationManager;
+
+    public PSYNCCommand(ReplicationManager replicationManager) {
+        this.replicationManager = replicationManager;
+    }
 
     @Override
     public void execute(List<String> arguments, BufferedWriter clientOutput) {
         try {
-            clientOutput.write("+FULLRESYNC <REPL_ID> 0\r\n");
+            String masterID = replicationManager.getMasterNode().getReplicationId();
+            clientOutput.write(RESPSerializer.simpleString("FULLRESYNC "+masterID+" 0"));
             clientOutput.flush();
         } catch (Exception e) {
             e.printStackTrace();

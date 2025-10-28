@@ -43,7 +43,7 @@ public class CommandFactory {
             case "DISCARD" -> new DISCARDCommand();
             case "INFO" -> new INFOCommand(replicationManager);
             case "REPLCONF" -> new REPLCONFCommand();
-            case "PSYNC" -> new PSYNCCommand();
+            case "PSYNC" -> new PSYNCCommand(replicationManager);
             default -> null;
         };
     }
