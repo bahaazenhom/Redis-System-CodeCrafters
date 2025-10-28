@@ -30,8 +30,8 @@ public class ReplicationManager {
             this.masterNode = master;
             return master;
         } else {
-            int masterPort = Integer.parseInt(args[1]);
-            String masterHost = args[2];
+            String masterHost = args[1];
+            int masterPort = Integer.parseInt(args[2]);
             MasterNode masterNode = new MasterNode(masterHost, masterPort, commandExecuter, "master");
             this.masterNode = masterNode;
             SlaveNode slave = new SlaveNode("local host", port, commandExecuter, args[0], this.masterNode);

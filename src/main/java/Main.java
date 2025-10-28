@@ -1,5 +1,6 @@
 
 import java.io.IOException;
+import java.util.Arrays;
 
 import command.CommandExecuter;
 import replication.ReplicationManager;
@@ -25,7 +26,8 @@ public class Main {
         for (int index = 0; index < args.length; index++) {
             String arg = args[index];
             if (arg.equals("--replicaof")) {
-                return new String[] { "slave", args[index + 1], args[index + 2] };
+                String[] masterData = args[index + 1].split(" ");
+                return new String[] { "slave", masterData[0], masterData[1] };
             }
         }
         return new String[] { "master" }; // default state
