@@ -80,4 +80,17 @@ public class ReplicationManager {
         // Fallback - should not happen
         return "role:unknown";
     }
+
+    public String getCurrentSlaveInfo() {
+        int port = Integer.parseInt(Thread.currentThread().getName().split("-")[1]);
+
+        // Check if this is a slave
+        SlaveNode slave = slaveNodes.get(port);
+        if (slave != null) {
+            return slave.getInfo();
+        }
+
+        // Fallback - should not happen
+        return "role:unknown";
+    }
 }

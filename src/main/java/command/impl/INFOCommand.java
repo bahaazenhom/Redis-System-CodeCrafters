@@ -18,9 +18,11 @@ public class INFOCommand implements CommandStrategy {
     public void execute(List<String> arguments, BufferedWriter clientOutput) {
         try {
             if (arguments.get(0).equals("replication")) {
-                String info = "role:master\r\n"
-                + "master_replid:8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb\r\n"
-                + "master_repl_offset:0";
+                String info;
+                if(replicationManager.getMasterNode()!=null){
+                    info = replicationManager.getMasterNode().getInfo();
+                }
+                else info = replicationManager.getCurrentSlaveInfo();
                 clientOutput.write(RESPSerializer.bulkString(info));
                 clientOutput.flush();
             }

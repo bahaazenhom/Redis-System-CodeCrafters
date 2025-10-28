@@ -36,7 +36,7 @@ public class SlaveNode extends ServerInstance {
     }
 
     public String getInfo() {
-        String info = "role:" + role + "\r\n"
+        String info = "role:" + this.role + "\r\n"
                 + "master_replid:" + replicationId + "\r\n"
                 + "master_repl_offset:" + replicationOffset;
 
