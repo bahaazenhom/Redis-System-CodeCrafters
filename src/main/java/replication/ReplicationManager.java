@@ -1,9 +1,15 @@
 package replication;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.OutputStreamWriter;
+import java.net.Socket;
 import java.util.HashMap;
 
 import command.CommandExecuter;
+import protocol.RESPSerializer;
 import server.ServerInstance;
 
 public class ReplicationManager {
@@ -34,7 +40,26 @@ public class ReplicationManager {
             int masterPort = Integer.parseInt(args[2]);
             SlaveNode slave = new SlaveNode("local host", port, commandExecuter, "slave", masterHost, masterPort);
             this.slaveNodes.put(port, slave);
+            masterHandshake(masterHost, masterPort);
             return slave;
+        }
+    }
+
+    private void masterHandshake(String masterHost, int masterPort) {
+        try {
+            Socket socket = new Socket(masterHost, masterPort);
+            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+
+            out.write(RESPSerializer.bulkString("PING"));
+            out.flush();
+
+            String response = in.readLine();
+            System.out.println("Received from master: " + response);
+            
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

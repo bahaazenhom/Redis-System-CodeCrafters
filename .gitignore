@@ -3,3 +3,4 @@ target/
 .idea/
 .vscode/
 REPLICATION_DESIGN.md
+src/main/java/replication/ReplicaCommunicationManager.java
