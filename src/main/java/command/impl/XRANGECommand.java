@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import command.CommandStrategy;
+import command.ResponseWriter.ResponseWriter;
 import protocol.RESPSerializer;
 import storage.DataStore;
 
@@ -23,7 +24,7 @@ public class XRANGECommand implements CommandStrategy {
     }
 
     @Override
-    public void execute(List<String> arguments, BufferedWriter clientOutput) {
+    public void execute(List<String> arguments, ResponseWriter clientOutput) {
         try {
             String streamKey = arguments.get(0);
             String startEntryId = arguments.get(1);

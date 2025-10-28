@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import command.CommandStrategy;
+import command.ResponseWriter.ResponseWriter;
 import protocol.RESPSerializer;
 import storage.DataStore;
 
@@ -32,7 +33,7 @@ public class BLPOPCommand implements CommandStrategy {
     }
 
     @Override
-    public void execute(List<String> arguments, BufferedWriter clientOutput) {
+    public void execute(List<String> arguments, ResponseWriter clientOutput) {
         try {
             String listKey = arguments.get(0);
             double timestamp = Double.parseDouble(arguments.get(1));

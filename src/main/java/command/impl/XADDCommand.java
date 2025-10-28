@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 
 import command.CommandStrategy;
+import command.ResponseWriter.ResponseWriter;
 import protocol.RESPSerializer;
 import storage.DataStore;
 import storage.exception.InvalidStreamEntryException;
@@ -28,7 +29,7 @@ public class XADDCommand implements CommandStrategy {
     }
 
     @Override
-    public void execute(List<String> arguments, BufferedWriter clientOutput) {
+    public void execute(List<String> arguments, ResponseWriter clientOutput) {
         try {
             String streamKey = arguments.get(0);
             String entryID = arguments.get(1);
@@ -40,12 +41,10 @@ public class XADDCommand implements CommandStrategy {
             }
 
             entryID = dataStore.xadd(streamKey, entryID, entryValues);
-            clientOutput.write(RESPSerializer.bulkString(entryID));
-            clientOutput.flush();
+            clientOutput.writeText(RESPSerializer.bulkString(entryID));
         } catch (InvalidStreamEntryException e) {
             try {
-                clientOutput.write(RESPSerializer.error(e.getMessage()));
-                clientOutput.flush();
+                clientOutput.writeText(RESPSerializer.error(e.getMessage()));
             } catch (IOException ioException) {
                 throw new RuntimeException(ioException);
             }

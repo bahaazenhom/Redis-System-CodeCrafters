@@ -2,6 +2,7 @@ package server;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.OutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.UUID;
 
 import command.CommandExecuter;
+import command.ResponseWriter.ResponseWriter;
 import protocol.RESPParser;
 
 public class ClientHandler implements Runnable {
@@ -28,16 +30,15 @@ public class ClientHandler implements Runnable {
     public void run() {
         try (BufferedReader in = new BufferedReader(
                 new InputStreamReader(socket.getInputStream()));
-                BufferedWriter out = new BufferedWriter(
-                        new OutputStreamWriter(socket.getOutputStream()))) {
-            processCommands(in, out);
-
+             OutputStream outputStream = socket.getOutputStream()) {
+            ResponseWriter responseWriter = new ResponseWriter(outputStream);
+            processCommands(in, responseWriter);
         } catch (IOException e) {
             System.err.println("Client connection error: " + e.getMessage());
         }
     }
 
-    private void processCommands(BufferedReader in, BufferedWriter out)
+    private void processCommands(BufferedReader in, ResponseWriter responseWriter)
             throws IOException {
         String line;
         while ((line = in.readLine()) != null) {
@@ -51,7 +52,7 @@ public class ClientHandler implements Runnable {
 
             List<String> arguments = commands.subList(1, commands.size());
             System.out.println("Received command: " + commandName + " with arguments: " + arguments);
-            commandExecuter.execute(clientId, commandName, arguments, out);
+            commandExecuter.execute(clientId, commandName, arguments, responseWriter);
         }
     }
 

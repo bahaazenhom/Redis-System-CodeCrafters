@@ -2,10 +2,9 @@ package command;
 
 import protocol.RESPSerializer;
 import replication.ReplicationManager;
-import server.ServerManager;
 import storage.DataStore;
 
-import java.io.BufferedWriter;
+import command.ResponseWriter.ResponseWriter;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -22,7 +21,6 @@ public class CommandExecuter {
     private final Map<String, CommandStrategy> commandMap = new HashMap<>();
     private final CommandFactory commandFactory;
     private final TransactionCoordinator transactionCoordinator;
-    
 
     public CommandExecuter(DataStore dataStore) {
         this.commandFactory = new CommandFactory(dataStore, ReplicationManager.create());
@@ -34,7 +32,7 @@ public class CommandExecuter {
         commandMap.put(commandName.toUpperCase(), command);
     }
 
-    public void execute(String clientId, String commandName, List<String> arguments, BufferedWriter clientOutput) {
+    public void execute(String clientId, String commandName, List<String> arguments, ResponseWriter clientOutput) {
         CommandStrategy command = commandFactory.getCommandStrategy(commandName);
 
         if (command != null) {

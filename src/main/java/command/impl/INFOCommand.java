@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import command.CommandStrategy;
+import command.ResponseWriter.ResponseWriter;
 import protocol.RESPSerializer;
 import replication.ReplicationManager;
 public class INFOCommand implements CommandStrategy {
@@ -15,7 +16,7 @@ public class INFOCommand implements CommandStrategy {
     }
 
     @Override
-    public void execute(List<String> arguments, BufferedWriter clientOutput) {
+    public void execute(List<String> arguments, ResponseWriter clientOutput) {
         try {
             if (arguments.get(0).equals("replication")) {
                 String info;

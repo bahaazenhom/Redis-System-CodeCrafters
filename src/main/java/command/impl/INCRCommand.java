@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.util.List;
 
 import command.CommandStrategy;
+import command.ResponseWriter.ResponseWriter;
 import protocol.RESPSerializer;
 import storage.DataStore;
 
@@ -16,7 +17,7 @@ public class INCRCommand implements CommandStrategy {
     }
 
     @Override
-    public void execute(List<String> arguments, BufferedWriter clientOutput) {
+    public void execute(List<String> arguments, ResponseWriter clientOutput) {
         try {
             String key = arguments.get(0);
             long newValue = dataStore.incr(key);

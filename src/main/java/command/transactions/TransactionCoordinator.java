@@ -5,7 +5,7 @@ import command.CommandRequest;
 import command.CommandStrategy;
 import protocol.RESPSerializer;
 
-import java.io.BufferedWriter;
+import command.ResponseWriter.ResponseWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ public class TransactionCoordinator {
      * Handle transaction control commands (MULTI/EXEC/DISCARD)
      */
     public void handleTransactionControlCommand(String clientId, String commandName, List<String> arguments,
-            CommandStrategy command, BufferedWriter clientOutput) throws IOException {
+            CommandStrategy command, ResponseWriter clientOutput) throws IOException {
 
         String upperCommand = commandName.toUpperCase();
 
@@ -70,14 +70,14 @@ public class TransactionCoordinator {
      * Queue a command for execution during EXEC
      */
     public void queueCommand(String clientId, String commandName, List<String> arguments,
-            CommandStrategy command, BufferedWriter clientOutput) throws IOException {
+            CommandStrategy command, ResponseWriter clientOutput) throws IOException {
         try {
             // Validate the command before queuing
             command.validateArguments(arguments);
-            
+
             // Enqueue the command
             transactionManager.enqueueCommand(clientId, new CommandRequest(commandName, arguments));
-            
+
             // Send QUEUED response
             clientOutput.write(RESPSerializer.bulkString("QUEUED"));
             clientOutput.flush();
@@ -94,7 +94,7 @@ public class TransactionCoordinator {
     // ============================================
 
     private void handleMulti(String clientId, List<String> arguments, CommandStrategy command,
-            BufferedWriter clientOutput) throws IOException {
+            ResponseWriter clientOutput) throws IOException {
         // Check if already in MULTI mode
         if (transactionManager.isInMultiMode(clientId)) {
             clientOutput.write(RESPSerializer.error("MULTI calls can not be nested"));
@@ -111,7 +111,7 @@ public class TransactionCoordinator {
         clientOutput.flush();
     }
 
-    private void handleExec(String clientId, BufferedWriter clientOutput) throws IOException {
+    private void handleExec(String clientId, ResponseWriter clientOutput) throws IOException {
         // Check if in MULTI mode
         if (!transactionManager.isInMultiMode(clientId)) {
             clientOutput.write(RESPSerializer.error("EXEC without MULTI"));
@@ -123,7 +123,7 @@ public class TransactionCoordinator {
         executeTransaction(clientId, clientOutput);
     }
 
-    private void handleDiscard(String clientId, BufferedWriter clientOutput) throws IOException {
+    private void handleDiscard(String clientId, ResponseWriter clientOutput) throws IOException {
         // Check if in MULTI mode
         if (!transactionManager.isInMultiMode(clientId)) {
             clientOutput.write(RESPSerializer.error("DISCARD without MULTI"));
@@ -137,7 +137,7 @@ public class TransactionCoordinator {
         clientOutput.flush();
     }
 
-    private void executeTransaction(String clientId, BufferedWriter clientOutput) throws IOException {
+    private void executeTransaction(String clientId, ResponseWriter clientOutput) throws IOException {
         // Get all queued commands and clear the transaction context
         TransactionContext context = transactionManager.getTransactionContextAndClear(clientId);
         List<CommandRequest> queuedCommands = context.drainCommands();
@@ -150,12 +150,16 @@ public class TransactionCoordinator {
             try {
                 // Use a StringWriter to capture the command output
                 StringWriter stringWriter = new StringWriter();
-                BufferedWriter tempWriter = new BufferedWriter(stringWriter);
+                ResponseWriter tempWriter = new ResponseWriter(new java.io.OutputStream() {
+                    @Override
+                    public void write(int b) {
+                        stringWriter.write(b);
+                    }
+                });
 
                 CommandStrategy commandStrategy = commandFactory.getCommandStrategy(request.getCommandName());
                 if (commandStrategy != null) {
                     commandStrategy.execute(request.getArguments(), tempWriter);
-                    tempWriter.flush();
                     replies.add(stringWriter.toString());
                 } else {
                     replies.add(RESPSerializer.error("unknown command '" + request.getCommandName() + "'"));

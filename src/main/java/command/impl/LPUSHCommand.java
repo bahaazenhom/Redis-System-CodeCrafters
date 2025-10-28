@@ -6,6 +6,7 @@ import java.util.ArrayDeque;
 import java.util.List;
 
 import command.CommandStrategy;
+import command.ResponseWriter.ResponseWriter;
 import protocol.RESPSerializer;
 import storage.DataStore;
 import storage.types.ListValue;
@@ -25,7 +26,7 @@ public class LPUSHCommand implements CommandStrategy {
     }
 
     @Override
-    public void execute(List<String> arguments, BufferedWriter clientOutput) {
+    public void execute(List<String> arguments, ResponseWriter clientOutput) {
         try {
             String listName = arguments.get(0);
             List<String> values = arguments.subList(1, arguments.size());

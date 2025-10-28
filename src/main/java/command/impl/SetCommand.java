@@ -1,6 +1,7 @@
 package command.impl;
 
 import command.CommandStrategy;
+import command.ResponseWriter.ResponseWriter;
 import protocol.RESPSerializer;
 import storage.DataStore;
 import storage.core.RedisValue;
@@ -37,7 +38,7 @@ public class SetCommand implements CommandStrategy {
     }
 
     @Override
-    public void execute(List<String> arguments, BufferedWriter clientOutput) {
+    public void execute(List<String> arguments, ResponseWriter clientOutput) {
         try {
             String key = arguments.get(0);
             String value = arguments.get(1);
@@ -45,8 +46,7 @@ public class SetCommand implements CommandStrategy {
             Long expiryTimeStamp = parseExpiryOptions(arguments);
             RedisValue redisValue = new StringValue(value, expiryTimeStamp);
             dataStore.setValue(key, redisValue);
-            clientOutput.write(RESPSerializer.simpleString("OK"));
-            clientOutput.flush();
+            clientOutput.writeText(RESPSerializer.simpleString("OK"));
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

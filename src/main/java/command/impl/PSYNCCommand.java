@@ -6,6 +6,7 @@ import java.util.Base64;
 import java.util.List;
 
 import command.CommandStrategy;
+import command.ResponseWriter.ResponseWriter;
 import protocol.RESPSerializer;
 import replication.ReplicationManager;
 
@@ -17,7 +18,7 @@ public class PSYNCCommand implements CommandStrategy {
     }
 
     @Override
-    public void execute(List<String> arguments, BufferedWriter clientOutput) {
+    public void execute(List<String> arguments, ResponseWriter clientOutput) {
         try {
             String masterID = replicationManager.getMasterNode().getReplicationId();
             clientOutput.write(RESPSerializer.simpleString("FULLRESYNC "+masterID+" 0"));
@@ -27,7 +28,8 @@ public class PSYNCCommand implements CommandStrategy {
             String header = "$" + rdbData.length + "\r\n";
             System.out.println("header is: " + header);
             System.out.println("binary data is: " + Arrays.toString(rdbData));
-            clientOutput.write(header+rdbData);
+            clientOutput.write(header);
+            clientOutput.writeBytes(rdbData);
             clientOutput.flush();
         } catch (Exception e) {
             e.printStackTrace();

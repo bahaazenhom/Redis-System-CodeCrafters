@@ -5,6 +5,7 @@ import java.util.Deque;
 import java.util.List;
 
 import command.CommandStrategy;
+import command.ResponseWriter.ResponseWriter;
 import protocol.RESPSerializer;
 import storage.DataStore;
 import storage.types.ListValue;
@@ -24,7 +25,7 @@ public class LLENCommand implements CommandStrategy {
     }
 
     @Override
-    public void execute(List<String> arguments, BufferedWriter clientOutput) {
+    public void execute(List<String> arguments, ResponseWriter clientOutput) {
         try {
             String listName = arguments.get(0);
             if (!dataStore.exists(listName)) {

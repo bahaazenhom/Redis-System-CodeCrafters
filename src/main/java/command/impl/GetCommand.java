@@ -1,6 +1,7 @@
 package command.impl;
 
 import command.CommandStrategy;
+import command.ResponseWriter.ResponseWriter;
 import protocol.RESPSerializer;
 import storage.DataStore;
 import storage.types.StringValue;
@@ -24,7 +25,7 @@ public class GetCommand implements CommandStrategy {
     }
 
     @Override
-    public void execute(List<String> arguments, BufferedWriter clientOutput) {
+    public void execute(List<String> arguments, ResponseWriter clientOutput) {
         try {
             String key = arguments.get(0);
             var redisValue = dataStore.getValue(key);

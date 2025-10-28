@@ -4,6 +4,7 @@ import java.io.BufferedWriter;
 import java.util.List;
 
 import command.CommandStrategy;
+import command.ResponseWriter.ResponseWriter;
 
 /**
  * MULTI command implementation.
@@ -20,7 +21,7 @@ public class MULTICommand implements CommandStrategy {
     }
 
     @Override
-    public void execute(List<String> arguments, BufferedWriter clientOutput) {
+    public void execute(List<String> arguments, ResponseWriter clientOutput) {
         // This method should never be called because MULTI is intercepted
         // in CommandExecuter.handleTransactionControlCommand()
         throw new UnsupportedOperationException("MULTI command should be handled by CommandExecuter");

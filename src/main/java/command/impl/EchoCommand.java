@@ -1,6 +1,7 @@
 package command.impl;
 
 import command.CommandStrategy;
+import command.ResponseWriter.ResponseWriter;
 import protocol.RESPSerializer;
 
 import java.io.BufferedWriter;
@@ -17,7 +18,7 @@ public class EchoCommand implements CommandStrategy {
     }
 
     @Override
-    public void execute(List<String> arguments, BufferedWriter clientOutput) {
+    public void execute(List<String> arguments, ResponseWriter clientOutput) {
         try {
             String message = arguments.get(0);
             clientOutput.write(RESPSerializer.bulkString(message));
