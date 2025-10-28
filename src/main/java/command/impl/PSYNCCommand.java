@@ -1,6 +1,7 @@
 package command.impl;
 
 import java.io.BufferedWriter;
+import java.util.Base64;
 import java.util.List;
 
 import command.CommandStrategy;
@@ -19,6 +20,11 @@ public class PSYNCCommand implements CommandStrategy {
         try {
             String masterID = replicationManager.getMasterNode().getReplicationId();
             clientOutput.write(RESPSerializer.simpleString("FULLRESYNC "+masterID+" 0"));
+            String emptyRdbBase64 =
+             "UkVESVMwMDEx+glyZWRpcy12ZXIFNy4yLjD6CnJlZGlzLWJpdHPAQPoFY3RpbWXCbQi8ZfoIdXNlZC1tZW3CsMQQAPoIYW9mLWJhc2XAAP/wbjv+wP9aog==";
+            byte[] rdbData = Base64.getDecoder().decode(emptyRdbBase64);
+            String header = "$" + rdbData.length + "\r\n";
+            clientOutput.write(header+rdbData);
             clientOutput.flush();
         } catch (Exception e) {
             e.printStackTrace();
