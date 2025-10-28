@@ -7,6 +7,8 @@ import java.net.Socket;
 import command.CommandExecuter;
 
 public class ServerInstance implements Runnable {
+    private final String host;
+
     private final int port;
     private final CommandExecuter commandExecuter;
     private final ServerSocket serverSocket;
@@ -17,7 +19,9 @@ public class ServerInstance implements Runnable {
         return serverRole;
     }
 
-    public ServerInstance(int port, CommandExecuter commandExecuter, String serverRole) throws IOException {
+    public ServerInstance(String host, int port, CommandExecuter commandExecuter, String serverRole)
+            throws IOException {
+        this.host = host;
         this.port = port;
         this.commandExecuter = commandExecuter;
         this.serverSocket = new ServerSocket(port);
@@ -59,5 +63,9 @@ public class ServerInstance implements Runnable {
 
     public int getPort() {
         return port;
+    }
+
+    public String getHost() {
+        return host;
     }
 }

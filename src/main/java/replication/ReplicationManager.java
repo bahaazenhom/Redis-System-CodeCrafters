@@ -24,13 +24,20 @@ public class ReplicationManager {
         return replicationManager;
     }
 
-    public ServerInstance createReplica(int port, CommandExecuter commandExecuter, String role) throws IOException {
-        if (role.equals("master")) {
-            MasterNode master = new MasterNode(port, commandExecuter, role);
+    public ServerInstance createReplica(int port, CommandExecuter commandExecuter, String[] args) throws IOException {
+        if (args[0].equals("master")) {
+            MasterNode master = new MasterNode("localhost", port, commandExecuter, args[0]);
             this.masterNode = master;
             return master;
-        } else
-            return new SlaveNode(port, commandExecuter, role, this.masterNode);
+        } else {
+            int masterPort = Integer.parseInt(args[1]);
+            String masterHost = args[2];
+            MasterNode masterNode = new MasterNode(masterHost, masterPort, commandExecuter, "master");
+            this.masterNode = masterNode;
+            SlaveNode slave = new SlaveNode("local host", port, commandExecuter, args[0], this.masterNode);
+            this.slaveNodes.put(port, slave);
+            return slave;
+        }
     }
 
     public MasterNode getMasterNode() {
@@ -43,19 +50,36 @@ public class ReplicationManager {
 
     public String getServerRole() {
         int port = Integer.parseInt(Thread.currentThread().getName().split("-")[1]);
-        if (port == masterNode.getPort()) {
+
+        // Check if this is the master
+        if (masterNode != null && masterNode.getPort() == port) {
             return "master";
         }
-        return "slave";
+
+        // Check if this is a slave
+        if (slaveNodes.containsKey(port)) {
+            return "slave";
+        }
+
+        // Fallback
+        return "unknown";
     }
 
     public String getReplicaInfo() {
         int port = Integer.parseInt(Thread.currentThread().getName().split("-")[1]);
 
-        if (masterNode.getPort() == port)
+        // Check if this is the master
+        if (masterNode != null && masterNode.getPort() == port) {
             return masterNode.getInfo();
-        else {
-            return slaveNodes.get(port).getInfo();
         }
+
+        // Check if this is a slave
+        SlaveNode slave = slaveNodes.get(port);
+        if (slave != null) {
+            return slave.getInfo();
+        }
+
+        // Fallback - should not happen
+        return "role:unknown";
     }
 }

@@ -11,8 +11,8 @@ public class SlaveNode extends ServerInstance {
     private final String replicationId = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb";
     private long replicationOffset = 0L;
 
-    public SlaveNode(int port, CommandExecuter commandExecuter, String role, MasterNode masterNode) throws IOException {
-        super(port, commandExecuter, role);
+    public SlaveNode(String host, int port, CommandExecuter commandExecuter, String role, MasterNode masterNode) throws IOException {
+        super(host, port, commandExecuter, role);
         this.masterNode = masterNode;
     }
 

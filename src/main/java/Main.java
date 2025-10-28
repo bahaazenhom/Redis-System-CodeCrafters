@@ -15,19 +15,20 @@ public class Main {
         CommandExecuter commandExecuter = new CommandExecuter(new InMemoryDataStore());
         ServerManager serverManager = ServerManager.create(commandExecuter);
         int port = parsePort(args);
-        String serverRole = parseServerRole(args);
+        String[] serverRole = parseServerRole(args);
         ReplicationManager replicationManager = ReplicationManager.create();
         ServerInstance serverInstance = replicationManager.createReplica(port, commandExecuter, serverRole);
         serverManager.startServer(serverInstance);
     }
 
-    private static String parseServerRole(String[] args) {
-        for (String arg : args) {
+    private static String[] parseServerRole(String[] args) {
+        for (int index = 0; index < args.length; index++) {
+            String arg = args[index];
             if (arg.equals("--replicaof")) {
-                return "slave";
+                return new String[] { "slave", args[index + 1], args[index + 2] };
             }
         }
-        return "master"; // default state
+        return new String[] { "master" }; // default state
     }
 
     private static int parsePort(String[] args) {
