@@ -42,24 +42,42 @@ public class ReplicationManager {
             int masterPort = Integer.parseInt(args[2]);
             SlaveNode slave = new SlaveNode("local host", port, commandExecuter, "slave", masterHost, masterPort);
             this.slaveNodes.put(port, slave);
-            masterHandshake(masterHost, masterPort);
+            masterHandshake(port, masterHost, masterPort);
             return slave;
         }
     }
 
-    private void masterHandshake(String masterHost, int masterPort) {
+    private void masterHandshake(int slavePort, String masterHost, int masterPort) {
         try {
             Socket socket = new Socket(masterHost, masterPort);
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            String response;
 
-            List<String> handShakeCommands = new ArrayList<>();
-            handShakeCommands.add("PING");
-            out.write(RESPSerializer.array(handShakeCommands));
+            List<String> pingHandShake = new ArrayList<>();
+            pingHandShake.add("PING");
+            out.write(RESPSerializer.array(pingHandShake));
             out.flush();
+            response = in.readLine();
+            System.out.println("ping response: " + response);
 
-            String response = in.readLine();
-            System.out.println("Received from master: " + response);
+            List<String> listeningPortHandShake = new ArrayList<>();
+            listeningPortHandShake.add("REPLCONF");
+            listeningPortHandShake.add("listening-port");
+            listeningPortHandShake.add(String.valueOf(slavePort));
+            out.write(RESPSerializer.array(listeningPortHandShake));
+            out.flush();
+            response = in.readLine();
+            System.out.println("listening-port response: " + response);
+
+            List<String> capaHandShake = new ArrayList<>();
+            capaHandShake.add("REPLCONF");
+            capaHandShake.add("capa");
+            capaHandShake.add("psync2");
+            out.write(RESPSerializer.array(capaHandShake));
+            out.flush();
+            response = in.readLine();
+            System.out.println("capa response: " + response);
 
             socket.close();
         } catch (IOException e) {

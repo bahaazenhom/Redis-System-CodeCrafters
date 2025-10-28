@@ -42,6 +42,7 @@ public class CommandFactory {
             case "EXEC" -> new EXECCommand();
             case "DISCARD" -> new DISCARDCommand();
             case "INFO" -> new INFOCommand(replicationManager);
+            case "REPLCONF" -> new REPLCONFCommand();
             default -> null;
         };
     }
