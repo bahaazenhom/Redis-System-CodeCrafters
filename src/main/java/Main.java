@@ -1,6 +1,5 @@
 
 import java.io.IOException;
-import java.util.Arrays;
 
 import command.CommandExecuter;
 import replication.ReplicationManager;

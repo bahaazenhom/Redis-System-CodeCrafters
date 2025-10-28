@@ -26,15 +26,13 @@ public class ReplicationManager {
 
     public ServerInstance createReplica(int port, CommandExecuter commandExecuter, String[] args) throws IOException {
         if (args[0].equals("master")) {
-            MasterNode master = new MasterNode("localhost", port, commandExecuter, args[0]);
+            MasterNode master = new MasterNode("localhost", port, commandExecuter, "master");
             this.masterNode = master;
             return master;
         } else {
             String masterHost = args[1];
             int masterPort = Integer.parseInt(args[2]);
-            MasterNode masterNode = new MasterNode(masterHost, masterPort, commandExecuter, "master");
-            this.masterNode = masterNode;
-            SlaveNode slave = new SlaveNode("local host", port, commandExecuter, args[0], this.masterNode);
+            SlaveNode slave = new SlaveNode("local host", port, commandExecuter, "slave", masterHost, masterPort);
             this.slaveNodes.put(port, slave);
             return slave;
         }
