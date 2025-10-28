@@ -6,7 +6,9 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 import command.CommandExecuter;
 import protocol.RESPSerializer;
@@ -51,12 +53,14 @@ public class ReplicationManager {
             BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
 
-            out.write(RESPSerializer.bulkString("PING"));
+            List<String> handShakeCommands = new ArrayList<>();
+            handShakeCommands.add("PING");
+            out.write(RESPSerializer.array(handShakeCommands));
             out.flush();
 
             String response = in.readLine();
             System.out.println("Received from master: " + response);
-            
+
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
