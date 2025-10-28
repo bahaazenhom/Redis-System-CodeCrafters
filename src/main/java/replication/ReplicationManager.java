@@ -79,6 +79,16 @@ public class ReplicationManager {
             response = in.readLine();
             System.out.println("capa response: " + response);
 
+            List<String> psyncHandShake = new ArrayList<>();
+            psyncHandShake.add("PSYNC");
+            psyncHandShake.add("?");
+            psyncHandShake.add("-1");
+            out.write(RESPSerializer.array(psyncHandShake));
+            out.flush();
+            response = in.readLine();
+            System.out.println("psync response: " + response);
+
+
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
