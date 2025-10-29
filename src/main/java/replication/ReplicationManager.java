@@ -32,7 +32,7 @@ public class ReplicationManager {
 
     public static ReplicationManager create() {
         if (replicationManager != null) {
-            return replicationManager;//
+            return replicationManager;
         }
         replicationManager = new ReplicationManager();
         return replicationManager;
@@ -248,6 +248,7 @@ private void masterHandshake(int slavePort, String masterHost, int masterPort) {
                 ackCommand.add("ACK");
                 ackCommand.add(String.valueOf(slave.getReplicationOffset()));
                 System.out.println("Sending ACK to master with offset: " + slave.getReplicationOffset());
+                System.out.println(slaveNodesSockets.toString());
                 masterConnection.write(RESPSerializer.array(ackCommand));
                 masterConnection.flush();
             } catch (Exception e) {
