@@ -24,6 +24,7 @@ public class ReplicationManager {
     private ConcurrentHashMap<Integer, ClientConnection> slaveNodesSockets;// map of slave port to their connections if
                                                                            // this instance is a master
     private static ReplicationManager replicationManager = null;// singleton instance of ReplicationManager
+    private static boolean isSlaveNode = false;
 
     private ReplicationManager() {
         this.masterNode = null;
@@ -48,7 +49,7 @@ public class ReplicationManager {
             int masterPort = Integer.parseInt(args[2]);
             System.out.println("-------------------------------- " + masterHost + ":" + masterPort);
             this.slaveNode = new SlaveNode("localhost", port, commandExecuter, "slave", masterHost, masterPort);
-
+            isSlaveNode = true;
             masterHandshake(port, masterHost, masterPort);
             return this.slaveNode;
         }
@@ -149,7 +150,7 @@ public class ReplicationManager {
                 remaining -= bytesRead;
             }
 
-            byte[] fileData = baos.toByteArray();
+            // byte[] fileData = baos.toByteArray();
 
             // ========== 7. Start replication stream ==========
             // Keep the socket reference in the slave node so it won't be closed
@@ -257,8 +258,8 @@ public class ReplicationManager {
         }
     }
 
-    public boolean isSlaveNode() {
-        return this.slaveNode != null;
+    public static boolean isSlaveNode() {
+        return isSlaveNode;
     }
 
     public void updateSlaveOffset(int length) {

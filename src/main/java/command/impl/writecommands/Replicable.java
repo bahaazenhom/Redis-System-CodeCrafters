@@ -4,5 +4,4 @@ import java.util.List;
 
 public interface Replicable {
     void replicateToReplicas(List<String> command);
-    boolean isSlaveNode();
 }

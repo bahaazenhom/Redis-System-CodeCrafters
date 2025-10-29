@@ -49,7 +49,7 @@ public class BLPOPCommand implements CommandStrategy, Replicable {
 
             // Send response to client
             // if this is a slave node, do not send response
-            if (isSlaveNode()) return;
+            if (ReplicationManager.isSlaveNode()) return;
             if (value == null)
                 clientOutput.write(RESPSerializer.nullArray());
             else
@@ -85,9 +85,5 @@ public class BLPOPCommand implements CommandStrategy, Replicable {
         }
     }
 
-    @Override
-    public boolean isSlaveNode() {
-        return replicationManager.isSlaveNode();
-    }
 
 }

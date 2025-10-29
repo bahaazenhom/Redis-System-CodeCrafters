@@ -50,7 +50,7 @@ public class SetCommand implements CommandStrategy, Replicable {
             RedisValue redisValue = new StringValue(value, expiryTimeStamp);
             dataStore.setValue(key, redisValue);
             // If this node is a replica, do not send replies or replicate
-            if (isSlaveNode()) return;
+            if (ReplicationManager.isSlaveNode()) return;
 
             clientOutput.write(RESPSerializer.simpleString("OK"));
             clientOutput.flush();
@@ -92,9 +92,5 @@ public class SetCommand implements CommandStrategy, Replicable {
         }
     }
 
-    @Override
-    public boolean isSlaveNode() {
-        return replicationManager.isSlaveNode();
-    }
 
 }

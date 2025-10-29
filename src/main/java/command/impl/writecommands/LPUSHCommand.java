@@ -38,7 +38,7 @@ public class LPUSHCommand implements CommandStrategy, Replicable {
             long size = dataStore.lpush(listName, values);
 
             // If this node is a replica, do not send replies or replicate
-            if (isSlaveNode()) return;
+            if (ReplicationManager.isSlaveNode()) return;
 
             clientOutput.write(RESPSerializer.integer(size));
             clientOutput.flush();
@@ -63,9 +63,5 @@ public class LPUSHCommand implements CommandStrategy, Replicable {
         }
     }
 
-    @Override
-    public boolean isSlaveNode() {
-        return replicationManager.isSlaveNode();
-    }
 
 }

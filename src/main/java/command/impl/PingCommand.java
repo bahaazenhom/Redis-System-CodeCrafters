@@ -3,6 +3,7 @@ package command.impl;
 import command.CommandStrategy;
 import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
+import replication.ReplicationManager;
 
 import java.io.IOException;
 import java.util.List;
@@ -19,7 +20,7 @@ public class PingCommand implements CommandStrategy {
     @Override
     public void execute(List<String> arguments, ClientConnection clientOutput) {
         try {
-            System.out.println("hello i think the simple string is here------------------------ i catched it");
+            if(ReplicationManager.isSlaveNode())return;
             clientOutput.write(RESPSerializer.simpleString("PONG"));
             clientOutput.flush();
         } catch (IOException e) {

@@ -26,7 +26,7 @@ public class INCRCommand implements CommandStrategy, Replicable {
             long newValue = dataStore.incr(key);
 
             // If this node is a replica, do not send replies or replicate
-            if (isSlaveNode()) return;
+            if (ReplicationManager.isSlaveNode()) return;
 
             clientOutput.write(RESPSerializer.integer(newValue));
             clientOutput.flush();
@@ -63,11 +63,6 @@ public class INCRCommand implements CommandStrategy, Replicable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
-    }
-
-    @Override
-    public boolean isSlaveNode() {
-        return replicationManager.isSlaveNode();
     }
 
 }
