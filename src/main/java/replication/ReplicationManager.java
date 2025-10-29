@@ -120,7 +120,6 @@ private void masterHandshake(int slavePort, String masterHost, int masterPort) {
             psyncHandShake.add("PSYNC");
             psyncHandShake.add("?");
             psyncHandShake.add("-1");
-            psyncHandShake.add(String.valueOf(slavePort));
             out.write(RESPSerializer.array(psyncHandShake));
             out.flush();
             String psyncResponse = readLine.apply(input);

@@ -37,7 +37,7 @@ public class PSYNCCommand implements CommandStrategy {
 
             System.out.println("Sent RDB file (" + rdbData.length + " bytes)");
 
-            int port = Integer.parseInt(arguments.get(arguments.size()-1));
+            int port = replicationManager.getSlaveNode().getPort();
             // Register slave
             replicationManager.getSlaveNodesSockets().put(port, clientOutput);
 
@@ -48,7 +48,7 @@ public class PSYNCCommand implements CommandStrategy {
 
     @Override
     public void validateArguments(List<String> arguments) throws IllegalArgumentException {
-        if (arguments.size() != 3) {
+        if (arguments.size() != 2) {
             throw new IllegalArgumentException("Wrong number of arguments for 'PSYNC' command");
         }
     }
