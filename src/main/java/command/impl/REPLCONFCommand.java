@@ -13,6 +13,7 @@ public class REPLCONFCommand implements CommandStrategy {
         try{
             // REPLCONF command does not require any specific action in this implementation
             // It is typically used for replication configuration between master and replica
+            System.out.println("the simple string is here --------------------------");
             clientOutput.write(RESPSerializer.simpleString("OK"));
             clientOutput.flush();
         } catch (Exception e) {

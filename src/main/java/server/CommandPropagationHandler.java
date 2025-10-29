@@ -51,7 +51,7 @@ public class CommandPropagationHandler implements Runnable {
                 startIndexSublist = 2;
             }
             List<String> arguments = commands.subList(startIndexSublist, commands.size());
-            System.out.println("Received command: " + commandName + " with arguments: " + arguments);
+            System.out.println("Received command: " + commandName + " with arguments from propagation: " + arguments);
             commandExecuter.execute("clientId", commandName, arguments, responseWriter);
 
             // Update replication offset
