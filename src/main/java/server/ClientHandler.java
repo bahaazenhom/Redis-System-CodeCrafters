@@ -50,6 +50,7 @@ public class ClientHandler implements Runnable {
 
             int startIndexSublist = 1;
             String commandName = commands.get(0);
+            System.out.println(commandName.equalsIgnoreCase("REPLCONF"));
             if(commandName.equalsIgnoreCase("REPLCONF")){
                 commandName += " " + commands.get(1);
                 startIndexSublist = 2;
