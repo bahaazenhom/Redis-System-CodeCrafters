@@ -6,7 +6,7 @@ import command.CommandStrategy;
 import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
 
-public class REPLCONFCommand implements CommandStrategy {
+public class ListeningPortCommand implements CommandStrategy {
 
     @Override
     public void execute(List<String> arguments, ClientConnection clientOutput) {

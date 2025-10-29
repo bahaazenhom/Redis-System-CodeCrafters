@@ -53,7 +53,7 @@ public class ClientHandler implements Runnable {
             
             int startIndexSublist = 1;
             if (commandName.equalsIgnoreCase("REPLCONF")) {
-                commandName += " " + commands.get(1);
+                commandName = commands.get(1);
                 startIndexSublist = 2;
             }
 

@@ -43,9 +43,9 @@ public class CommandFactory {
             case "EXEC" -> new EXECCommand();
             case "DISCARD" -> new DISCARDCommand();
             case "INFO" -> new INFOCommand(replicationManager);
-            case "REPLCONF" -> new REPLCONFCommand();
+            case "LISTENING-PORT" -> new ListeningPortCommand();
             case "PSYNC" -> new PSYNCCommand(replicationManager);
-            case "REPLCONF GETACK" -> new REPLCONFGETACKCommand(replicationManager);
+            case "GETACK" -> new GetAckCommand(replicationManager);
             default -> null;
         };
     }
