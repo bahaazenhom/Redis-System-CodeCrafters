@@ -47,9 +47,10 @@ public class CommandPropagationHandler implements Runnable {
             
             int startIndexSublist = 1;
             if (commandName.equalsIgnoreCase("REPLCONF")) {
-                commandName += " " + commands.get(1);
+                commandName = commands.get(1);
                 startIndexSublist = 2;
             }
+            
             List<String> arguments = commands.subList(startIndexSublist, commands.size());
             System.out.println("Received command: " + commandName + " with arguments from propagation: " + arguments);
             commandExecuter.execute("clientId", commandName, arguments, responseWriter);
