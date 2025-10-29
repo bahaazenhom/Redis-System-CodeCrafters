@@ -15,13 +15,14 @@ import java.util.concurrent.ConcurrentHashMap;
 import command.CommandExecuter;
 import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
-import server.ReplicaHandler;
+import server.CommandPropagationHandler;
 import server.ServerInstance;
 
 public class ReplicationManager {
     private MasterNode masterNode;// reference to the master node if this instance is a master
     private SlaveNode slaveNode;// reference to the slave node if this instance is a slave
-    private ConcurrentHashMap<Integer, ClientConnection> slaveNodesSockets;// map of slave port to their connections if this instance is a master
+    private ConcurrentHashMap<Integer, ClientConnection> slaveNodesSockets;// map of slave port to their connections if
+                                                                           // this instance is a master
     private static ReplicationManager replicationManager = null;// singleton instance of ReplicationManager
 
     private ReplicationManager() {
@@ -53,7 +54,7 @@ public class ReplicationManager {
         }
     }
 
-private void masterHandshake(int slavePort, String masterHost, int masterPort) {
+    private void masterHandshake(int slavePort, String masterHost, int masterPort) {
         try {
             Socket socket = new Socket(masterHost, masterPort);
             InputStream input = socket.getInputStream();
@@ -142,7 +143,8 @@ private void masterHandshake(int slavePort, String masterHost, int masterPort) {
             while (remaining > 0) {
                 int toRead = Math.min(buffer.length, remaining);
                 int bytesRead = input.read(buffer, 0, toRead);
-                if (bytesRead == -1) break; // stream closed unexpectedly
+                if (bytesRead == -1)
+                    break; // stream closed unexpectedly
                 baos.write(buffer, 0, bytesRead);
                 remaining -= bytesRead;
             }
@@ -156,7 +158,6 @@ private void masterHandshake(int slavePort, String masterHost, int masterPort) {
             }
 
             ClientConnection connection = new ClientConnection(socket.getOutputStream());
-            slaveNodesSockets.put(slavePort, connection);
             // Wrap the same InputStream in a BufferedReader for command parsing
             BufferedReader reader = new BufferedReader(new InputStreamReader(input));
             handleReplicationStream(connection, reader);
@@ -164,12 +165,11 @@ private void masterHandshake(int slavePort, String masterHost, int masterPort) {
         } catch (IOException e) {
             e.printStackTrace();
         }
-}
-
+    }
 
     private void handleReplicationStream(ClientConnection connection, BufferedReader in) {
         // Start a new thread to handle incoming commands from the master
-        Thread replicaHandler = new Thread(new ReplicaHandler(slaveNode.getCommandExecuter(),
+        Thread replicaHandler = new Thread(new CommandPropagationHandler(slaveNode.getCommandExecuter(),
                 connection, in));
         replicaHandler.start();
     }
@@ -226,8 +226,8 @@ private void masterHandshake(int slavePort, String masterHost, int masterPort) {
         return this.slaveNode;
     }
 
-    public void sendAckToSlaves(){
-        for(ClientConnection slaveConnection : slaveNodesSockets.values()){
+    public void sendAckToSlaves() {
+        for (ClientConnection slaveConnection : slaveNodesSockets.values()) {
             try {
                 List<String> ackCommand = new ArrayList<>();
                 ackCommand.add("REPLCONF");
@@ -241,22 +241,30 @@ private void masterHandshake(int slavePort, String masterHost, int masterPort) {
         }
     }
 
-    public void responseToMasterWithAckOffset(){
+    public void responseToMasterWithAckOffset() {
         SlaveNode slave = this.slaveNode;
-        if(slave != null){
+        if (slave != null) {
             try {
                 ClientConnection masterConnection = slaveNodesSockets.get(slave.getPort());
                 List<String> ackCommand = new ArrayList<>();
                 ackCommand.add("REPLCONF");
                 ackCommand.add("ACK");
                 ackCommand.add(String.valueOf(slave.getReplicationOffset()));
-                System.out.println("Sending ACK to master with offset: " + slave.getReplicationOffset());
-                System.out.println(slaveNodesSockets.toString());
                 masterConnection.write(RESPSerializer.array(ackCommand));
                 masterConnection.flush();
             } catch (Exception e) {
                 e.printStackTrace();// Log the error
             }
+        }
+    }
+
+    public boolean isSlaveNode() {
+        return this.slaveNode != null;
+    }
+
+    public void updateSlaveOffset(int length) {
+        if(this.slaveNode != null) {
+            this.slaveNode.incrementReplicationOffset(length);
         }
     }
 }

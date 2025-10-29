@@ -44,10 +44,14 @@ public class XADDCommand implements CommandStrategy, Replicable {
             }
 
             entryID = dataStore.xadd(streamKey, entryID, entryValues);
+
+            // If this node is a replica, do not send replies back to the master/client
+            if (isSlaveNode()) return;
+
             clientOutput.write(RESPSerializer.bulkString(entryID));
             clientOutput.flush();
 
-            // Replication to replicas
+            // Replication to replicas (only on master)
             List<String> commandForReplication = new ArrayList<>();
             commandForReplication.add("XADD");
             commandForReplication.addAll(arguments);
@@ -72,6 +76,11 @@ public class XADDCommand implements CommandStrategy, Replicable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public boolean isSlaveNode() {
+        return replicationManager.isSlaveNode();
     }
 
 }

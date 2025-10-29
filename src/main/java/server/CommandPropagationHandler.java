@@ -7,14 +7,17 @@ import java.util.List;
 import command.CommandExecuter;
 import command.ResponseWriter.ClientConnection;
 import protocol.RESPParser;
+import protocol.RESPSerializer;
+import replication.ReplicationManager;
 
-public class ReplicaHandler implements Runnable {
+public class CommandPropagationHandler implements Runnable {
 
+    private final ReplicationManager replicationManager = ReplicationManager.create();
     private final ClientConnection responseWriter;
     private final CommandExecuter commandExecuter;
     private final BufferedReader in;
 
-    public ReplicaHandler(CommandExecuter commandExecuter, ClientConnection responseWriter, BufferedReader in) {
+    public CommandPropagationHandler(CommandExecuter commandExecuter, ClientConnection responseWriter, BufferedReader in) {
         this.commandExecuter = commandExecuter;
         this.responseWriter = responseWriter;
         this.in = in;
@@ -33,7 +36,7 @@ public class ReplicaHandler implements Runnable {
             throws IOException {
         String line;
         while ((line = in.readLine()) != null) {
-            System.out.println("ReplicaHandler received line: " + line);
+            System.out.println("--------------------------------ReplicaHandler received line: " + line);
             if (line.isEmpty() || !line.startsWith("*"))
                 continue;
 
@@ -50,6 +53,10 @@ public class ReplicaHandler implements Runnable {
             List<String> arguments = commands.subList(startIndexSublist, commands.size());
             System.out.println("Received command: " + commandName + " with arguments: " + arguments);
             commandExecuter.execute("clientId", commandName, arguments, responseWriter);
+
+            // Update replication offset
+            String RESPCommand = RESPSerializer.array(commands);
+            replicationManager.updateSlaveOffset(RESPCommand.getBytes().length);
         }
     }
 

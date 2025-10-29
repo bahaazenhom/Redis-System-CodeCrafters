@@ -36,10 +36,14 @@ public class LPUSHCommand implements CommandStrategy, Replicable {
             if (!dataStore.exists(listName))
                 dataStore.setValue(listName, new ListValue(new ArrayDeque<>()));
             long size = dataStore.lpush(listName, values);
+
+            // If this node is a replica, do not send replies or replicate
+            if (isSlaveNode()) return;
+
             clientOutput.write(RESPSerializer.integer(size));
             clientOutput.flush();
 
-            // Replication to replicas
+            // Replication to replicas (only on master)
             List<String> commandForReplication = new ArrayList<>();
             commandForReplication.add("LPUSH");
             commandForReplication.addAll(arguments);
@@ -57,6 +61,11 @@ public class LPUSHCommand implements CommandStrategy, Replicable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public boolean isSlaveNode() {
+        return replicationManager.isSlaveNode();
     }
 
 }

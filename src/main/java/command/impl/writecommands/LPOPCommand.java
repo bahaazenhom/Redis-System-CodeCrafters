@@ -44,6 +44,10 @@ public class LPOPCommand implements CommandStrategy, Replicable {
                 return;
             }
             List<String> firstValues = dataStore.lpop(listName, counter);
+
+            // If this node is a replica, do not send replies or replicate
+            if (isSlaveNode()) return;
+
             if (counter == null) {
                 clientOutput.write(RESPSerializer.bulkString(firstValues.get(0)));
             } else {
@@ -69,6 +73,11 @@ public class LPOPCommand implements CommandStrategy, Replicable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public boolean isSlaveNode() {
+        return replicationManager.isSlaveNode();
     }
 
 }

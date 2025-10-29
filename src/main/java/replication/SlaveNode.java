@@ -61,4 +61,8 @@ public class SlaveNode extends ServerInstance {
         return masterPort;
     }
 
+    public void incrementReplicationOffset(int length) {
+        this.replicationOffset += length;
+    }
+
 }

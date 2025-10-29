@@ -11,7 +11,7 @@ public class RESPParser {
         List<String> result = new ArrayList<>();
 
         String line;
-        
+
         for (int i = 0; i < numElements; i++) {
             line = reader.readLine();
             if (line == null || !line.startsWith("$")) {

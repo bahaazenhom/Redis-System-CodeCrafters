@@ -42,10 +42,14 @@ public class RPUSHCommand implements CommandStrategy, Replicable {
                 return;
             }
             long size = dataStore.rpush(listName, values);
+
+            // If this node is a replica, do not send replies or replicate
+            if (isSlaveNode()) return;
+
             clientOutput.write(RESPSerializer.integer(size));
             clientOutput.flush();
 
-            // Replication to replicas
+            // Replication to replicas (only on master)
             List<String> commandForReplication = new ArrayList<>();
             commandForReplication.add("RPUSH");
             commandForReplication.addAll(arguments);
@@ -63,6 +67,11 @@ public class RPUSHCommand implements CommandStrategy, Replicable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public boolean isSlaveNode() {
+        return replicationManager.isSlaveNode();
     }
 
 }
