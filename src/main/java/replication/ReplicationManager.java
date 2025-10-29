@@ -12,6 +12,7 @@ import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import command.CommandExecuter;
 import command.ResponseWriter.ClientConnection;
@@ -22,12 +23,12 @@ import server.ServerInstance;
 public class ReplicationManager {
     private MasterNode masterNode;
     private SlaveNode slaveNode;
-    private HashMap<Integer, ClientConnection> slaveNodesSockets;
+    private ConcurrentHashMap<Integer, ClientConnection> slaveNodesSockets;
     private static ReplicationManager replicationManager = null;
 
     private ReplicationManager() {
         this.masterNode = null;
-        this.slaveNodesSockets = new HashMap<>();
+        this.slaveNodesSockets = new ConcurrentHashMap<>();
     }
 
     public static ReplicationManager create() {
@@ -179,7 +180,7 @@ private void masterHandshake(int slavePort, String masterHost, int masterPort) {
         return masterNode;
     }
 
-    public HashMap<Integer, ClientConnection> getSlaveNodesSockets() {
+    public ConcurrentHashMap<Integer, ClientConnection> getSlaveNodesSockets() {
         return this.slaveNodesSockets;
     }
 
