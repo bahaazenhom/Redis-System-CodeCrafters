@@ -6,26 +6,26 @@ import command.CommandStrategy;
 import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
 
-public class ListeningPortCommand implements CommandStrategy {
+public class CapaCommand implements CommandStrategy {
 
     @Override
     public void execute(List<String> arguments, ClientConnection clientOutput) {
         try{
-            // REPLCONF command does not require any specific action in this implementation
-            // It is typically used for replication configuration between master and replica
-            System.out.println("the simple string is here --------------------------");
+            // Currently, no capabilities are supported, so we return an empty list
             clientOutput.write(RESPSerializer.simpleString("OK"));
             clientOutput.flush();
-        } catch (Exception e) {
-            e.printStackTrace();
+        }
+        catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 
     @Override
     public void validateArguments(List<String> arguments) throws IllegalArgumentException {
         if(arguments.size() != 1){
-            throw new IllegalArgumentException("Wrong number of arguments for 'LISTENING-PORT' command");
+            throw new IllegalArgumentException("Wrong number of arguments for 'CAPA' command");
         }
     }
+
     
 }

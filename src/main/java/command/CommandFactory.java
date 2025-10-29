@@ -44,6 +44,7 @@ public class CommandFactory {
             case "DISCARD" -> new DISCARDCommand();
             case "INFO" -> new INFOCommand(replicationManager);
             case "LISTENING-PORT" -> new ListeningPortCommand();
+            case "CAPA" -> new CapaCommand();
             case "PSYNC" -> new PSYNCCommand(replicationManager);
             case "GETACK" -> new GetAckCommand(replicationManager);
             default -> null;
