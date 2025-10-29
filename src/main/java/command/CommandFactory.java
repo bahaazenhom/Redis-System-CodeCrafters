@@ -45,8 +45,8 @@ public class CommandFactory {
             case "INFO" -> new INFOCommand(replicationManager);
             case "REPLCONF" -> new REPLCONFCommand();
             case "PSYNC" -> new PSYNCCommand(replicationManager);
-            case "REPLCONFGETACK" -> new REPLCONFGETACKCommand(replicationManager);
-            case "REPLCONFACK" -> new REPLCONFACKCommand();
+            case "REPLCONF GETACK" -> new REPLCONFGETACKCommand(replicationManager);
+            case "REPLCONF ACK" -> new REPLCONFACKCommand();
             default -> null;
         };
     }
