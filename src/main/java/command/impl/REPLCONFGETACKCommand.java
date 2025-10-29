@@ -6,10 +6,10 @@ import command.CommandStrategy;
 import command.ResponseWriter.ClientConnection;
 import replication.ReplicationManager;
 
-public class REPLCONFGETACKCommand implements CommandStrategy {
+public class ReplconfGetAckCommand implements CommandStrategy {
     ReplicationManager replicationManager;
 
-    public REPLCONFGETACKCommand(ReplicationManager replicationManager) {
+    public ReplconfGetAckCommand(ReplicationManager replicationManager) {
         this.replicationManager = replicationManager;
     }
 

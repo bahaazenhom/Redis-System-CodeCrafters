@@ -249,6 +249,7 @@ private void masterHandshake(int slavePort, String masterHost, int masterPort) {
                 ackCommand.add("REPLCONF");
                 ackCommand.add("ACK");
                 ackCommand.add(String.valueOf(slave.getReplicationOffset()));
+                System.out.println("Sending ACK to master with offset: " + slave.getReplicationOffset());
                 masterConnection.write(RESPSerializer.array(ackCommand));
                 masterConnection.flush();
             } catch (Exception e) {
