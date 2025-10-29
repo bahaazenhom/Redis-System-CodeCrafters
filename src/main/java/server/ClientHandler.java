@@ -50,9 +50,14 @@ public class ClientHandler implements Runnable {
 
             String commandName = commands.get(0);
 
-  
+            
+            int startIndexSublist = 1;
+            if (commandName.equalsIgnoreCase("REPLCONF")) {
+                commandName += " " + commands.get(1);
+                startIndexSublist = 2;
+            }
 
-            List<String> arguments = commands.subList(1, commands.size());
+            List<String> arguments = commands.subList(startIndexSublist, commands.size());
             System.out.println("Received command: " + commandName + " with arguments: " + arguments);
             commandExecuter.execute(clientId, commandName, arguments, responseWriter);
         }
