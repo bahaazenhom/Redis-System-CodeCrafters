@@ -46,8 +46,9 @@ public class ReplicationManager {
         } else {
             String masterHost = args[1];
             int masterPort = Integer.parseInt(args[2]);
-            this.slaveNode = new SlaveNode("local host", port, commandExecuter, "slave", masterHost, masterPort);
-            
+            System.out.println("-------------------------------- " + masterHost + ":" + masterPort);
+            this.slaveNode = new SlaveNode("localhost", port, commandExecuter, "slave", masterHost, masterPort);
+
             masterHandshake(port, masterHost, masterPort);
             return this.slaveNode;
         }
