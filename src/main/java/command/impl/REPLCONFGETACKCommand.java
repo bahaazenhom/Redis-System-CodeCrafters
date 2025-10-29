@@ -18,7 +18,7 @@ public class REPLCONFGETACKCommand implements CommandStrategy {
         try{
             String ackValue = arguments.get(0);
             System.out.println("Received REPLCONF GETACK with value: " + ackValue);
-            replicationManager.responseToMasterWithAckOffset();
+            replicationManager.responseToMasterWithAckOffset(clientOutput);
         }
         catch (Exception e) {
             throw new RuntimeException(e);

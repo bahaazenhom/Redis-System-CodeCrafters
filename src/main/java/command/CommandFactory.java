@@ -46,7 +46,6 @@ public class CommandFactory {
             case "REPLCONF" -> new REPLCONFCommand();
             case "PSYNC" -> new PSYNCCommand(replicationManager);
             case "REPLCONF GETACK" -> new REPLCONFGETACKCommand(replicationManager);
-            case "REPLCONF ACK" -> new REPLCONFACKCommand();
             default -> null;
         };
     }

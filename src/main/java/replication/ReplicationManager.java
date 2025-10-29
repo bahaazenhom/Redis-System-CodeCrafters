@@ -241,17 +241,16 @@ public class ReplicationManager {
         }
     }
 
-    public void responseToMasterWithAckOffset() {
+    public void responseToMasterWithAckOffset(ClientConnection slaveMasterConnection) {
         SlaveNode slave = this.slaveNode;
         if (slave != null) {
             try {
-                ClientConnection masterConnection = slaveNodesSockets.get(slave.getPort());
                 List<String> ackCommand = new ArrayList<>();
                 ackCommand.add("REPLCONF");
                 ackCommand.add("ACK");
                 ackCommand.add(String.valueOf(slave.getReplicationOffset()));
-                masterConnection.write(RESPSerializer.array(ackCommand));
-                masterConnection.flush();
+                slaveMasterConnection.write(RESPSerializer.array(ackCommand));
+                slaveMasterConnection.flush();
             } catch (Exception e) {
                 e.printStackTrace();// Log the error
             }
