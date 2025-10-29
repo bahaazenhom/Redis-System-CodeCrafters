@@ -23,8 +23,8 @@ public class ListeningPortCommand implements CommandStrategy {
 
     @Override
     public void validateArguments(List<String> arguments) throws IllegalArgumentException {
-        if(arguments.size() < 2) {
-            throw new IllegalArgumentException("Wrong number of arguments for 'REPLCONF' command");
+        if(arguments.size() < 1) {
+            throw new IllegalArgumentException("Wrong number of arguments for 'LISTENING-PORT' command");
         }
     }
     
