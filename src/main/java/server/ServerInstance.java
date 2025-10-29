@@ -10,8 +10,9 @@ public class ServerInstance implements Runnable {
     private final String host;
     private final int port;
     private final CommandExecuter commandExecuter;
-
     private final ServerSocket serverSocket;
+    private Socket clientSocket;
+
     private volatile boolean running = true;
     private final String serverRole;
 
@@ -35,7 +36,7 @@ public class ServerInstance implements Runnable {
 
         while (running) {
             try {
-                Socket clientSocket = serverSocket.accept();
+                clientSocket = serverSocket.accept();
                 System.out.println("New client connected to port " + port + ": " + clientSocket.getInetAddress());
                 // Handle each client in a separate thread
                 Thread clientThread = new Thread(
@@ -71,5 +72,9 @@ public class ServerInstance implements Runnable {
 
     public CommandExecuter getCommandExecuter() {
         return commandExecuter;
+    }
+
+    public Socket getClientSocket() {
+        return clientSocket;
     }
 }

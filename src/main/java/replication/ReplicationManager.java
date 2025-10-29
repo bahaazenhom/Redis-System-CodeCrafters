@@ -6,11 +6,9 @@ import java.io.InputStreamReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -21,10 +19,10 @@ import server.ReplicaHandler;
 import server.ServerInstance;
 
 public class ReplicationManager {
-    private MasterNode masterNode;
-    private SlaveNode slaveNode;
-    private ConcurrentHashMap<Integer, ClientConnection> slaveNodesSockets;
-    private static ReplicationManager replicationManager = null;
+    private MasterNode masterNode;// reference to the master node if this instance is a master
+    private SlaveNode slaveNode;// reference to the slave node if this instance is a slave
+    private ConcurrentHashMap<Integer, ClientConnection> slaveNodesSockets;// map of slave port to their connections if this instance is a master
+    private static ReplicationManager replicationManager = null;// singleton instance of ReplicationManager
 
     private ReplicationManager() {
         this.masterNode = null;
