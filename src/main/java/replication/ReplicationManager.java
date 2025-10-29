@@ -32,7 +32,7 @@ public class ReplicationManager {
 
     public static ReplicationManager create() {
         if (replicationManager != null) {
-            return replicationManager;
+            return replicationManager;//
         }
         replicationManager = new ReplicationManager();
         return replicationManager;
