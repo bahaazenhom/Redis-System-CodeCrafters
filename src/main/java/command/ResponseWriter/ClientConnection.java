@@ -1,37 +1,32 @@
 package command.ResponseWriter;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.OutputStreamWriter;
+import java.nio.charset.StandardCharsets;
 
 public class ClientConnection {
-    private final BufferedWriter writer;
     private final OutputStream outputStream;
 
     public ClientConnection(OutputStream outputStream) {
         this.outputStream = outputStream;
-        this.writer = new BufferedWriter(new OutputStreamWriter(outputStream));
     }
 
-    // For text-based commands
+    // For text-based commands (RESP messages)
     public void write(String response) throws IOException {
-        writer.write(response);
+        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
     }
 
     public void flush() throws IOException {
-        writer.flush();
-    }
-
-    // For binary commands like PSYNC
-    public void writeBytes(byte[] data) throws IOException {
-        writer.flush(); // Flush any pending text first
-        outputStream.write(data);
         outputStream.flush();
     }
 
-    public BufferedWriter getWriter() {
-        return writer;
+    // For binary data (like RDB)
+    public void writeBytes(byte[] data) throws IOException {
+        outputStream.write(data);
+    }
+
+    public void flushBytes() throws IOException {
+        outputStream.flush();
     }
 
     public OutputStream getOutputStream() {

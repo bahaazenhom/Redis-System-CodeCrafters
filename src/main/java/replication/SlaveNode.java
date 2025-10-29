@@ -1,6 +1,7 @@
 package replication;
 
 import java.io.IOException;
+import java.net.Socket;
 import command.CommandExecuter;
 import server.ServerInstance;
 
@@ -46,6 +47,15 @@ public class SlaveNode extends ServerInstance {
     }
 
     private final int masterPort;
+    private Socket masterSocket;
+
+    public void setMasterSocket(Socket masterSocket) {
+        this.masterSocket = masterSocket;
+    }
+
+    public Socket getMasterSocket() {
+        return masterSocket;
+    }
 
     public int getMasterPort() {
         return masterPort;

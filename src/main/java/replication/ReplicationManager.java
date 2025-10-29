@@ -1,20 +1,23 @@
 package replication;
 
-import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.IOException;
+import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.Arrays;
+// import java.util.HashMap; (not used)
 import java.util.List;
 
 import command.CommandExecuter;
 import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
-import server.ClientHandler;
+// import server.ClientHandler; (not used)
 import server.ReplicaHandler;
 import server.ServerInstance;
 
@@ -51,63 +54,117 @@ public class ReplicationManager {
         }
     }
 
-    private void masterHandshake(int slavePort, String masterHost, int masterPort) {
+private void masterHandshake(int slavePort, String masterHost, int masterPort) {
         try {
             Socket socket = new Socket(masterHost, masterPort);
-            BufferedReader in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            InputStream input = socket.getInputStream();
             BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+
+            // helper lambda to read a CRLF-terminated line from InputStream
+            java.util.function.Function<InputStream, String> readLine = (is) -> {
+                try {
+                    ByteArrayOutputStream lineBuf = new ByteArrayOutputStream();
+                    int prev = -1;
+                    int curr;
+                    while ((curr = is.read()) != -1) {
+                        if (prev == '\r' && curr == '\n') {
+                            // remove trailing CR from buffer
+                            byte[] bytes = lineBuf.toByteArray();
+                            if (bytes.length > 0) {
+                                return new String(bytes, 0, bytes.length - 1);
+                            } else {
+                                return "";
+                            }
+                        }
+                        lineBuf.write(curr);
+                        prev = curr;
+                    }
+                } catch (IOException e) {
+                    // fall through
+                }
+                return null;
+            };
+
             String response;
 
-            // PING
+            // ========== 1. PING ==========
             List<String> pingHandShake = new ArrayList<>();
             pingHandShake.add("PING");
             out.write(RESPSerializer.array(pingHandShake));
             out.flush();
-            response = in.readLine();
+            response = readLine.apply(input);
             System.out.println("ping response: " + response);
 
-            // REPLCONF listening-port
+            // ========== 2. REPLCONF listening-port ==========
             List<String> listeningPortHandShake = new ArrayList<>();
             listeningPortHandShake.add("REPLCONF");
             listeningPortHandShake.add("listening-port");
             listeningPortHandShake.add(String.valueOf(slavePort));
             out.write(RESPSerializer.array(listeningPortHandShake));
             out.flush();
-            response = in.readLine();
+            response = readLine.apply(input);
             System.out.println("listening-port response: " + response);
 
-            // REPLCONF capa psync2
+            // ========== 3. REPLCONF capa psync2 ==========
             List<String> capaHandShake = new ArrayList<>();
             capaHandShake.add("REPLCONF");
             capaHandShake.add("capa");
             capaHandShake.add("psync2");
             out.write(RESPSerializer.array(capaHandShake));
             out.flush();
-            response = in.readLine();
+            response = readLine.apply(input);
             System.out.println("capa response: " + response);
 
-            // PSYNC ? -1 <slave-port>
+            // ========== 4. PSYNC ==========
             List<String> psyncHandShake = new ArrayList<>();
             psyncHandShake.add("PSYNC");
             psyncHandShake.add("?");
             psyncHandShake.add("-1");
             out.write(RESPSerializer.array(psyncHandShake));
             out.flush();
-            String psyncResponse = in.readLine();
+            String psyncResponse = readLine.apply(input);
             System.out.println("psync response: " + psyncResponse);
 
-            String header = in.readLine();
+            // ========== 5. Read RDB header (CRLF-terminated) ==========
+            String header = readLine.apply(input);
             System.out.println("file header response: " + header);
-            String fileData = in.readLine();
-            System.out.println("RDB file data response: " + fileData);
 
-            // Start handling replication stream
-            handleReplicationStream(socket.getOutputStream(), in);
+            if (header == null || !header.startsWith("$")) {
+                throw new IOException("Invalid RDB header received: " + header);
+            }
+
+            // Parse the byte length from header (e.g. "$88" → 88)
+            int rdbLength = Integer.parseInt(header.substring(1));
+
+            // ========== 6. Read binary RDB data into a streaming OutputStream ==========
+            ByteArrayOutputStream baos = new ByteArrayOutputStream(Math.min(rdbLength, 65536));
+            byte[] buffer = new byte[4096];
+            int remaining = rdbLength;
+            while (remaining > 0) {
+                int toRead = Math.min(buffer.length, remaining);
+                int bytesRead = input.read(buffer, 0, toRead);
+                if (bytesRead == -1) break; // stream closed unexpectedly
+                baos.write(buffer, 0, bytesRead);
+                remaining -= bytesRead;
+            }
+
+            byte[] fileData = baos.toByteArray();
+
+            // ========== 7. Start replication stream ==========
+            // Keep the socket reference in the slave node so it won't be closed
+            if (this.slaveNode != null) {
+                this.slaveNode.setMasterSocket(socket);
+            }
+
+            // Wrap the same InputStream in a BufferedReader for command parsing
+            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
+            handleReplicationStream(socket.getOutputStream(), reader);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
+}
+
 
     private void handleReplicationStream(OutputStream outputStream, BufferedReader in) {
         // Start a new thread to handle incoming commands from the master

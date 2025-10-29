@@ -1,5 +1,6 @@
 package command.impl;
 
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 
@@ -20,21 +21,23 @@ public class PSYNCCommand implements CommandStrategy {
         try {
             // Send FULLRESYNC response
             String masterID = replicationManager.getMasterNode().getReplicationId();
-            clientOutput.write(RESPSerializer.simpleString("FULLRESYNC "+masterID+" 0"));
+            clientOutput.write(RESPSerializer.simpleString("FULLRESYNC " + masterID + " 0"));
+            clientOutput.flush(); //  flush text
 
             // Send RDB file (empty RDB for simplicity)
-            String emptyRdbBase64 =
-             "UkVESVMwMDEx+glyZWRpcy12ZXIFNy4yLjD6CnJlZGlzLWJpdHPAQPoFY3RpbWXCbQi8ZfoIdXNlZC1tZW3CsMQQAPoIYW9mLWJhc2XAAP/wbjv+wP9aog==";
+            String emptyRdbBase64 = "UkVESVMwMDEx+glyZWRpcy12ZXIFNy4yLjD6CnJlZGlzLWJpdHPAQPoFY3RpbWXCbQi8ZfoIdXNlZC1tZW3CsMQQAPoIYW9mLWJhc2XAAP/wbjv+wP9aog==";
             byte[] rdbData = Base64.getDecoder().decode(emptyRdbBase64);
+            System.out.println("Decoded RDB data: " + Arrays.toString(rdbData));
+
+            // Write header and binary RDB data
             String header = "$" + rdbData.length + "\r\n";
-            // Write header and RDB data 
-            clientOutput.write(header); // Write header (as string)
-            clientOutput.flush();
+            clientOutput.write(header);
             clientOutput.writeBytes(rdbData);
-            clientOutput.write("\r\n");
             clientOutput.flush();
 
-            // Register the slave connection for future command propagation
+            System.out.println("Sent RDB file (" + rdbData.length + " bytes)");
+
+            // Register slave
             replicationManager.getSlaveNodesSockets().add(clientOutput);
 
         } catch (Exception e) {
