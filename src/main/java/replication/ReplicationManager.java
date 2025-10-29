@@ -47,6 +47,7 @@ public class ReplicationManager {
             String masterHost = args[1];
             int masterPort = Integer.parseInt(args[2]);
             this.slaveNode = new SlaveNode("local host", port, commandExecuter, "slave", masterHost, masterPort);
+            
             masterHandshake(port, masterHost, masterPort);
             return this.slaveNode;
         }
@@ -154,9 +155,11 @@ private void masterHandshake(int slavePort, String masterHost, int masterPort) {
                 this.slaveNode.setMasterSocket(socket);
             }
 
+            ClientConnection connection = new ClientConnection(socket.getOutputStream());
+            slaveNodesSockets.put(slavePort, connection);
             // Wrap the same InputStream in a BufferedReader for command parsing
             BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-            handleReplicationStream(socket.getOutputStream(), reader);
+            handleReplicationStream(connection, reader);
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -164,10 +167,10 @@ private void masterHandshake(int slavePort, String masterHost, int masterPort) {
 }
 
 
-    private void handleReplicationStream(OutputStream outputStream, BufferedReader in) {
+    private void handleReplicationStream(ClientConnection connection, BufferedReader in) {
         // Start a new thread to handle incoming commands from the master
         Thread replicaHandler = new Thread(new ReplicaHandler(slaveNode.getCommandExecuter(),
-                new ClientConnection(outputStream), in));
+                connection, in));
         replicaHandler.start();
     }
 
