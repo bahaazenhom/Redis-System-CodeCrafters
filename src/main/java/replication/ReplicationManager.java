@@ -253,7 +253,7 @@ private void masterHandshake(int slavePort, String masterHost, int masterPort) {
                 masterConnection.write(RESPSerializer.array(ackCommand));
                 masterConnection.flush();
             } catch (Exception e) {
-                e.printStackTrace();
+                e.printStackTrace();// Log the error
             }
         }
     }
