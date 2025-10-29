@@ -10,7 +10,7 @@ import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 // import java.util.HashMap; (not used)
 import java.util.List;
 
@@ -24,12 +24,12 @@ import server.ServerInstance;
 public class ReplicationManager {
     private MasterNode masterNode;
     private SlaveNode slaveNode;
-    private List<ClientConnection> slaveNodesSockets;
+    private HashMap<Integer, ClientConnection> slaveNodesSockets;
     private static ReplicationManager replicationManager = null;
 
     private ReplicationManager() {
         this.masterNode = null;
-        this.slaveNodesSockets = new ArrayList<>();
+        this.slaveNodesSockets = new HashMap<>();
     }
 
     public static ReplicationManager create() {
@@ -120,6 +120,7 @@ private void masterHandshake(int slavePort, String masterHost, int masterPort) {
             psyncHandShake.add("PSYNC");
             psyncHandShake.add("?");
             psyncHandShake.add("-1");
+            psyncHandShake.add(String.valueOf(slavePort));
             out.write(RESPSerializer.array(psyncHandShake));
             out.flush();
             String psyncResponse = readLine.apply(input);
@@ -177,7 +178,7 @@ private void masterHandshake(int slavePort, String masterHost, int masterPort) {
         return masterNode;
     }
 
-    public List<ClientConnection> getSlaveNodesSockets() {
+    public HashMap<Integer, ClientConnection> getSlaveNodesSockets() {
         return this.slaveNodesSockets;
     }
 
@@ -215,7 +216,7 @@ private void masterHandshake(int slavePort, String masterHost, int masterPort) {
             return;
         }
 
-        for (ClientConnection slaveConnection : slaveNodesSockets) {
+        for (ClientConnection slaveConnection : slaveNodesSockets.values()) {
             slaveConnection.write(RESPSerializer.array(command));
             slaveConnection.flush();
         }
@@ -223,5 +224,37 @@ private void masterHandshake(int slavePort, String masterHost, int masterPort) {
 
     public SlaveNode getSlaveNode() {
         return this.slaveNode;
+    }
+
+    public void sendAckToSlaves(){
+        for(ClientConnection slaveConnection : slaveNodesSockets.values()){
+            try {
+                List<String> ackCommand = new ArrayList<>();
+                ackCommand.add("REPLCONF");
+                ackCommand.add("GETACK");
+                ackCommand.add("*");
+                slaveConnection.write(RESPSerializer.array(ackCommand));
+                slaveConnection.flush();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void responseToMasterWithAckOffset(){
+        SlaveNode slave = this.slaveNode;
+        if(slave != null){
+            try {
+                ClientConnection masterConnection = slaveNodesSockets.get(slave.getPort());
+                List<String> ackCommand = new ArrayList<>();
+                ackCommand.add("REPLCONF");
+                ackCommand.add("ACK");
+                ackCommand.add(String.valueOf(slave.getReplicationOffset()));
+                masterConnection.write(RESPSerializer.array(ackCommand));
+                masterConnection.flush();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

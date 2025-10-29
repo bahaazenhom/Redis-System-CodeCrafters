@@ -37,8 +37,9 @@ public class PSYNCCommand implements CommandStrategy {
 
             System.out.println("Sent RDB file (" + rdbData.length + " bytes)");
 
+            int port = Integer.parseInt(arguments.get(arguments.size()-1));
             // Register slave
-            replicationManager.getSlaveNodesSockets().add(clientOutput);
+            replicationManager.getSlaveNodesSockets().put(port, clientOutput);
 
         } catch (Exception e) {
             e.printStackTrace();
