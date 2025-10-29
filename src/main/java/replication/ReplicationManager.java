@@ -11,13 +11,11 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.HashMap;
-// import java.util.HashMap; (not used)
 import java.util.List;
 
 import command.CommandExecuter;
 import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
-// import server.ClientHandler; (not used)
 import server.ReplicaHandler;
 import server.ServerInstance;
 
