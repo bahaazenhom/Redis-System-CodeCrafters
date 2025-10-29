@@ -48,7 +48,7 @@ public class PSYNCCommand implements CommandStrategy {
 
     @Override
     public void validateArguments(List<String> arguments) throws IllegalArgumentException {
-        if (arguments.size() != 2) {
+        if (arguments.size() != 3) {
             throw new IllegalArgumentException("Wrong number of arguments for 'PSYNC' command");
         }
     }
