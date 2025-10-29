@@ -1,28 +1,38 @@
-package command.impl;
+package command.impl.writecommands;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import command.CommandStrategy;
-import command.ResponseWriter.ResponseWriter;
+import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
+import replication.ReplicationManager;
 import storage.DataStore;
 
-public class INCRCommand implements CommandStrategy {
+public class INCRCommand implements CommandStrategy, Replicable {
     private final DataStore dataStore;
+    private final ReplicationManager replicationManager;
 
-    public INCRCommand(DataStore dataStore) {
+    public INCRCommand(DataStore dataStore, ReplicationManager replicationManager) {
         this.dataStore = dataStore;
+        this.replicationManager = replicationManager;
     }
 
     @Override
-    public void execute(List<String> arguments, ResponseWriter clientOutput) {
+    public void execute(List<String> arguments, ClientConnection clientOutput) {
         try {
             String key = arguments.get(0);
             long newValue = dataStore.incr(key);
             clientOutput.write(RESPSerializer.integer(newValue));
             clientOutput.flush();
+
+            // Replication to replicas
+            List<String> commandForReplication = new ArrayList<>();
+            commandForReplication.add("INCR");
+            commandForReplication.addAll(arguments);
+            replicateToReplicas(commandForReplication);
+
         } catch (NumberFormatException nfe) {
             try {
                 clientOutput.write(RESPSerializer.error(nfe.getMessage()));
@@ -39,6 +49,15 @@ public class INCRCommand implements CommandStrategy {
     public void validateArguments(List<String> arguments) throws IllegalArgumentException {
         if (arguments.size() != 1) {
             throw new IllegalArgumentException("INCR command requires exactly one argument.");
+        }
+    }
+
+    @Override
+    public void replicateToReplicas(List<String> command) {
+        try {
+            replicationManager.replicateToSlaves(command);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

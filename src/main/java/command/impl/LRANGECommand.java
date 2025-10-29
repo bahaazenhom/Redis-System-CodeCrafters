@@ -1,13 +1,12 @@
 package command.impl;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Deque;
 import java.util.List;
 
 import command.CommandStrategy;
-import command.ResponseWriter.ResponseWriter;
+import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
 import storage.DataStore;
 import storage.types.ListValue;
@@ -33,7 +32,7 @@ public class LRANGECommand implements CommandStrategy {
     }
 
     @Override
-    public void execute(List<String> arguments, ResponseWriter clientOutput) {
+    public void execute(List<String> arguments, ClientConnection clientOutput) {
         try {
             String listName = arguments.get(0);
             int startIndex = Integer.parseInt(arguments.get(1));

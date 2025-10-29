@@ -1,13 +1,11 @@
 package replication;
 
 import java.io.IOException;
-
 import command.CommandExecuter;
 import server.ServerInstance;
 
 public class SlaveNode extends ServerInstance {
     private final String masterHost;
-
     private String role = "slave";
     private final String replicationId = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb";
     private long replicationOffset = 0L;
@@ -52,4 +50,5 @@ public class SlaveNode extends ServerInstance {
     public int getMasterPort() {
         return masterPort;
     }
+
 }

@@ -1,16 +1,15 @@
 package command.impl;
 
-import java.io.BufferedWriter;
 import java.util.List;
 
 import command.CommandStrategy;
-import command.ResponseWriter.ResponseWriter;
+import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
 
 public class REPLCONFCommand implements CommandStrategy {
 
     @Override
-    public void execute(List<String> arguments, ResponseWriter clientOutput) {
+    public void execute(List<String> arguments, ClientConnection clientOutput) {
         try{
             // REPLCONF command does not require any specific action in this implementation
             // It is typically used for replication configuration between master and replica

@@ -1,21 +1,24 @@
-package command.impl;
+package command.impl.writecommands;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
 import command.CommandStrategy;
-import command.ResponseWriter.ResponseWriter;
+import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
+import replication.ReplicationManager;
 import storage.DataStore;
 import storage.exception.InvalidStreamEntryException;
 
-public class XADDCommand implements CommandStrategy {
+public class XADDCommand implements CommandStrategy, Replicable {
     private final DataStore dataStore;
+    private final ReplicationManager replicationManager;
 
-    public XADDCommand(DataStore dataStore) {
+    public XADDCommand(DataStore dataStore, ReplicationManager replicationManager) {
         this.dataStore = dataStore;
+        this.replicationManager = replicationManager;
     }
 
     @Override
@@ -29,7 +32,7 @@ public class XADDCommand implements CommandStrategy {
     }
 
     @Override
-    public void execute(List<String> arguments, ResponseWriter clientOutput) {
+    public void execute(List<String> arguments, ClientConnection clientOutput) {
         try {
             String streamKey = arguments.get(0);
             String entryID = arguments.get(1);
@@ -43,6 +46,13 @@ public class XADDCommand implements CommandStrategy {
             entryID = dataStore.xadd(streamKey, entryID, entryValues);
             clientOutput.write(RESPSerializer.bulkString(entryID));
             clientOutput.flush();
+
+            // Replication to replicas
+            List<String> commandForReplication = new ArrayList<>();
+            commandForReplication.add("XADD");
+            commandForReplication.addAll(arguments);
+            replicateToReplicas(commandForReplication);
+
         } catch (InvalidStreamEntryException e) {
             try {
                 clientOutput.write(RESPSerializer.error(e.getMessage()));
@@ -52,6 +62,15 @@ public class XADDCommand implements CommandStrategy {
             }
         } catch (IOException exception) {
             throw new RuntimeException(exception);
+        }
+    }
+
+    @Override
+    public void replicateToReplicas(List<String> command) {
+        try {
+            replicationManager.replicateToSlaves(command);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

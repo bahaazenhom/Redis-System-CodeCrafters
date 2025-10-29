@@ -4,7 +4,7 @@ import protocol.RESPSerializer;
 import replication.ReplicationManager;
 import storage.DataStore;
 
-import command.ResponseWriter.ResponseWriter;
+import command.ResponseWriter.ClientConnection;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +32,7 @@ public class CommandExecuter {
         commandMap.put(commandName.toUpperCase(), command);
     }
 
-    public void execute(String clientId, String commandName, List<String> arguments, ResponseWriter clientOutput) {
+    public void execute(String clientId, String commandName, List<String> arguments, ClientConnection clientOutput) {
         CommandStrategy command = commandFactory.getCommandStrategy(commandName);
 
         if (command != null) {

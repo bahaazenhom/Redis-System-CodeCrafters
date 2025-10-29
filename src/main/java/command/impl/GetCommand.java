@@ -1,12 +1,11 @@
 package command.impl;
 
 import command.CommandStrategy;
-import command.ResponseWriter.ResponseWriter;
+import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
 import storage.DataStore;
 import storage.types.StringValue;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.List;
 
@@ -25,7 +24,7 @@ public class GetCommand implements CommandStrategy {
     }
 
     @Override
-    public void execute(List<String> arguments, ResponseWriter clientOutput) {
+    public void execute(List<String> arguments, ClientConnection clientOutput) {
         try {
             String key = arguments.get(0);
             var redisValue = dataStore.getValue(key);

@@ -1,21 +1,24 @@
-package command.impl;
+package command.impl.writecommands;
 
 import command.CommandStrategy;
-import command.ResponseWriter.ResponseWriter;
+import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
+import replication.ReplicationManager;
 import storage.DataStore;
 import storage.core.RedisValue;
 import storage.types.StringValue;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
-public class SetCommand implements CommandStrategy {
+public class SetCommand implements CommandStrategy, Replicable {
     private final DataStore dataStore;
+    private final ReplicationManager replicationManager;
 
-    public SetCommand(DataStore dataStore) {
+    public SetCommand(DataStore dataStore, ReplicationManager replicationManager) {
         this.dataStore = dataStore;
+        this.replicationManager = replicationManager;
     }
 
     @Override
@@ -38,7 +41,7 @@ public class SetCommand implements CommandStrategy {
     }
 
     @Override
-    public void execute(List<String> arguments, ResponseWriter clientOutput) {
+    public void execute(List<String> arguments, ClientConnection clientOutput) {
         try {
             String key = arguments.get(0);
             String value = arguments.get(1);
@@ -48,6 +51,13 @@ public class SetCommand implements CommandStrategy {
             dataStore.setValue(key, redisValue);
             clientOutput.write(RESPSerializer.simpleString("OK"));
             clientOutput.flush();
+
+            // Replication to replicas
+            List<String> commandForReplication = new ArrayList<>();
+            commandForReplication.add("SET");
+            commandForReplication.addAll(arguments);
+            replicateToReplicas(commandForReplication);
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -67,6 +77,15 @@ public class SetCommand implements CommandStrategy {
                 return System.currentTimeMillis() + timeValue;
             default:
                 return null;
+        }
+    }
+
+    @Override
+    public void replicateToReplicas(List<String> command) {
+        try {
+            replicationManager.replicateToSlaves(command);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 

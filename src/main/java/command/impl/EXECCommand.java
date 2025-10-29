@@ -1,10 +1,9 @@
 package command.impl;
 
-import java.io.BufferedWriter;
 import java.util.List;
 
 import command.CommandStrategy;
-import command.ResponseWriter.ResponseWriter;
+import command.ResponseWriter.ClientConnection;
 
 /**
  * EXEC command implementation.
@@ -14,7 +13,7 @@ import command.ResponseWriter.ResponseWriter;
 public class EXECCommand implements CommandStrategy {
 
     @Override
-    public void execute(List<String> arguments, ResponseWriter clientOutput) {
+    public void execute(List<String> arguments, ClientConnection clientOutput) {
         // This method should never be called because EXEC is intercepted
         // in CommandExecuter.handleTransactionControlCommand()
         throw new UnsupportedOperationException("EXEC command should be handled by CommandExecuter");

@@ -5,7 +5,7 @@ import command.CommandRequest;
 import command.CommandStrategy;
 import protocol.RESPSerializer;
 
-import command.ResponseWriter.ResponseWriter;
+import command.ResponseWriter.ClientConnection;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.ArrayList;
@@ -47,7 +47,7 @@ public class TransactionCoordinator {
      * Handle transaction control commands (MULTI/EXEC/DISCARD)
      */
     public void handleTransactionControlCommand(String clientId, String commandName, List<String> arguments,
-            CommandStrategy command, ResponseWriter clientOutput) throws IOException {
+            CommandStrategy command, ClientConnection clientOutput) throws IOException {
 
         String upperCommand = commandName.toUpperCase();
 
@@ -70,7 +70,7 @@ public class TransactionCoordinator {
      * Queue a command for execution during EXEC
      */
     public void queueCommand(String clientId, String commandName, List<String> arguments,
-            CommandStrategy command, ResponseWriter clientOutput) throws IOException {
+            CommandStrategy command, ClientConnection clientOutput) throws IOException {
         try {
             // Validate the command before queuing
             command.validateArguments(arguments);
@@ -94,7 +94,7 @@ public class TransactionCoordinator {
     // ============================================
 
     private void handleMulti(String clientId, List<String> arguments, CommandStrategy command,
-            ResponseWriter clientOutput) throws IOException {
+            ClientConnection clientOutput) throws IOException {
         // Check if already in MULTI mode
         if (transactionManager.isInMultiMode(clientId)) {
             clientOutput.write(RESPSerializer.error("MULTI calls can not be nested"));
@@ -111,7 +111,7 @@ public class TransactionCoordinator {
         clientOutput.flush();
     }
 
-    private void handleExec(String clientId, ResponseWriter clientOutput) throws IOException {
+    private void handleExec(String clientId, ClientConnection clientOutput) throws IOException {
         // Check if in MULTI mode
         if (!transactionManager.isInMultiMode(clientId)) {
             clientOutput.write(RESPSerializer.error("EXEC without MULTI"));
@@ -123,7 +123,7 @@ public class TransactionCoordinator {
         executeTransaction(clientId, clientOutput);
     }
 
-    private void handleDiscard(String clientId, ResponseWriter clientOutput) throws IOException {
+    private void handleDiscard(String clientId, ClientConnection clientOutput) throws IOException {
         // Check if in MULTI mode
         if (!transactionManager.isInMultiMode(clientId)) {
             clientOutput.write(RESPSerializer.error("DISCARD without MULTI"));
@@ -137,7 +137,7 @@ public class TransactionCoordinator {
         clientOutput.flush();
     }
 
-    private void executeTransaction(String clientId, ResponseWriter clientOutput) throws IOException {
+    private void executeTransaction(String clientId, ClientConnection clientOutput) throws IOException {
         // Get all queued commands and clear the transaction context
         TransactionContext context = transactionManager.getTransactionContextAndClear(clientId);
         List<CommandRequest> queuedCommands = context.drainCommands();
@@ -150,7 +150,7 @@ public class TransactionCoordinator {
             try {
                 // Use a StringWriter to capture the command output
                 StringWriter stringWriter = new StringWriter();
-                ResponseWriter tempWriter = new ResponseWriter(new java.io.OutputStream() {
+                ClientConnection tempWriter = new ClientConnection(new java.io.OutputStream() {
                     @Override
                     public void write(int b) {
                         stringWriter.write(b);

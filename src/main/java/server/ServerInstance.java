@@ -8,9 +8,9 @@ import command.CommandExecuter;
 
 public class ServerInstance implements Runnable {
     private final String host;
-
     private final int port;
     private final CommandExecuter commandExecuter;
+
     private final ServerSocket serverSocket;
     private volatile boolean running = true;
     private final String serverRole;
@@ -67,5 +67,9 @@ public class ServerInstance implements Runnable {
 
     public String getHost() {
         return host;
+    }
+
+    public CommandExecuter getCommandExecuter() {
+        return commandExecuter;
     }
 }

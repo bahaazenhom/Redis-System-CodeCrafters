@@ -1,10 +1,10 @@
 package command.impl;
 
-import java.io.BufferedWriter;
+
 import java.util.List;
 
 import command.CommandStrategy;
-import command.ResponseWriter.ResponseWriter;
+import command.ResponseWriter.ClientConnection;
 
 /**
  * DISCARD command implementation.
@@ -14,7 +14,7 @@ import command.ResponseWriter.ResponseWriter;
 public class DISCARDCommand implements CommandStrategy {
 
     @Override
-    public void execute(List<String> arguments, ResponseWriter clientOutput) {
+    public void execute(List<String> arguments, ClientConnection clientOutput) {
         // This method should never be called because DISCARD is intercepted
         // in CommandExecuter.handleTransactionControlCommand()
         throw new UnsupportedOperationException("DISCARD command should be handled by CommandExecuter");

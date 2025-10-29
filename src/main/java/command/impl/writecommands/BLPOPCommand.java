@@ -1,20 +1,22 @@
-package command.impl;
+package command.impl.writecommands;
 
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import command.CommandStrategy;
-import command.ResponseWriter.ResponseWriter;
+import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
+import replication.ReplicationManager;
 import storage.DataStore;
 
-public class BLPOPCommand implements CommandStrategy {
+public class BLPOPCommand implements CommandStrategy, Replicable {
     private final DataStore dataStore;
+    private final ReplicationManager replicationManager;
 
-    public BLPOPCommand(DataStore dataStore) {
+    public BLPOPCommand(DataStore dataStore, ReplicationManager replicationManager) {
         this.dataStore = dataStore;
+        this.replicationManager = replicationManager;
     }
 
     @Override
@@ -33,7 +35,7 @@ public class BLPOPCommand implements CommandStrategy {
     }
 
     @Override
-    public void execute(List<String> arguments, ResponseWriter clientOutput) {
+    public void execute(List<String> arguments, ClientConnection clientOutput) {
         try {
             String listKey = arguments.get(0);
             double timestamp = Double.parseDouble(arguments.get(1));
@@ -50,6 +52,13 @@ public class BLPOPCommand implements CommandStrategy {
                 clientOutput.write(RESPSerializer.array(result));
 
             clientOutput.flush();
+
+            // Replication to replicas
+            List<String> commandForReplication = new ArrayList<>();
+            commandForReplication.add("BLPOP");
+            commandForReplication.addAll(arguments);
+            replicateToReplicas(commandForReplication);
+            
         } catch (InterruptedException exception) {
             try {
                 clientOutput.write(RESPSerializer.error("Operation Interrupted"));
@@ -60,6 +69,15 @@ public class BLPOPCommand implements CommandStrategy {
             }
         } catch (IOException exception) {
             throw new RuntimeException(exception);
+        }
+    }
+
+    @Override
+    public void replicateToReplicas(List<String> command) {
+        try {
+            replicationManager.replicateToSlaves(command);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 
