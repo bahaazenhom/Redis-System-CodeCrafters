@@ -19,6 +19,7 @@ public class PingCommand implements CommandStrategy {
     @Override
     public void execute(List<String> arguments, ClientConnection clientOutput) {
         try {
+            System.out.println("hello i think the simple string is here------------------------ i catched it");
             clientOutput.write(RESPSerializer.simpleString("PONG"));
             clientOutput.flush();
         } catch (IOException e) {
