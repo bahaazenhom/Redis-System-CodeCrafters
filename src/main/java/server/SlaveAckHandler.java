@@ -35,10 +35,11 @@ public class SlaveAckHandler{
         System.out.println("SlaveAckHandler processing commands for clientId: " + clientId);
         BufferedReader in = clientConnection.getBufferedReader();
         String line;
+        System.out.println("or just here---------------");
         while ((line = in.readLine()) != null) {
             if (line.isEmpty() || !line.startsWith("*"))
                 continue;
-
+                System.out.println("are i am here--------------------------");
             int numElements = Integer.parseInt(line.substring(1));
             List<String> commands = RESPParser.parseRequest(numElements, in);
             System.out.println("--------------------------------SlaveAckHandler received line: " + line);
