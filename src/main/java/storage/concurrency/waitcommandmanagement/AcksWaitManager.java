@@ -19,6 +19,7 @@ public class AcksWaitManager {
      * Blocks this client until enough replica ACKs or timeout.
      */
     public int awaitClientForAcks(WaitRequest req) throws InterruptedException {
+        System.out.println("client is waiting-------------");
         req.getLock().lock();
         try {
             if (req.tryComplete()) {
