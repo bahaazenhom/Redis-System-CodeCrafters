@@ -18,7 +18,7 @@ public class SlaveNode extends ServerInstance {
         super(host, port, commandExecuter, role);
         this.masterHost = masterHost;
         this.masterPort = masterPort;
-        this.id = this.getClientSocket().getPort();
+        this.id = port; // For simplicity, using port as ID
     }
 
     public String getRole() {
