@@ -20,12 +20,12 @@ public class ClientConnection {
     /* ========== WRITE ========== */
 
     public synchronized void write(String response) throws IOException {
-        //outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-        writer.write(response);
+        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+       // writer.write(response);
     }
 
     public synchronized void flush() throws IOException {
-        writer.flush();
+        outputStream.flush();
     }
 
     public synchronized void writeBytes(byte[] data) throws IOException {
