@@ -57,6 +57,7 @@ public class CommandPropagationHandler implements Runnable {
 
             // Update replication offset
             String RESPCommand = RESPSerializer.array(commands);
+            System.out.println("Updating slave offset by: " + RESPCommand.getBytes().length+" for command: "+RESPCommand);
             replicationManager.updateSlaveOffset(RESPCommand.getBytes().length);
             
             replicationManager.responseToMasterWithAckOffset(responseWriter);
