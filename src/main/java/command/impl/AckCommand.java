@@ -23,6 +23,7 @@ public class AckCommand implements CommandStrategy {
             long ackOffset = Long.parseLong(ackOffsetValue);
 
             Integer slavePort = replicationManager.getSlaveIdForConnection(clientOutput);
+            System.out.println("[AckCommand] Received ACK " + ackOffset + " from connection " + clientOutput + " mapped to slave " + slavePort);
             if (slavePort == null) {
                 System.out.println("Received ACK from an unregistered replica connection, ignoring.");
                 return;

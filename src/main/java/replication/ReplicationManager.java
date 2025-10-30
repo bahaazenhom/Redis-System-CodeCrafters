@@ -183,10 +183,12 @@ public class ReplicationManager {
     }
 
     public void registerSlaveConnection(int listeningPort, ClientConnection connection) {
+        System.out.println("[ReplicationManager] Registering slave listening on port " + listeningPort + " -> " + connection);
         slaveNodesSockets.put(listeningPort, connection);
     }
 
     public Integer getSlaveIdForConnection(ClientConnection connection) {
+        System.out.println("[ReplicationManager] Registered replica connections: " + slaveNodesSockets.size());
         for (Map.Entry<Integer, ClientConnection> entry : slaveNodesSockets.entrySet()) {
             if (entry.getValue() == connection) {
                 return entry.getKey();
@@ -241,10 +243,14 @@ public class ReplicationManager {
 
     // You are the Master here
     public void askForOffsetAcksFromSlaves() {
+        if (slaveNodesSockets.isEmpty()) {
+            System.out.println("[ReplicationManager] No registered slave connections when requesting ACKs.");
+        }
         for (Map.Entry<Integer, ClientConnection> entry : slaveNodesSockets.entrySet()) {
             try {
                 ClientConnection slaveMasterConnection = entry.getValue();
-                System.out.println("2 connection with port "+entry.getKey()+" $$$$$$$$ " + slaveMasterConnection);
+                System.out.println("[ReplicationManager] Requesting ACK from replica listening on port " + entry.getKey()
+                        + " using connection " + slaveMasterConnection);
 
                 List<String> ackCommand = new ArrayList<>();
                 ackCommand.add("REPLCONF");

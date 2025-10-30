@@ -18,6 +18,8 @@ public class GetAckCommand implements CommandStrategy {
         try {
             String ackValue = arguments.get(0);
             System.out.println("Received REPLCONF GETACK with value: " + ackValue);
+            System.out.println("[GetAckCommand] Replica replying with offset "
+                    + replicationManager.getSlaveNode().getReplicationOffset());
 
             replicationManager.responseToMasterWithAckOffset(clientConnection);
         } catch (Exception e) {

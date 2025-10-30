@@ -56,8 +56,10 @@ public class AcksWaitManager {
         System.out.println("Signaling waiters for replica " + replicaId + " at offset " + replicaOffset);
         while (true) {
             WaitRequest req = waitQueue.peek();
-            if (req == null)
+            if (req == null) {
+                System.out.println("[AcksWaitManager] No pending wait requests.");
                 return;
+            }
 
             // If the first waiter requires higher offset than this replica reached, stop.
             if (req.getOffsetTarget() > replicaOffset)

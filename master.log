@@ -1,0 +1,17 @@
+Initializing Master Node on port 6379
+Successfully started server on port: 6379
+Server started on port 6379, waiting for clients...
+New client connected to port 6379: /127.0.0.1
+$$$$$ client connection is: command.ResponseWriter.ClientConnection@54b1f40b
+socket port is: 61187
+are you master? 61187 compared to 61187
+-------------------------------------------------
+[PROPAGATION] Raw line received: "*3"
+[PROPAGATION] RESP array count: 3
+[PROPAGATION] Parsed RESP elements: [WAIT, 1, 500]
+[PROPAGATION] Initial commandName: WAIT
+[PROPAGATION] Final commandName: WAIT, args: [1, 500]
+[PROPAGATION] Executing: WAIT [1, 500]
+client is waiting-------------
+[PROPAGATION] Command executed successfully
+[PROPAGATION] Input stream closed, exiting processCommands

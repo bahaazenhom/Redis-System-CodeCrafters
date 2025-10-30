@@ -20,6 +20,7 @@ public class ListeningPortCommand implements CommandStrategy {
             int listeningPort = Integer.parseInt(arguments.get(0));
 
             if (replicationManager.getMasterNode() != null) {
+                System.out.println("[ListeningPortCommand] Master registering replica connection for port " + listeningPort);
                 replicationManager.registerSlaveConnection(listeningPort, clientOutput);
             }
 
