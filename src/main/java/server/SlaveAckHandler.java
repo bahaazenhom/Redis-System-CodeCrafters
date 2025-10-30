@@ -27,6 +27,7 @@ public class SlaveAckHandler implements Runnable {
     @Override
     public void run() {
         try {
+            System.out.println("Starting SlaveAckHandler for clientId: " + clientId);
             processCommands(clientConnection);
         } catch (IOException e) {
             System.err.println("Client connection error: " + e.getMessage());
@@ -35,6 +36,7 @@ public class SlaveAckHandler implements Runnable {
 
     private void processCommands(ClientConnection clientConnection)
             throws IOException {
+        System.out.println("SlaveAckHandler processing commands for clientId: " + clientId);
         BufferedReader in = clientConnection.getBufferedReader();
         String line;
         while ((line = in.readLine()) != null) {
@@ -43,10 +45,9 @@ public class SlaveAckHandler implements Runnable {
 
             int numElements = Integer.parseInt(line.substring(1));
             List<String> commands = RESPParser.parseRequest(numElements, in);
-
+            System.out.println("--------------------------------SlaveAckHandler received line: " + line);
             String commandName = commands.get(0);
 
-            
             int startIndexSublist = 1;
             if (commandName.equalsIgnoreCase("REPLCONF")) {
                 commandName = commands.get(1);
@@ -54,7 +55,7 @@ public class SlaveAckHandler implements Runnable {
             }
 
             List<String> arguments = commands.subList(startIndexSublist, commands.size());
-            System.out.println("Received command: " + commandName + " with arguments: " + arguments);
+            System.out.println("Received command from ack handler--------: " + commandName + " with arguments: " + arguments);
             commandExecuter.execute(clientId, commandName, arguments, clientConnection);
         }
     }
