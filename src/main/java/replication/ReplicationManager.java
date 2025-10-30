@@ -281,6 +281,8 @@ public class ReplicationManager {
                 ackCommand.add("REPLCONF");
                 ackCommand.add("ACK");
                 ackCommand.add(String.valueOf(slave.getReplicationOffset()));
+                System.out.println("[ReplicationManager] Slave sending ACK with offset "
+                        + slave.getReplicationOffset() + " via connection " + slaveMasterConnection);
                 slaveMasterConnection.write(RESPSerializer.array(ackCommand));
                 slaveMasterConnection.flush();
 
