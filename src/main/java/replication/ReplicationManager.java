@@ -182,6 +182,19 @@ public class ReplicationManager {
         return this.slaveNodesSockets;
     }
 
+    public void registerSlaveConnection(int listeningPort, ClientConnection connection) {
+        slaveNodesSockets.put(listeningPort, connection);
+    }
+
+    public Integer getSlaveIdForConnection(ClientConnection connection) {
+        for (Map.Entry<Integer, ClientConnection> entry : slaveNodesSockets.entrySet()) {
+            if (entry.getValue() == connection) {
+                return entry.getKey();
+            }
+        }
+        return null;
+    }
+
     public String getReplicaInfo() {
         int port = Integer.parseInt(Thread.currentThread().getName().split("-")[1]);
 

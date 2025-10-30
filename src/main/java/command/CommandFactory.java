@@ -46,7 +46,7 @@ public class CommandFactory {
             case "EXEC" -> new EXECCommand();
             case "DISCARD" -> new DISCARDCommand();
             case "INFO" -> new INFOCommand(replicationManager);
-            case "LISTENING-PORT" -> new ListeningPortCommand();
+            case "LISTENING-PORT" -> new ListeningPortCommand(replicationManager);
             case "CAPA" -> new CapaCommand();
             case "PSYNC" -> new PSYNCCommand(replicationManager);
             case "GETACK" -> new GetAckCommand(replicationManager);

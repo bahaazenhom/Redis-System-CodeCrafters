@@ -36,13 +36,10 @@ public class PSYNCCommand implements CommandStrategy {
             clientConnection.flush();
 
             System.out.println("Sent RDB file (" + rdbData.length + " bytes)");
-            
-            int slavePort = replicationManager.getMasterNode().getClientSocket().getPort();
-            // Register slave.
-            System.out.println("Registering slave on port: " + slavePort);
-            System.out.println("this is the connection we will store: $$$$$$$$ " + clientConnection);
-            replicationManager.getSlaveNodesSockets().put(slavePort, clientConnection);
 
+            Integer slavePort = replicationManager.getSlaveIdForConnection(clientConnection);
+            System.out.println("Replica handshake complete. Registered listening port: "
+                    + (slavePort != null ? slavePort : "unknown"));
 
         } catch (Exception e) {
             e.printStackTrace();
