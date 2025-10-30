@@ -22,7 +22,11 @@ public class WaitCommand implements CommandStrategy {
         try{
             int numAcksRequired = Integer.parseInt(arguments.get(0));
             long timeoutMillis = Long.parseLong(arguments.get(1));
-            
+            if(replicationManager.getMasterNode().getOffset() == 0){
+                clientOutput.write(RESPSerializer.integer(replicationManager.getSlaveNodesSockets().size()));
+                clientOutput.flush();
+                return;
+            }
             long targetOffset = replicationManager.getMasterNode().getOffset();
             System.out.println("[WaitCommand] Waiting for " + numAcksRequired + " replicas at offset " + targetOffset
                     + " within " + timeoutMillis + " ms");

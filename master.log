@@ -1,0 +1,49 @@
+Initializing Master Node on port 6379
+Successfully started server on port: 6379
+Server started on port 6379, waiting for clients...
+New client connected to port 6379: /127.0.0.1
+$$$$$ client connection is: command.ResponseWriter.ClientConnection@524ccef1
+socket port is: 59518
+are you master? 59518 compared to 59518
+-------------------------------------------------
+[PROPAGATION] Raw line received: "*1"
+[PROPAGATION] RESP array count: 1
+[PROPAGATION] Parsed RESP elements: [PING]
+[PROPAGATION] Initial commandName: PING
+[PROPAGATION] Final commandName: PING, args: []
+[PROPAGATION] Executing: PING []
+[PROPAGATION] Command executed successfully
+-------------------------------------------------
+[PROPAGATION] Raw line received: "*3"
+[PROPAGATION] RESP array count: 3
+[PROPAGATION] Parsed RESP elements: [REPLCONF, listening-port, 6380]
+[PROPAGATION] Initial commandName: REPLCONF
+[PROPAGATION] REPLCONF detected
+[PROPAGATION] REPLCONF subcommand: listening-port
+[PROPAGATION] Final commandName: listening-port, args: [6380]
+[PROPAGATION] Executing: listening-port [6380]
+[ListeningPortCommand] Master registering replica connection for port 6380
+[ReplicationManager] Registering slave listening on port 6380 -> command.ResponseWriter.ClientConnection@524ccef1
+[PROPAGATION] Command executed successfully
+-------------------------------------------------
+[PROPAGATION] Raw line received: "*3"
+[PROPAGATION] RESP array count: 3
+[PROPAGATION] Parsed RESP elements: [REPLCONF, capa, psync2]
+[PROPAGATION] Initial commandName: REPLCONF
+[PROPAGATION] REPLCONF detected
+[PROPAGATION] REPLCONF subcommand: capa
+[PROPAGATION] Final commandName: capa, args: [psync2]
+[PROPAGATION] Executing: capa [psync2]
+[PROPAGATION] Command executed successfully
+-------------------------------------------------
+[PROPAGATION] Raw line received: "*3"
+[PROPAGATION] RESP array count: 3
+[PROPAGATION] Parsed RESP elements: [PSYNC, ?, -1]
+[PROPAGATION] Initial commandName: PSYNC
+[PROPAGATION] Final commandName: PSYNC, args: [?, -1]
+[PROPAGATION] Executing: PSYNC [?, -1]
+Decoded RDB data: [82, 69, 68, 73, 83, 48, 48, 49, 49, -6, 9, 114, 101, 100, 105, 115, 45, 118, 101, 114, 5, 55, 46, 50, 46, 48, -6, 10, 114, 101, 100, 105, 115, 45, 98, 105, 116, 115, -64, 64, -6, 5, 99, 116, 105, 109, 101, -62, 109, 8, -68, 101, -6, 8, 117, 115, 101, 100, 45, 109, 101, 109, -62, -80, -60, 16, 0, -6, 8, 97, 111, 102, 45, 98, 97, 115, 101, -64, 0, -1, -16, 110, 59, -2, -64, -1, 90, -94]
+Sent RDB file (88 bytes)
+[ReplicationManager] Registered replica connections: 1
+Replica handshake complete. Registered listening port: 6380
+[PROPAGATION] Command executed successfully

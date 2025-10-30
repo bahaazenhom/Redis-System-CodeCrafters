@@ -1,0 +1,8 @@
+-------------------------------- 127.0.0.1:6379
+ping response: +PONG
+listening-port response: +OK
+capa response: +OK
+psync response: +FULLRESYNC 8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb 0
+file header response: $88
+Successfully started server on port: 6380
+Server started on port 6380, waiting for clients...
