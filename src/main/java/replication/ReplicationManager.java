@@ -227,8 +227,11 @@ public class ReplicationManager {
 
     // You are the Master here
     public void askForOffsetAcksFromSlaves() {
-        for (ClientConnection slaveMasterConnection : slaveNodesSockets.values()) {
+        for (Integer slavePort : slaveNodesSockets.keySet()) {
             try {
+                Socket slaveSocket = new Socket("localhost", slavePort);
+                ClientConnection slaveMasterConnection = new ClientConnection(slaveSocket.getOutputStream(),
+                        slaveSocket.getInputStream());
                 List<String> ackCommand = new ArrayList<>();
                 ackCommand.add("REPLCONF");
                 ackCommand.add("GETACK");
