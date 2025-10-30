@@ -6,6 +6,8 @@ import command.CommandExecuter;
 import server.ServerInstance;
 
 public class SlaveNode extends ServerInstance {
+    private final int id;
+
     private final String masterHost;
     private String role = "slave";
     private final String replicationId = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb";
@@ -16,6 +18,7 @@ public class SlaveNode extends ServerInstance {
         super(host, port, commandExecuter, role);
         this.masterHost = masterHost;
         this.masterPort = masterPort;
+        this.id = this.getClientSocket().getPort();
     }
 
     public String getRole() {
@@ -32,6 +35,10 @@ public class SlaveNode extends ServerInstance {
 
     public void setReplicationOffset(long replicationOffset) {
         this.replicationOffset = replicationOffset;
+    }
+
+    public int getId() {
+        return id;
     }
 
     public String getInfo() {
@@ -61,7 +68,7 @@ public class SlaveNode extends ServerInstance {
         return masterPort;
     }
 
-    public void incrementReplicationOffset(int length) {
+    public void incrementReplicationOffset(long length) {
         this.replicationOffset += length;
     }
 

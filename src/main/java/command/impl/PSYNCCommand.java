@@ -20,7 +20,7 @@ public class PSYNCCommand implements CommandStrategy {
     public void execute(List<String> arguments, ClientConnection clientOutput) {
         try {
             // Send FULLRESYNC response
-            String masterID = replicationManager.getMasterNode().getReplicationId();
+            String masterID = replicationManager.getMasterNode().getId();
             clientOutput.write(RESPSerializer.simpleString("FULLRESYNC " + masterID + " 0"));
             clientOutput.flush(); //  flush text
 
@@ -37,10 +37,10 @@ public class PSYNCCommand implements CommandStrategy {
             
             System.out.println("Sent RDB file (" + rdbData.length + " bytes)");
             
-            int port = replicationManager.getMasterNode().getClientSocket().getPort();
+            int slavePort = replicationManager.getMasterNode().getClientSocket().getPort();
             // Register slave.
-            System.out.println("Registering slave on port: " + port);
-            replicationManager.getSlaveNodesSockets().put(port, clientOutput);
+            System.out.println("Registering slave on port: " + slavePort);
+            replicationManager.getSlaveNodesSockets().put(slavePort, clientOutput);
 
 
         } catch (Exception e) {

@@ -46,17 +46,20 @@ public class XADDCommand implements CommandStrategy, Replicable {
             entryID = dataStore.xadd(streamKey, entryID, entryValues);
 
             // If this node is a replica, do not send replies back to the master/client
-            if (ReplicationManager.isSlaveNode()) return;
+            if (ReplicationManager.isSlaveNode())
+                return;
 
             clientOutput.write(RESPSerializer.bulkString(entryID));
             clientOutput.flush();
 
-            // Replication to replicas (only on master)
             List<String> commandForReplication = new ArrayList<>();
             commandForReplication.add("XADD");
             commandForReplication.addAll(arguments);
-            replicateToReplicas(commandForReplication);
 
+            // Update master offset
+            updateMasterOffset(RESPSerializer.array(commandForReplication).getBytes().length);
+            // Replication to replicas
+            replicateToReplicas(commandForReplication);
         } catch (InvalidStreamEntryException e) {
             try {
                 clientOutput.write(RESPSerializer.error(e.getMessage()));
@@ -78,5 +81,9 @@ public class XADDCommand implements CommandStrategy, Replicable {
         }
     }
 
+    @Override
+    public void updateMasterOffset(long offset) {
+        replicationManager.updateMasterOffset(offset);
+    }
 
 }

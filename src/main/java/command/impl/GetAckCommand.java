@@ -15,12 +15,12 @@ public class GetAckCommand implements CommandStrategy {
 
     @Override
     public void execute(List<String> arguments, ClientConnection clientOutput) {
-        try{
+        try {
             String ackValue = arguments.get(0);
             System.out.println("Received REPLCONF GETACK with value: " + ackValue);
+            
             replicationManager.responseToMasterWithAckOffset(clientOutput);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
     }

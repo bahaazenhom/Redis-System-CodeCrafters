@@ -50,17 +50,20 @@ public class SetCommand implements CommandStrategy, Replicable {
             RedisValue redisValue = new StringValue(value, expiryTimeStamp);
             dataStore.setValue(key, redisValue);
             // If this node is a replica, do not send replies or replicate
-            if (ReplicationManager.isSlaveNode()) return;
+            if (ReplicationManager.isSlaveNode())
+                return;
 
             clientOutput.write(RESPSerializer.simpleString("OK"));
             clientOutput.flush();
 
-            // Replication to replicas
             List<String> commandForReplication = new ArrayList<>();
             commandForReplication.add("SET");
             commandForReplication.addAll(arguments);
-            replicateToReplicas(commandForReplication);
 
+            // Update master offset
+            updateMasterOffset(RESPSerializer.array(commandForReplication).getBytes().length);
+            // Replication to replicas
+            replicateToReplicas(commandForReplication);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -92,5 +95,9 @@ public class SetCommand implements CommandStrategy, Replicable {
         }
     }
 
+    @Override
+    public void updateMasterOffset(long offset) {
+        replicationManager.updateMasterOffset(offset);
+    }
 
 }

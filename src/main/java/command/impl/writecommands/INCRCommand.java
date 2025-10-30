@@ -26,15 +26,19 @@ public class INCRCommand implements CommandStrategy, Replicable {
             long newValue = dataStore.incr(key);
 
             // If this node is a replica, do not send replies or replicate
-            if (ReplicationManager.isSlaveNode()) return;
+            if (ReplicationManager.isSlaveNode())
+                return;
 
             clientOutput.write(RESPSerializer.integer(newValue));
             clientOutput.flush();
 
-            // Replication to replicas
             List<String> commandForReplication = new ArrayList<>();
             commandForReplication.add("INCR");
             commandForReplication.addAll(arguments);
+
+            // Update master offset
+            updateMasterOffset(RESPSerializer.array(commandForReplication).getBytes().length);
+            // Replication to replicas
             replicateToReplicas(commandForReplication);
 
         } catch (NumberFormatException nfe) {
@@ -63,6 +67,11 @@ public class INCRCommand implements CommandStrategy, Replicable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void updateMasterOffset(long offset) {
+        replicationManager.updateMasterOffset(offset);
     }
 
 }

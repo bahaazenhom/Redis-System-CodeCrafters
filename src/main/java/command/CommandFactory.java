@@ -7,15 +7,18 @@ import command.impl.*;
 import command.impl.writecommands.*;
 import replication.ReplicationManager;
 import storage.DataStore;
+import storage.concurrency.waitcommandmanagement.AcksWaitManager;
 
 public class CommandFactory {
     private final DataStore dataStore;
     private final Map<String, CommandStrategy> commandMapCache = new ConcurrentHashMap<>();
     private final ReplicationManager replicationManager;
+    private final AcksWaitManager acksWaitManager;
 
     public CommandFactory(DataStore dataStore, ReplicationManager replicationManager) {
         this.dataStore = dataStore;
         this.replicationManager = replicationManager;
+        this.acksWaitManager = new AcksWaitManager(replicationManager);
     }
 
     public CommandStrategy getCommandStrategy(String commandName) {
@@ -47,6 +50,8 @@ public class CommandFactory {
             case "CAPA" -> new CapaCommand();
             case "PSYNC" -> new PSYNCCommand(replicationManager);
             case "GETACK" -> new GetAckCommand(replicationManager);
+            case "ACK" -> new AckCommand(acksWaitManager, replicationManager);
+            case "WAIT" -> new WaitCommand(replicationManager, acksWaitManager);
             default -> null;
         };
     }

@@ -46,7 +46,8 @@ public class LPOPCommand implements CommandStrategy, Replicable {
             List<String> firstValues = dataStore.lpop(listName, counter);
 
             // If this node is a replica, do not send replies or replicate
-            if (ReplicationManager.isSlaveNode()) return;
+            if (ReplicationManager.isSlaveNode())
+                return;
 
             if (counter == null) {
                 clientOutput.write(RESPSerializer.bulkString(firstValues.get(0)));
@@ -55,10 +56,13 @@ public class LPOPCommand implements CommandStrategy, Replicable {
             }
             clientOutput.flush();
 
-            // Replication to replicas
             List<String> commandForReplication = new ArrayList<>();
             commandForReplication.add("LPOP");
             commandForReplication.addAll(arguments);
+
+            // Update master offset
+            updateMasterOffset(RESPSerializer.array(commandForReplication).getBytes().length);
+            // Replication to replicas
             replicateToReplicas(commandForReplication);
 
         } catch (IOException exception) {
@@ -75,4 +79,8 @@ public class LPOPCommand implements CommandStrategy, Replicable {
         }
     }
 
+    @Override
+    public void updateMasterOffset(long offset) {
+        replicationManager.updateMasterOffset(offset);
+    }
 }

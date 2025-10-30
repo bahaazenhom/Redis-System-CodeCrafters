@@ -227,7 +227,7 @@ public class ReplicationManager {
         return this.slaveNode;
     }
 
-    public void sendAckToSlaves() {
+    public void askForOffsetAcksFromSlaves() {
         for (ClientConnection slaveConnection : slaveNodesSockets.values()) {
             try {
                 List<String> ackCommand = new ArrayList<>();
@@ -262,9 +262,15 @@ public class ReplicationManager {
         return isSlaveNode;
     }
 
-    public void updateSlaveOffset(int length) {
-        if(this.slaveNode != null) {
+    public void updateSlaveOffset(long length) {
+        if (this.slaveNode != null) {
             this.slaveNode.incrementReplicationOffset(length);
+        }
+    }
+
+    public void updateMasterOffset(long length) {
+        if (this.masterNode != null) {
+            this.masterNode.incrementReplicationOffset(length);
         }
     }
 }

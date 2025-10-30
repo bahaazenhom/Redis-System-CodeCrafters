@@ -46,21 +46,26 @@ public class BLPOPCommand implements CommandStrategy, Replicable {
             result.add(listKey);
             result.add(value);
 
-
+            
+            
             // Send response to client
             // if this is a slave node, do not send response
             if (ReplicationManager.isSlaveNode()) return;
+            
             if (value == null)
-                clientOutput.write(RESPSerializer.nullArray());
+            clientOutput.write(RESPSerializer.nullArray());
             else
-                clientOutput.write(RESPSerializer.array(result));
-
+            clientOutput.write(RESPSerializer.array(result));
+            
             clientOutput.flush();
-
-            // Replication to replicas
+            
             List<String> commandForReplication = new ArrayList<>();
             commandForReplication.add("BLPOP");
             commandForReplication.addAll(arguments);
+
+            // Update master offset
+            updateMasterOffset(RESPSerializer.array(commandForReplication).getBytes().length);
+            // Replication to replicas
             replicateToReplicas(commandForReplication);
             
         } catch (InterruptedException exception) {
@@ -83,6 +88,11 @@ public class BLPOPCommand implements CommandStrategy, Replicable {
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
+    }
+
+    @Override
+    public void updateMasterOffset(long offset) {
+        replicationManager.updateMasterOffset(offset);
     }
 
 
