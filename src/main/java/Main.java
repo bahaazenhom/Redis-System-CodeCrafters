@@ -13,7 +13,7 @@ public class Main {
     public static void main(String[] args) throws IOException {
 
         CommandExecuter commandExecuter = new CommandExecuter(new InMemoryDataStore());
-        ServerManager serverManager = ServerManager.create(commandExecuter);
+        ServerManager serverManager = ServerManager.create();
         int port = parsePort(args);
         String[] serverRole = parseServerRole(args);
         ReplicationManager replicationManager = ReplicationManager.create();

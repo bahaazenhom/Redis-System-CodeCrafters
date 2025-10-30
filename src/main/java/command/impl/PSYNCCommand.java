@@ -17,12 +17,12 @@ public class PSYNCCommand implements CommandStrategy {
     }
 
     @Override
-    public void execute(List<String> arguments, ClientConnection clientOutput) {
+    public void execute(List<String> arguments, ClientConnection clientConnection) {
         try {
             // Send FULLRESYNC response
             String masterID = replicationManager.getMasterNode().getId();
-            clientOutput.write(RESPSerializer.simpleString("FULLRESYNC " + masterID + " 0"));
-            clientOutput.flush(); //  flush text
+            clientConnection.write(RESPSerializer.simpleString("FULLRESYNC " + masterID + " 0"));
+            clientConnection.flush(); //flush text
 
             // Send RDB file (empty RDB for simplicity)
             String emptyRdbBase64 = "UkVESVMwMDEx+glyZWRpcy12ZXIFNy4yLjD6CnJlZGlzLWJpdHPAQPoFY3RpbWXCbQi8ZfoIdXNlZC1tZW3CsMQQAPoIYW9mLWJhc2XAAP/wbjv+wP9aog==";
@@ -31,16 +31,16 @@ public class PSYNCCommand implements CommandStrategy {
 
             // Write header and binary RDB data
             String header = "$" + rdbData.length + "\r\n";
-            clientOutput.write(header);
-            clientOutput.writeBytes(rdbData);
-            clientOutput.flush();
-            
+            clientConnection.write(header);
+            clientConnection.writeBytes(rdbData);
+            clientConnection.flush();
+
             System.out.println("Sent RDB file (" + rdbData.length + " bytes)");
             
             int slavePort = replicationManager.getMasterNode().getClientSocket().getPort();
             // Register slave.
             System.out.println("Registering slave on port: " + slavePort);
-            replicationManager.getSlaveNodesSockets().put(slavePort, clientOutput);
+            replicationManager.getSlaveNodesSockets().put(slavePort, clientConnection);
 
 
         } catch (Exception e) {

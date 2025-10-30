@@ -15,7 +15,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import command.CommandExecuter;
 import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
-import server.ClientHandler;
 import server.CommandPropagationHandler;
 import server.ServerInstance;
 import server.SlaveAckHandler;
@@ -60,8 +59,8 @@ public class ReplicationManager {
     private void masterHandshake(int slavePort, String masterHost, int masterPort) {
         try {
             Socket socket = new Socket(masterHost, masterPort);
-            InputStream input = socket.getInputStream();
-            BufferedWriter out = new BufferedWriter(new OutputStreamWriter(socket.getOutputStream()));
+            ClientConnection clientConnection = new ClientConnection(socket.getOutputStream(),
+                    socket.getInputStream());
 
             // helper lambda to read a CRLF-terminated line from InputStream
             java.util.function.Function<InputStream, String> readLine = (is) -> {
@@ -93,9 +92,9 @@ public class ReplicationManager {
             // ========== 1. PING ==========
             List<String> pingHandShake = new ArrayList<>();
             pingHandShake.add("PING");
-            out.write(RESPSerializer.array(pingHandShake));
-            out.flush();
-            response = readLine.apply(input);
+            clientConnection.write(RESPSerializer.array(pingHandShake));
+            clientConnection.flush();
+            response = readLine.apply(clientConnection.getInputStream());
             System.out.println("ping response: " + response);
 
             // ========== 2. REPLCONF listening-port ==========
@@ -103,9 +102,9 @@ public class ReplicationManager {
             listeningPortHandShake.add("REPLCONF");
             listeningPortHandShake.add("listening-port");
             listeningPortHandShake.add(String.valueOf(slavePort));
-            out.write(RESPSerializer.array(listeningPortHandShake));
-            out.flush();
-            response = readLine.apply(input);
+            clientConnection.write(RESPSerializer.array(listeningPortHandShake));
+            clientConnection.flush();
+            response = readLine.apply(clientConnection.getInputStream());
             System.out.println("listening-port response: " + response);
 
             // ========== 3. REPLCONF capa psync2 ==========
@@ -113,9 +112,9 @@ public class ReplicationManager {
             capaHandShake.add("REPLCONF");
             capaHandShake.add("capa");
             capaHandShake.add("psync2");
-            out.write(RESPSerializer.array(capaHandShake));
-            out.flush();
-            response = readLine.apply(input);
+            clientConnection.write(RESPSerializer.array(capaHandShake));
+            clientConnection.flush();
+            response = readLine.apply(clientConnection.getInputStream());
             System.out.println("capa response: " + response);
 
             // ========== 4. PSYNC ==========
@@ -123,13 +122,13 @@ public class ReplicationManager {
             psyncHandShake.add("PSYNC");
             psyncHandShake.add("?");
             psyncHandShake.add("-1");
-            out.write(RESPSerializer.array(psyncHandShake));
-            out.flush();
-            String psyncResponse = readLine.apply(input);
+            clientConnection.write(RESPSerializer.array(psyncHandShake));
+            clientConnection.flush();
+            String psyncResponse = readLine.apply(clientConnection.getInputStream());
             System.out.println("psync response: " + psyncResponse);
 
             // ========== 5. Read RDB header (CRLF-terminated) ==========
-            String header = readLine.apply(input);
+            String header = readLine.apply(clientConnection.getInputStream());
             System.out.println("file header response: " + header);
 
             if (header == null || !header.startsWith("$")) {
@@ -145,7 +144,7 @@ public class ReplicationManager {
             int remaining = rdbLength;
             while (remaining > 0) {
                 int toRead = Math.min(buffer.length, remaining);
-                int bytesRead = input.read(buffer, 0, toRead);
+                int bytesRead = clientConnection.getInputStream().read(buffer, 0, toRead);
                 if (bytesRead == -1)
                     break; // stream closed unexpectedly
                 baos.write(buffer, 0, bytesRead);
@@ -160,20 +159,17 @@ public class ReplicationManager {
                 this.slaveNode.setMasterSocket(socket);
             }
 
-            ClientConnection connection = new ClientConnection(socket.getOutputStream(), socket.getInputStream());
-            // Wrap the same InputStream in a BufferedReader for command parsing
-            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            handleReplicationStreamFromMaster(connection, reader);
+            handleReplicationStreamFromMaster(clientConnection);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void handleReplicationStreamFromMaster(ClientConnection connection, BufferedReader in) {
+    private void handleReplicationStreamFromMaster(ClientConnection connection) {
         // Start a new thread to handle incoming commands from the master
         Thread replicaHandler = new Thread(new CommandPropagationHandler(slaveNode.getCommandExecuter(),
-                connection, in));
+                connection));
         replicaHandler.start();
     }
 
@@ -229,7 +225,7 @@ public class ReplicationManager {
         return this.slaveNode;
     }
 
-    // You are the aster here
+    // You are the Master here
     public void askForOffsetAcksFromSlaves() {
         for (ClientConnection slaveMasterConnection : slaveNodesSockets.values()) {
             try {
@@ -239,9 +235,9 @@ public class ReplicationManager {
                 ackCommand.add("*");
                 slaveMasterConnection.write(RESPSerializer.array(ackCommand));
                 slaveMasterConnection.flush();
-                System.out.println("Master asked slave for ACK offset "+ackCommand);
+                System.out.println("Master asked slave for ACK offset " + ackCommand);
                 // Wait for the acknowledgment from the slave
-                handleAcksCommandsReceivedFromSlaves(slaveMasterConnection);
+               // handleAcksCommandsReceivedFromSlaves(slaveMasterConnection);
             } catch (Exception e) {
                 e.printStackTrace();
             }

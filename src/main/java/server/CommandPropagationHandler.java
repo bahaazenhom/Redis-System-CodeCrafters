@@ -13,27 +13,26 @@ import replication.ReplicationManager;
 public class CommandPropagationHandler implements Runnable {
 
     private final ReplicationManager replicationManager = ReplicationManager.create();
-    private final ClientConnection responseWriter;
+    private final ClientConnection clientConnection;
     private final CommandExecuter commandExecuter;
-    private final BufferedReader in;
 
-    public CommandPropagationHandler(CommandExecuter commandExecuter, ClientConnection responseWriter, BufferedReader in) {
+    public CommandPropagationHandler(CommandExecuter commandExecuter, ClientConnection clientConnection) {
         this.commandExecuter = commandExecuter;
-        this.responseWriter = responseWriter;
-        this.in = in;
+        this.clientConnection = clientConnection;
     }
 
     @Override
     public void run() {
         try {
-            processCommands(in, responseWriter);
+            processCommands(clientConnection);
         } catch (IOException e) {
             System.err.println("Client connection error: " + e.getMessage());
         }
     }
 
-    private void processCommands(BufferedReader in, ClientConnection responseWriter)
+    private void processCommands(ClientConnection clientConnection)
             throws IOException {
+        BufferedReader in = clientConnection.getBufferedReader();
         String line;
         while ((line = in.readLine()) != null) {
             System.out.println("--------------------------------ReplicaHandler received line: " + line);
@@ -53,7 +52,7 @@ public class CommandPropagationHandler implements Runnable {
             
             List<String> arguments = commands.subList(startIndexSublist, commands.size());
             System.out.println("Received command: " + commandName + " with arguments from propagation: " + arguments);
-            commandExecuter.execute("clientId", commandName, arguments, responseWriter);
+            commandExecuter.execute("clientId", commandName, arguments, clientConnection);
 
             // Update replication offset
             String RESPCommand = RESPSerializer.array(commands);

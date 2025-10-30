@@ -2,8 +2,6 @@ package server;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import command.CommandExecuter;
-
 /**
  * ServerManager handles multiple Redis server instances running on different
  * ports.
@@ -17,7 +15,7 @@ public class ServerManager {
     private ServerManager() {
     }
 
-    public static ServerManager create(CommandExecuter commandExecuter) {
+    public static ServerManager create() {
         if (serverManager != null) {
             return serverManager;
         }
