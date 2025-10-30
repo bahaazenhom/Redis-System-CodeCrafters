@@ -26,7 +26,7 @@ public class CommandPropagationHandler implements Runnable {
         try {
             processCommands(clientConnection);
         } catch (IOException e) {
-            System.err.println("Client connection error: " + e.getMessage());
+            System.err.println("Client connection error in CommandPropagationHandler: " + e.getMessage());
         }
     }
 
