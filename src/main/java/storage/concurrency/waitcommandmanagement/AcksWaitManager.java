@@ -23,9 +23,14 @@ public class AcksWaitManager {
         try {
             if (req.tryComplete()) {
                 return req.getCurrentReceivedAcks();
-            }   
+            }
             waitQueue.add(req);
             replicationManager.askForOffsetAcksFromSlaves();
+
+            if (req.tryComplete()) {
+                waitQueue.remove(req);
+                return req.getCurrentReceivedAcks();
+            }
 
             long remaining = req.remainingNanos();
             while (!req.isFulfilled() && remaining > 0) {
