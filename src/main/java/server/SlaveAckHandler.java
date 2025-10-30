@@ -1,10 +1,7 @@
 package server;
 
 import java.io.BufferedReader;
-import java.io.OutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.net.Socket;
 import java.util.List;
 import java.util.UUID;
 
@@ -12,7 +9,7 @@ import command.CommandExecuter;
 import command.ResponseWriter.ClientConnection;
 import protocol.RESPParser;
 
-public class SlaveAckHandler implements Runnable {
+public class SlaveAckHandler{
 
     private final ClientConnection clientConnection;
     private final CommandExecuter commandExecuter;
@@ -24,7 +21,6 @@ public class SlaveAckHandler implements Runnable {
         this.clientId = UUID.randomUUID().toString();
     }
 
-    @Override
     public void run() {
         try {
             System.out.println("Starting SlaveAckHandler for clientId: " + clientId);

@@ -250,8 +250,7 @@ public class ReplicationManager {
 
     private void handleAcksCommandsReceivedFromSlaves(ClientConnection connection) {
         // Start a new thread to handle incoming acks commands from slaves
-        Thread slaveAckHandler = new Thread(new SlaveAckHandler(connection, masterNode.getCommandExecuter()));
-        slaveAckHandler.start();
+        new SlaveAckHandler(connection, masterNode.getCommandExecuter()).run();
     }
 
     // You are the Slave here
