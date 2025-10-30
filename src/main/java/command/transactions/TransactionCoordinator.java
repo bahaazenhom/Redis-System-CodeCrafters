@@ -47,21 +47,21 @@ public class TransactionCoordinator {
      * Handle transaction control commands (MULTI/EXEC/DISCARD)
      */
     public void handleTransactionControlCommand(String clientId, String commandName, List<String> arguments,
-            CommandStrategy command, ClientConnection clientOutput) throws IOException {
+            CommandStrategy command, ClientConnection clientConnection) throws IOException {
 
         String upperCommand = commandName.toUpperCase();
 
         switch (upperCommand) {
             case "MULTI":
-                handleMulti(clientId, arguments, command, clientOutput);
+                handleMulti(clientId, arguments, command, clientConnection);
                 break;
 
             case "EXEC":
-                handleExec(clientId, clientOutput);
+                handleExec(clientId, clientConnection);
                 break;
 
             case "DISCARD":
-                handleDiscard(clientId, clientOutput);
+                handleDiscard(clientId, clientConnection);
                 break;
         }
     }
@@ -70,7 +70,7 @@ public class TransactionCoordinator {
      * Queue a command for execution during EXEC
      */
     public void queueCommand(String clientId, String commandName, List<String> arguments,
-            CommandStrategy command, ClientConnection clientOutput) throws IOException {
+            CommandStrategy command, ClientConnection clientConnection) throws IOException {
         try {
             // Validate the command before queuing
             command.validateArguments(arguments);
@@ -79,13 +79,13 @@ public class TransactionCoordinator {
             transactionManager.enqueueCommand(clientId, new CommandRequest(commandName, arguments));
 
             // Send QUEUED response
-            clientOutput.write(RESPSerializer.bulkString("QUEUED"));
-            clientOutput.flush();
+            clientConnection.write(RESPSerializer.bulkString("QUEUED"));
+            clientConnection.flush();
         } catch (IllegalArgumentException e) {
             // Validation error during queuing - discard transaction
             transactionManager.discardTransaction(clientId);
-            clientOutput.write(RESPSerializer.error(e.getMessage()));
-            clientOutput.flush();
+            clientConnection.write(RESPSerializer.error(e.getMessage()));
+            clientConnection.flush();
         }
     }
 
@@ -94,11 +94,11 @@ public class TransactionCoordinator {
     // ============================================
 
     private void handleMulti(String clientId, List<String> arguments, CommandStrategy command,
-            ClientConnection clientOutput) throws IOException {
+            ClientConnection clientConnection) throws IOException {
         // Check if already in MULTI mode
         if (transactionManager.isInMultiMode(clientId)) {
-            clientOutput.write(RESPSerializer.error("MULTI calls can not be nested"));
-            clientOutput.flush();
+            clientConnection.write(RESPSerializer.error("MULTI calls can not be nested"));
+            clientConnection.flush();
             return;
         }
 
@@ -107,37 +107,37 @@ public class TransactionCoordinator {
 
         // Begin transaction
         transactionManager.beginTransactionContext(clientId);
-        clientOutput.write(RESPSerializer.simpleString("OK"));
-        clientOutput.flush();
+        clientConnection.write(RESPSerializer.simpleString("OK"));
+        clientConnection.flush();
     }
 
-    private void handleExec(String clientId, ClientConnection clientOutput) throws IOException {
+    private void handleExec(String clientId, ClientConnection clientConnection) throws IOException {
         // Check if in MULTI mode
         if (!transactionManager.isInMultiMode(clientId)) {
-            clientOutput.write(RESPSerializer.error("EXEC without MULTI"));
-            clientOutput.flush();
+            clientConnection.write(RESPSerializer.error("EXEC without MULTI"));
+            clientConnection.flush();
             return;
         }
 
         // Execute all queued commands atomically
-        executeTransaction(clientId, clientOutput);
+        executeTransaction(clientId, clientConnection);
     }
 
-    private void handleDiscard(String clientId, ClientConnection clientOutput) throws IOException {
+    private void handleDiscard(String clientId, ClientConnection clientConnection) throws IOException {
         // Check if in MULTI mode
         if (!transactionManager.isInMultiMode(clientId)) {
-            clientOutput.write(RESPSerializer.error("DISCARD without MULTI"));
-            clientOutput.flush();
+            clientConnection.write(RESPSerializer.error("DISCARD without MULTI"));
+            clientConnection.flush();
             return;
         }
 
         // Discard the transaction
         transactionManager.discardTransaction(clientId);
-        clientOutput.write(RESPSerializer.simpleString("OK"));
-        clientOutput.flush();
+        clientConnection.write(RESPSerializer.simpleString("OK"));
+        clientConnection.flush();
     }
 
-    private void executeTransaction(String clientId, ClientConnection clientOutput) throws IOException {
+    private void executeTransaction(String clientId, ClientConnection clientConnection) throws IOException {
         // Get all queued commands and clear the transaction context
         TransactionContext context = transactionManager.getTransactionContextAndClear(clientId);
         List<CommandRequest> queuedCommands = context.drainCommands();
@@ -155,7 +155,7 @@ public class TransactionCoordinator {
                     public void write(int b) {
                         stringWriter.write(b);
                     }
-                });
+                }, clientConnection.getInputStream());
 
                 CommandStrategy commandStrategy = commandFactory.getCommandStrategy(request.getCommandName());
                 if (commandStrategy != null) {
@@ -171,7 +171,7 @@ public class TransactionCoordinator {
         }
 
         // Send all replies as a RESP array
-        clientOutput.write(RESPSerializer.execArray(replies));
-        clientOutput.flush();
+        clientConnection.write(RESPSerializer.execArray(replies));
+        clientConnection.flush();
     }
 }

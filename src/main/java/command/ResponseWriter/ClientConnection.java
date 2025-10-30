@@ -1,35 +1,72 @@
 package command.ResponseWriter;
 
-import java.io.IOException;
-import java.io.OutputStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 
 public class ClientConnection {
-    private final OutputStream outputStream;
 
-    public ClientConnection(OutputStream outputStream) {
+    private final OutputStream outputStream;
+    private final InputStream inputStream;
+    private final BufferedReader reader;
+
+    public ClientConnection(OutputStream outputStream, InputStream inputStream) {
         this.outputStream = outputStream;
+        this.inputStream = inputStream;
+        this.reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
     }
 
-    // For text-based commands (RESP messages)
-    public void write(String response) throws IOException {
+    /* ========== WRITE ========== */
+
+    public synchronized void write(String response) throws IOException {
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
     }
 
-    public void flush() throws IOException {
+    public synchronized void flush() throws IOException {
         outputStream.flush();
     }
 
-    // For binary data (like RDB)
-    public void writeBytes(byte[] data) throws IOException {
+    public synchronized void writeBytes(byte[] data) throws IOException {
         outputStream.write(data);
     }
 
-    public void flushBytes() throws IOException {
+    public synchronized void flushBytes() throws IOException {
         outputStream.flush();
+    }
+
+    /* ========== READ (simple) ========== */
+
+    // Read a single character (like InputStream.read())
+    public int read() throws IOException {
+        return inputStream.read();
+    }
+
+    // Read a single line terminated by '\n' (like BufferedReader.readLine())
+    public String readLine() throws IOException {
+        return reader.readLine();
+    }
+
+    // Read raw bytes into a buffer
+    public int readBytes(byte[] buffer) throws IOException {
+        return inputStream.read(buffer);
+    }
+
+    /* ========== CONNECTION MGMT ========== */
+
+    public void close() {
+        try { reader.close(); } catch (IOException ignored) {}
+        try { inputStream.close(); } catch (IOException ignored) {}
+        try { outputStream.close(); } catch (IOException ignored) {}
     }
 
     public OutputStream getOutputStream() {
         return outputStream;
+    }
+
+    public InputStream getInputStream() {
+        return inputStream;
+    }
+
+    public BufferedReader getBufferedReader() {
+        return reader;
     }
 }

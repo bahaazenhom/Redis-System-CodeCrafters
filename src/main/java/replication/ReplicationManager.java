@@ -15,8 +15,10 @@ import java.util.concurrent.ConcurrentHashMap;
 import command.CommandExecuter;
 import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
+import server.ClientHandler;
 import server.CommandPropagationHandler;
 import server.ServerInstance;
+import server.SlaveAckHandler;
 
 public class ReplicationManager {
     private MasterNode masterNode;// reference to the master node if this instance is a master
@@ -158,17 +160,17 @@ public class ReplicationManager {
                 this.slaveNode.setMasterSocket(socket);
             }
 
-            ClientConnection connection = new ClientConnection(socket.getOutputStream());
+            ClientConnection connection = new ClientConnection(socket.getOutputStream(), socket.getInputStream());
             // Wrap the same InputStream in a BufferedReader for command parsing
-            BufferedReader reader = new BufferedReader(new InputStreamReader(input));
-            handleReplicationStream(connection, reader);
+            BufferedReader reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            handleReplicationStreamFromMaster(connection, reader);
 
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    private void handleReplicationStream(ClientConnection connection, BufferedReader in) {
+    private void handleReplicationStreamFromMaster(ClientConnection connection, BufferedReader in) {
         // Start a new thread to handle incoming commands from the master
         Thread replicaHandler = new Thread(new CommandPropagationHandler(slaveNode.getCommandExecuter(),
                 connection, in));
@@ -227,21 +229,32 @@ public class ReplicationManager {
         return this.slaveNode;
     }
 
+    // You are the aster here
     public void askForOffsetAcksFromSlaves() {
-        for (ClientConnection slaveConnection : slaveNodesSockets.values()) {
+        for (ClientConnection slaveMasterConnection : slaveNodesSockets.values()) {
             try {
                 List<String> ackCommand = new ArrayList<>();
                 ackCommand.add("REPLCONF");
                 ackCommand.add("GETACK");
                 ackCommand.add("*");
-                slaveConnection.write(RESPSerializer.array(ackCommand));
-                slaveConnection.flush();
+                slaveMasterConnection.write(RESPSerializer.array(ackCommand));
+                slaveMasterConnection.flush();
+
+                // Wait for the acknowledgment from the slave
+                handleAcksCommandsReceivedFromSlaves(slaveMasterConnection);
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
     }
 
+    private void handleAcksCommandsReceivedFromSlaves(ClientConnection connection) {
+        // Start a new thread to handle incoming acks commands from slaves
+        Thread slaveAckHandler = new Thread(new SlaveAckHandler(connection, masterNode.getCommandExecuter()));
+        slaveAckHandler.start();
+    }
+
+    // You are the Slave here
     public void responseToMasterWithAckOffset(ClientConnection slaveMasterConnection) {
         SlaveNode slave = this.slaveNode;
         if (slave != null) {
@@ -252,6 +265,7 @@ public class ReplicationManager {
                 ackCommand.add(String.valueOf(slave.getReplicationOffset()));
                 slaveMasterConnection.write(RESPSerializer.array(ackCommand));
                 slaveMasterConnection.flush();
+
             } catch (Exception e) {
                 e.printStackTrace();// Log the error
             }

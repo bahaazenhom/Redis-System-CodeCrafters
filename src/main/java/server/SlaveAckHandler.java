@@ -12,34 +12,30 @@ import command.CommandExecuter;
 import command.ResponseWriter.ClientConnection;
 import protocol.RESPParser;
 
-public class ClientHandler implements Runnable {
+public class SlaveAckHandler implements Runnable {
 
-    private final Socket socket;
+    private final ClientConnection clientConnection;
     private final CommandExecuter commandExecuter;
     private final String clientId;
 
-    public ClientHandler(Socket socket, CommandExecuter commandExecuter) {
-        this.socket = socket;
+    public SlaveAckHandler(ClientConnection clientConnection, CommandExecuter commandExecuter) {
+        this.clientConnection = clientConnection;
         this.commandExecuter = commandExecuter;
         this.clientId = UUID.randomUUID().toString();
     }
 
     @Override
     public void run() {
-        try (BufferedReader in = new BufferedReader(
-                new InputStreamReader(socket.getInputStream()));
-                OutputStream outputStream = socket.getOutputStream()) {
-
-            ClientConnection clientConnection = new ClientConnection(outputStream, socket.getInputStream());
-
-            processCommands(in, clientConnection);
+        try {
+            processCommands(clientConnection);
         } catch (IOException e) {
             System.err.println("Client connection error: " + e.getMessage());
         }
     }
 
-    private void processCommands(BufferedReader in, ClientConnection clientConnection)
+    private void processCommands(ClientConnection clientConnection)
             throws IOException {
+        BufferedReader in = clientConnection.getBufferedReader();
         String line;
         while ((line = in.readLine()) != null) {
             if (line.isEmpty() || !line.startsWith("*"))

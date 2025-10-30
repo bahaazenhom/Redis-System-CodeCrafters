@@ -32,7 +32,7 @@ public class CommandExecuter {
         commandMap.put(commandName.toUpperCase(), command);
     }
 
-    public void execute(String clientId, String commandName, List<String> arguments, ClientConnection clientOutput) {
+    public void execute(String clientId, String commandName, List<String> arguments, ClientConnection clientConnection) {
         CommandStrategy command = commandFactory.getCommandStrategy(commandName);
 
         if (command != null) {
@@ -40,24 +40,24 @@ public class CommandExecuter {
                 // Delegate transaction control commands to TransactionCoordinator
                 if (transactionCoordinator.isTransactionControlCommand(commandName)) {
                     transactionCoordinator.handleTransactionControlCommand(clientId, commandName, arguments, command,
-                            clientOutput);
+                            clientConnection);
                     return;
                 }
 
                 // If client is in MULTI mode, queue the command instead of executing
                 if (transactionCoordinator.isInMultiMode(clientId)) {
-                    transactionCoordinator.queueCommand(clientId, commandName, arguments, command, clientOutput);
+                    transactionCoordinator.queueCommand(clientId, commandName, arguments, command, clientConnection);
                     return;
                 }
 
                 // Normal execution path: validate and execute
                 command.validateArguments(arguments);
-                command.execute(arguments, clientOutput);
+                command.execute(arguments, clientConnection);
 
             } catch (IllegalArgumentException e) {
                 try {
-                    clientOutput.write(RESPSerializer.error(e.getMessage()));
-                    clientOutput.flush();
+                    clientConnection.write(RESPSerializer.error(e.getMessage()));
+                    clientConnection.flush();
                 } catch (IOException ioException) {
                     throw new RuntimeException(ioException);
                 }
@@ -67,8 +67,8 @@ public class CommandExecuter {
         } else {
             // Unknown command
             try {
-                clientOutput.write(RESPSerializer.error("unknown command '" + commandName + "'"));
-                clientOutput.flush();
+                clientConnection.write(RESPSerializer.error("unknown command '" + commandName + "'"));
+                clientConnection.flush();
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
