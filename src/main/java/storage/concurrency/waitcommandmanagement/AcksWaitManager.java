@@ -61,7 +61,8 @@ public class AcksWaitManager {
             // If the first waiter requires higher offset than this replica reached, stop.
             if (req.getOffsetTarget() > replicaOffset)
                 return;
-                System.out.println("the replica offset " + replicaOffset + " reached the target offset " + req.getOffsetTarget());
+            System.out.println(
+                    "the replica offset " + replicaOffset + " reached the target offset " + req.getOffsetTarget());
             // Remove the request so we can update it
             req = waitQueue.poll();
             req.getLock().lock();
