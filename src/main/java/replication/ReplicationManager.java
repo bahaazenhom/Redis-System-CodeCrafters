@@ -229,6 +229,7 @@ public class ReplicationManager {
     public void askForOffsetAcksFromSlaves() {
         for (Integer slavePort : slaveNodesSockets.keySet()) {
             try {
+                System.out.println("Master asking slave on port " + slavePort + " for ACK offset");
                 Socket slaveSocket = new Socket("localhost", slavePort);
                 ClientConnection slaveMasterConnection = new ClientConnection(slaveSocket.getOutputStream(),
                         slaveSocket.getInputStream());
