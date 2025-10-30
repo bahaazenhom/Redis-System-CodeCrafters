@@ -52,6 +52,7 @@ public class AcksWaitManager {
      * reached.
      */
     public void signalWaiters(int replicaId, long replicaOffset) {
+        System.out.println("Signaling waiters for replica " + replicaId + " at offset " + replicaOffset);
         while (true) {
             WaitRequest req = waitQueue.peek();
             if (req == null)
@@ -60,7 +61,7 @@ public class AcksWaitManager {
             // If the first waiter requires higher offset than this replica reached, stop.
             if (req.getOffsetTarget() > replicaOffset)
                 return;
-
+                System.out.println("the replica offset " + replicaOffset + " reached the target offset " + req.getOffsetTarget());
             // Remove the request so we can update it
             req = waitQueue.poll();
             req.getLock().lock();
@@ -72,6 +73,7 @@ public class AcksWaitManager {
                 if (req.tryComplete()) {
                     req.getCondition().signal();
                 } else {
+                    System.out.println("Not enough replicas yet → reinsert request for future ACKs");
                     // Not enough replicas yet → reinsert request for future ACKs
                     waitQueue.add(req);
                 }
