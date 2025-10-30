@@ -8,21 +8,24 @@ public class ClientConnection {
     private final OutputStream outputStream;
     private final InputStream inputStream;
     private final BufferedReader reader;
+    private final BufferedWriter writer;
 
     public ClientConnection(OutputStream outputStream, InputStream inputStream) {
         this.outputStream = outputStream;
         this.inputStream = inputStream;
         this.reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
+        this.writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
     }
 
     /* ========== WRITE ========== */
 
     public synchronized void write(String response) throws IOException {
-        outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+        //outputStream.write(response.getBytes(StandardCharsets.UTF_8));
+        writer.write(response);
     }
 
     public synchronized void flush() throws IOException {
-        outputStream.flush();
+        writer.flush();
     }
 
     public synchronized void writeBytes(byte[] data) throws IOException {

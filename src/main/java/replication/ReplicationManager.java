@@ -250,33 +250,22 @@ public class ReplicationManager {
     }
 
     // You are the Slave here
-public void responseToMasterWithAckOffset(ClientConnection slaveMasterConnection) {
-    SlaveNode slave = this.slaveNode;
-    if (slave != null) {
-        try {
-            long offset = slave.getReplicationOffset();
-            System.out.println("[SLAVE] Sending ACK to master, offset=" + offset);
+    public void responseToMasterWithAckOffset(ClientConnection slaveMasterConnection) {
+        SlaveNode slave = this.slaveNode;
+        if (slave != null) {
+            try {
+                List<String> ackCommand = new ArrayList<>();
+                ackCommand.add("REPLCONF");
+                ackCommand.add("ACK");
+                ackCommand.add(String.valueOf(slave.getReplicationOffset()));
+                slaveMasterConnection.write(RESPSerializer.array(ackCommand));
+                slaveMasterConnection.flush();
 
-            List<String> ackCommand = new ArrayList<>();
-            ackCommand.add("REPLCONF");
-            ackCommand.add("ACK");
-            ackCommand.add(String.valueOf(offset));
-
-            String resp = RESPSerializer.array(ackCommand);
-            System.out.println("[SLAVE] ACK Payload: " + resp);
-
-            slaveMasterConnection.write(resp);
-            slaveMasterConnection.flush();
-
-            System.out.println("[SLAVE] ACK sent to master ✅");
-
-        } catch (Exception e) {
-            System.out.println("[SLAVE] ERROR sending ACK to master ❌");
-            e.printStackTrace();
+            } catch (Exception e) {
+                e.printStackTrace();// Log the error
+            }
         }
     }
-}
-
 
     public static boolean isSlaveNode() {
         return isSlaveNode;
