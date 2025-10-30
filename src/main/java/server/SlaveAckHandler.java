@@ -26,7 +26,7 @@ public class SlaveAckHandler{
             System.out.println("Starting SlaveAckHandler for clientId: " + clientId);
             processCommands(clientConnection);
         } catch (IOException e) {
-            System.err.println("Client connection error: " + e.getMessage());
+            System.err.println("Client connection error from SlaveAckHandler: " + e.getMessage());
         }
     }
 

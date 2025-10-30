@@ -34,7 +34,7 @@ public class ClientHandler implements Runnable {
 
             processCommands(in, clientConnection);
         } catch (IOException e) {
-            System.err.println("Client connection error: " + e.getMessage());
+            System.err.println("Client connection error from ClientHandler: " + e.getMessage());
         }
     }
 
