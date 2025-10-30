@@ -40,6 +40,7 @@ public class PSYNCCommand implements CommandStrategy {
             int slavePort = replicationManager.getMasterNode().getClientSocket().getPort();
             // Register slave.
             System.out.println("Registering slave on port: " + slavePort);
+            System.out.println("this is the connection we will store: $$$$$$$$ " + clientConnection);
             replicationManager.getSlaveNodesSockets().put(slavePort, clientConnection);
 
 

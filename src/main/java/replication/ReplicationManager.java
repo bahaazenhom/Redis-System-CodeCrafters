@@ -226,23 +226,25 @@ public class ReplicationManager {
     }
 
     // You are the Master here
-        public void askForOffsetAcksFromSlaves() {
-            for (ClientConnection slaveMasterConnection : slaveNodesSockets.values()) {
-                try {
-                    List<String> ackCommand = new ArrayList<>();
-                    ackCommand.add("REPLCONF");
-                    ackCommand.add("GETACK");
-                    ackCommand.add("*");
-                    slaveMasterConnection.write(RESPSerializer.array(ackCommand));
-                    slaveMasterConnection.flush();
-                    System.out.println("Master asked slave for ACK offset " + RESPSerializer.array(ackCommand));
-                    // Wait for the acknowledgment from the slave
+    public void askForOffsetAcksFromSlaves() {
+        for (ClientConnection slaveMasterConnection : slaveNodesSockets.values()) {
+            try {
+                System.out.println("2 and this is the connection we will store: $$$$$$$$ " + slaveMasterConnection);
+
+                List<String> ackCommand = new ArrayList<>();
+                ackCommand.add("REPLCONF");
+                ackCommand.add("GETACK");
+                ackCommand.add("*");
+                slaveMasterConnection.write(RESPSerializer.array(ackCommand));
+                slaveMasterConnection.flush();
+                System.out.println("Master asked slave for ACK offset " + RESPSerializer.array(ackCommand));
+                // Wait for the acknowledgment from the slave
                 // handleAcksCommandsReceivedFromSlaves(slaveMasterConnection);
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+            } catch (Exception e) {
+                e.printStackTrace();
             }
         }
+    }
 
     private void handleAcksCommandsReceivedFromSlaves(ClientConnection connection) {
         // Start a new thread to handle incoming acks commands from slaves
