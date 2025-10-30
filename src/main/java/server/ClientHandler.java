@@ -41,6 +41,8 @@ private void processCommands(BufferedReader in, ClientConnection clientConnectio
         throws IOException {
 
     String line;
+    System.out.println("$$$$$ client connection is: " + clientConnection);
+    System.out.println("socket port is: " + socket.getPort());
     while ((line = in.readLine()) != null) {
 
         System.out.println("-------------------------------------------------");
