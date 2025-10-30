@@ -226,27 +226,23 @@ public class ReplicationManager {
     }
 
     // You are the Master here
-    public void askForOffsetAcksFromSlaves() {
-        for (Integer slavePort : slaveNodesSockets.keySet()) {
-            try {
-                System.out.println("Master asking slave on port " + slavePort + " for ACK offset");
-                Socket slaveSocket = new Socket("localhost", slavePort);
-                ClientConnection slaveMasterConnection = new ClientConnection(slaveSocket.getOutputStream(),
-                        slaveSocket.getInputStream());
-                List<String> ackCommand = new ArrayList<>();
-                ackCommand.add("REPLCONF");
-                ackCommand.add("GETACK");
-                ackCommand.add("*");
-                slaveMasterConnection.write(RESPSerializer.array(ackCommand));
-                slaveMasterConnection.flush();
-                System.out.println("Master asked slave for ACK offset " + RESPSerializer.array(ackCommand));
-                // Wait for the acknowledgment from the slave
-               // handleAcksCommandsReceivedFromSlaves(slaveMasterConnection);
-            } catch (Exception e) {
-                e.printStackTrace();
+        public void askForOffsetAcksFromSlaves() {
+            for (ClientConnection slaveMasterConnection : slaveNodesSockets.values()) {
+                try {
+                    List<String> ackCommand = new ArrayList<>();
+                    ackCommand.add("REPLCONF");
+                    ackCommand.add("GETACK");
+                    ackCommand.add("*");
+                    slaveMasterConnection.write(RESPSerializer.array(ackCommand));
+                    slaveMasterConnection.flush();
+                    System.out.println("Master asked slave for ACK offset " + RESPSerializer.array(ackCommand));
+                    // Wait for the acknowledgment from the slave
+                // handleAcksCommandsReceivedFromSlaves(slaveMasterConnection);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
             }
         }
-    }
 
     private void handleAcksCommandsReceivedFromSlaves(ClientConnection connection) {
         // Start a new thread to handle incoming acks commands from slaves
