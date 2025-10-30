@@ -34,33 +34,56 @@ public class ClientHandler implements Runnable {
 
             processCommands(in, clientConnection);
         } catch (IOException e) {
-            System.err.println("Client connection error from ClientHandler: " + e.getMessage());
+            System.err.println("Client connection error from : " + e.getMessage());
         }
     }
+private void processCommands(BufferedReader in, ClientConnection clientConnection)
+        throws IOException {
 
-    private void processCommands(BufferedReader in, ClientConnection clientConnection)
-            throws IOException {
-        String line;
-        while ((line = in.readLine()) != null) {
-            if (line.isEmpty() || !line.startsWith("*"))
-                continue;
+    String line;
+    while ((line = in.readLine()) != null) {
 
-            int numElements = Integer.parseInt(line.substring(1));
-            List<String> commands = RESPParser.parseRequest(numElements, in);
+        System.out.println("-------------------------------------------------");
+        System.out.println("[PROPAGATION] Raw line received: \"" + line + "\"");
 
-            String commandName = commands.get(0);
+        if (line.isEmpty() || !line.startsWith("*")) {
+            System.out.println("[PROPAGATION] Skipping line (empty or not array)");
+            continue;
+        }
 
-            
-            int startIndexSublist = 1;
-            if (commandName.equalsIgnoreCase("REPLCONF")) {
-                commandName = commands.get(1);
-                startIndexSublist = 2;
-            }
+        int numElements = Integer.parseInt(line.substring(1));
+        System.out.println("[PROPAGATION] RESP array count: " + numElements);
 
-            List<String> arguments = commands.subList(startIndexSublist, commands.size());
-            System.out.println("Received command: " + commandName + " with arguments: " + arguments);
+        List<String> commands = RESPParser.parseRequest(numElements, in);
+        System.out.println("[PROPAGATION] Parsed RESP elements: " + commands);
+
+        String commandName = commands.get(0);
+        System.out.println("[PROPAGATION] Initial commandName: " + commandName);
+
+        int startIndexSublist = 1;
+        if (commandName.equalsIgnoreCase("REPLCONF")) {
+            System.out.println("[PROPAGATION] REPLCONF detected");
+            commandName = commands.get(1);
+            startIndexSublist = 2;
+            System.out.println("[PROPAGATION] REPLCONF subcommand: " + commandName);
+        }
+
+        List<String> arguments = commands.subList(startIndexSublist, commands.size());
+        System.out.println("[PROPAGATION] Final commandName: " + commandName + ", args: " + arguments);
+
+        System.out.println("[PROPAGATION] Executing: " + commandName + " " + arguments);
+
+        try {
             commandExecuter.execute(clientId, commandName, arguments, clientConnection);
+            System.out.println("[PROPAGATION] Command executed successfully");
+        } catch (Exception e) {
+            System.out.println("[PROPAGATION] ERROR executing command: " + e.getMessage());
+            e.printStackTrace();
         }
     }
+
+    System.out.println("[PROPAGATION] Input stream closed, exiting processCommands");
+}
+
 
 }
