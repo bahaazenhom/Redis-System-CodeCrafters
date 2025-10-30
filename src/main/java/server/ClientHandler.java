@@ -11,12 +11,14 @@ import java.util.UUID;
 import command.CommandExecuter;
 import command.ResponseWriter.ClientConnection;
 import protocol.RESPParser;
+import replication.ReplicationManager;
 
 public class ClientHandler implements Runnable {
 
     private final Socket socket;
     private final CommandExecuter commandExecuter;
     private final String clientId;
+    private final ReplicationManager replicationManager = ReplicationManager.create();
 
     public ClientHandler(Socket socket, CommandExecuter commandExecuter) {
         this.socket = socket;
@@ -43,6 +45,8 @@ private void processCommands(BufferedReader in, ClientConnection clientConnectio
     String line;
     System.out.println("$$$$$ client connection is: " + clientConnection);
     System.out.println("socket port is: " + socket.getPort());
+    System.out.println("are you master? " + replicationManager.getMasterNode().getClientSocket().getPort()
+            + " compared to " + socket.getPort());
     while ((line = in.readLine()) != null) {
 
         System.out.println("-------------------------------------------------");
