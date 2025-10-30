@@ -10,6 +10,7 @@ import java.io.OutputStreamWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import command.CommandExecuter;
@@ -227,9 +228,10 @@ public class ReplicationManager {
 
     // You are the Master here
     public void askForOffsetAcksFromSlaves() {
-        for (ClientConnection slaveMasterConnection : slaveNodesSockets.values()) {
+        for (Map.Entry<Integer, ClientConnection> entry : slaveNodesSockets.entrySet()) {
             try {
-                System.out.println("2 and this is the connection we will store: $$$$$$$$ " + slaveMasterConnection);
+                ClientConnection slaveMasterConnection = entry.getValue();
+                System.out.println("2 connection with port "+entry.getKey()+" $$$$$$$$ " + slaveMasterConnection);
 
                 List<String> ackCommand = new ArrayList<>();
                 ackCommand.add("REPLCONF");
