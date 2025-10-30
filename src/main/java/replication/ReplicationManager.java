@@ -235,7 +235,7 @@ public class ReplicationManager {
                 ackCommand.add("*");
                 slaveMasterConnection.write(RESPSerializer.array(ackCommand));
                 slaveMasterConnection.flush();
-                System.out.println("Master asked slave for ACK offset " + ackCommand);
+                System.out.println("Master asked slave for ACK offset " + RESPSerializer.array(ackCommand));
                 // Wait for the acknowledgment from the slave
                // handleAcksCommandsReceivedFromSlaves(slaveMasterConnection);
             } catch (Exception e) {
