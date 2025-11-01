@@ -66,5 +66,9 @@ public class WaitRequest implements Comparable<WaitRequest> {
     public ReentrantLock getLock() { return lock; }
     public Condition getCondition() { return condition; }
     public int getCurrentReceivedAcks() { return currentReceivedAcks; }
+
+    public int getNumAcksRequired() {
+        return numAcksRequired;
+    }
 }
 

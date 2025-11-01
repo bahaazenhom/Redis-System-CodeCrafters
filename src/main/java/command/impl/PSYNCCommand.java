@@ -8,6 +8,7 @@ import command.CommandStrategy;
 import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
 import replication.ReplicationManager;
+import server.SlaveAckHandler;
 
 public class PSYNCCommand implements CommandStrategy {
     private final ReplicationManager replicationManager;
@@ -22,7 +23,7 @@ public class PSYNCCommand implements CommandStrategy {
             // Send FULLRESYNC response
             String masterID = replicationManager.getMasterNode().getId();
             clientConnection.write(RESPSerializer.simpleString("FULLRESYNC " + masterID + " 0"));
-            clientConnection.flush(); //flush text
+            clientConnection.flush(); // flush text
 
             // Send RDB file (empty RDB for simplicity)
             String emptyRdbBase64 = "UkVESVMwMDEx+glyZWRpcy12ZXIFNy4yLjD6CnJlZGlzLWJpdHPAQPoFY3RpbWXCbQi8ZfoIdXNlZC1tZW3CsMQQAPoIYW9mLWJhc2XAAP/wbjv+wP9aog==";
@@ -40,6 +41,9 @@ public class PSYNCCommand implements CommandStrategy {
             Integer slavePort = replicationManager.getSlaveIdForConnection(clientConnection);
             System.out.println("Replica handshake complete. Registered listening port: "
                     + (slavePort != null ? slavePort : "unknown"));
+            // new Thread(() -> {
+            //     new SlaveAckHandler(clientConnection, replicationManager.getMasterNode().getCommandExecuter()).run();
+            // }).start();
 
         } catch (Exception e) {
             e.printStackTrace();

@@ -47,8 +47,8 @@ private void processCommands(BufferedReader in, ClientConnection clientConnectio
     System.out.println("socket port is: " + socket.getPort());
     System.out.println("are you master? " + replicationManager.getMasterNode().getClientSocket().getPort()
             + " compared to " + socket.getPort());
-    while ((line = in.readLine()) != null) {
-
+    while ((line = in.readLine()) != null) {    
+        
         System.out.println("-------------------------------------------------");
         System.out.println("[PROPAGATION] Raw line received: \"" + line + "\"");
 
