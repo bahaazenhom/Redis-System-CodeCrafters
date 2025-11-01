@@ -3,8 +3,8 @@ package command.impl.acks;
 import java.util.List;
 
 import command.CommandStrategy;
-import command.ResponseWriter.ClientConnection;
 import replication.ReplicationManager;
+import server.connection.ClientConnection;
 import storage.concurrency.waitcommandmanagement.AcksWaitManager;
 
 public class AckCommand implements CommandStrategy {

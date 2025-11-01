@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import command.CommandExecuter;
-import server.ServerInstance;
+import server.core.ServerInstance;
 
 public class MasterNode extends ServerInstance {
     private final String role = "master";

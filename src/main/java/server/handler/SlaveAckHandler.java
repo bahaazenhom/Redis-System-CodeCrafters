@@ -1,27 +1,29 @@
-package server;
+package server.handler;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
+import java.util.logging.Logger;
 
 import command.CommandExecuter;
 import protocol.RESPParser;
-import protocol.RESPSerializer;
-import replication.ReplicationManager;
 import server.connection.ClientConnection;
+import util.AppLogger;
 
-public class CommandPropagationHandler implements Runnable {
+public class SlaveAckHandler {
 
-    private final ReplicationManager replicationManager = ReplicationManager.create();
     private final ClientConnection clientConnection;
     private final CommandExecuter commandExecuter;
+    private final String clientId;
+    Logger logger = AppLogger.getLogger(SlaveAckHandler.class);
 
-    public CommandPropagationHandler(CommandExecuter commandExecuter, ClientConnection clientConnection) {
-        this.commandExecuter = commandExecuter;
+    public SlaveAckHandler(ClientConnection clientConnection, CommandExecuter commandExecuter) {
         this.clientConnection = clientConnection;
+        this.commandExecuter = commandExecuter;
+        this.clientId = UUID.randomUUID().toString();
     }
 
-    @Override
     public void run() {
         try {
             processCommands(clientConnection);
@@ -32,29 +34,28 @@ public class CommandPropagationHandler implements Runnable {
 
     private void processCommands(ClientConnection clientConnection)
             throws IOException {
+        logger.info("Processing commands for client: " + clientId);
+
         BufferedReader in = clientConnection.getBufferedReader();
         String line;
         while ((line = in.readLine()) != null) {
-            if (line.isEmpty() || !line.startsWith("*"))
+            if (line.isEmpty() || !line.startsWith("*")) {
                 continue;
+            }
 
             int numElements = Integer.parseInt(line.substring(1));
             List<String> commands = RESPParser.parseRequest(numElements, in);
 
             String commandName = commands.get(0);
-            
+
             int startIndexSublist = 1;
             if (commandName.equalsIgnoreCase("REPLCONF")) {
                 commandName = commands.get(1);
                 startIndexSublist = 2;
             }
-            
-            List<String> arguments = commands.subList(startIndexSublist, commands.size());
-            commandExecuter.execute("clientId", commandName, arguments, clientConnection);
 
-            // Update replication offset
-            String RESPCommand = RESPSerializer.array(commands);
-            replicationManager.updateSlaveOffset(RESPCommand.getBytes().length);
+            List<String> arguments = commands.subList(startIndexSublist, commands.size());
+            commandExecuter.execute(clientId, commandName, arguments, clientConnection);
         }
     }
 

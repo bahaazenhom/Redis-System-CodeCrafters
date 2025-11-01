@@ -1,4 +1,4 @@
-package command.ResponseWriter;
+package server.connection;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;

@@ -1,10 +1,11 @@
-package server;
+package server.core;
 
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 import command.CommandExecuter;
+import server.handler.ClientHandler;
 
 public class ServerInstance implements Runnable {
     private final String host;

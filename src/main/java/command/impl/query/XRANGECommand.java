@@ -4,8 +4,8 @@ import java.io.IOException;
 import java.util.List;
 
 import command.CommandStrategy;
-import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
+import server.connection.ClientConnection;
 import storage.DataStore;
 
 public class XRANGECommand implements CommandStrategy {

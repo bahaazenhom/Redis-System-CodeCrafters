@@ -4,10 +4,11 @@ import java.util.List;
 import java.util.logging.Logger;
 
 import command.CommandStrategy;
-import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
 import replication.ReplicationManager;
-import storage.concurrency.waitcommandmanagement.*;
+import server.connection.ClientConnection;
+import storage.concurrency.waitcommandmanagement.AcksWaitManager;
+import storage.concurrency.waitcommandmanagement.WaitRequest;
 import util.AppLogger;
 
 public class WaitCommand implements CommandStrategy {

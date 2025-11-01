@@ -3,7 +3,7 @@ package replication;
 import java.io.IOException;
 import java.net.Socket;
 import command.CommandExecuter;
-import server.ServerInstance;
+import server.core.ServerInstance;
 
 public class SlaveNode extends ServerInstance {
     private final int id;

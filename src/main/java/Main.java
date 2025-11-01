@@ -4,13 +4,14 @@ import java.util.logging.Level;
 
 import command.CommandExecuter;
 import replication.ReplicationManager;
-import server.ServerInstance;
-import server.ServerManager;
+import server.ServerContext;
+import server.core.ServerInstance;
+import server.core.ServerManager;
 import storage.impl.InMemoryDataStore;
 import util.AppLogger;
+import util.ServerConfiguration;
 
 public class Main {
-    private static final int DEFAULT_PORT = 6379;
 
     public static void main(String[] args) throws IOException {
         // Initialize logging system
@@ -18,37 +19,25 @@ public class Main {
         // Set log level to INFO for production, or FINE/FINEST for debugging
         AppLogger.setLogLevel(Level.INFO); // Change to Level.FINE for more verbose logs
 
+        ServerConfiguration config = new ServerConfiguration(args);
+
+        ServerContext serverContext = ServerContext.getInstance();
+        
+        // Store configuration in ServerContext for global access
+        serverContext.setConfiguration(config);
+
         CommandExecuter commandExecuter = new CommandExecuter(new InMemoryDataStore());
         ServerManager serverManager = ServerManager.create();
-        int port = parsePort(args);
-        String[] serverRole = parseServerRole(args);
+
+        int port = config.getPort();
+        int masterPort = config.getMasterPort();
+        String serverRole = config.getServerRole();
+        String masterHost = config.getMasterHost();
+
         ReplicationManager replicationManager = ReplicationManager.create();
-        ServerInstance serverInstance = replicationManager.createReplica(port, commandExecuter, serverRole);
+        ServerInstance serverInstance = replicationManager.createReplica(commandExecuter, port, serverRole, masterPort, masterHost);
         serverManager.startServer(serverInstance);
     }
 
-    private static String[] parseServerRole(String[] args) {
-        for (int index = 0; index < args.length; index++) {
-            String arg = args[index];
-            if (arg.equals("--replicaof")) {
-                String[] masterData = args[index + 1].split(" ");
-                return new String[] { "slave", masterData[0], masterData[1] };
-            }
-        }
-        return new String[] { "master" }; // default state
-    }
 
-    private static int parsePort(String[] args) {
-        int port = DEFAULT_PORT;
-        if (args.length > 0) {
-            try {
-                if (args[0].equals("--port")) {
-                    port = Integer.parseInt(args[1]);
-                }
-            } catch (NumberFormatException e) {
-                // Use default port if invalid
-            }
-        }
-        return port;
-    }
 }

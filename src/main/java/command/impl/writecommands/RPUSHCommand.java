@@ -5,9 +5,9 @@ import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.List;
 import command.CommandStrategy;
-import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
 import replication.ReplicationManager;
+import server.connection.ClientConnection;
 import storage.DataStore;
 import storage.types.ListValue;
 

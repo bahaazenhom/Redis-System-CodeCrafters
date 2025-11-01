@@ -10,10 +10,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import command.CommandExecuter;
-import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
-import server.CommandPropagationHandler;
-import server.ServerInstance;
+import server.connection.ClientConnection;
+import server.handler.CommandPropagationHandler;
+import server.core.ServerInstance;
 
 public class ReplicationManager {
     private MasterNode masterNode;// reference to the master node if this instance is a master
@@ -36,21 +36,22 @@ public class ReplicationManager {
         return replicationManager;
     }
 
-    public ServerInstance createReplica(int port, CommandExecuter commandExecuter, String[] args) throws IOException {
-        if (args[0].equals("master")) {
-            MasterNode master = new MasterNode("localhost", port, commandExecuter, "master");
+    public ServerInstance createReplica(CommandExecuter commandExecuter, int port, String serverRole, int masterPort,
+            String host) throws IOException {
+        if (serverRole.equals("master")) {
+            MasterNode master = new MasterNode(host, port, commandExecuter, serverRole);
             this.masterNode = master;
             return master;
         } else {
-            String masterHost = args[1];
-            int masterPort = Integer.parseInt(args[2]);
-            this.slaveNode = new SlaveNode("localhost", port, commandExecuter, "slave", masterHost, masterPort);
+            String masterHost = host;
+            int master_port = masterPort;
+            this.slaveNode = new SlaveNode(host, port, commandExecuter, serverRole, masterHost, master_port);
             isSlaveNode = true;
-            masterHandshake(port, masterHost, masterPort);
+            masterHandshake(port, masterHost, master_port);
             return this.slaveNode;
         }
     }
-
+    
     private void masterHandshake(int slavePort, String masterHost, int masterPort) {
         try {
             Socket socket = new Socket(masterHost, masterPort);

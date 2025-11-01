@@ -4,7 +4,7 @@ package command.impl.transaction;
 import java.util.List;
 
 import command.CommandStrategy;
-import command.ResponseWriter.ClientConnection;
+import server.connection.ClientConnection;
 
 /**
  * DISCARD command implementation.

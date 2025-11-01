@@ -1,4 +1,5 @@
-package server;
+package server.core;
+
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 

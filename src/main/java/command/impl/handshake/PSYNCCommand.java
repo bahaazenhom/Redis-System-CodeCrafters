@@ -4,10 +4,10 @@ import java.util.Base64;
 import java.util.List;
 
 import command.CommandStrategy;
-import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
 import replication.ReplicationManager;
-import server.SlaveAckHandler;
+import server.connection.ClientConnection;
+import server.handler.SlaveAckHandler;
 
 public class PSYNCCommand implements CommandStrategy {
     private final ReplicationManager replicationManager;

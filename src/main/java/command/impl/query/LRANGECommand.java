@@ -6,8 +6,8 @@ import java.util.Deque;
 import java.util.List;
 
 import command.CommandStrategy;
-import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
+import server.connection.ClientConnection;
 import storage.DataStore;
 import storage.types.ListValue;
 

@@ -39,6 +39,7 @@ public class CommandFactory {
             case "ECHO" -> new EchoCommand();
             case "SET" -> new SetCommand(dataStore, replicationManager);
             case "GET" -> new GetCommand(dataStore);
+            case "CONFIG" -> new CONFIGCommand();
             case "RPUSH" -> new RPUSHCommand(dataStore, replicationManager);
             case "LRANGE" -> new LRANGECommand(dataStore);
             case "LPUSH" -> new LPUSHCommand(dataStore, replicationManager);

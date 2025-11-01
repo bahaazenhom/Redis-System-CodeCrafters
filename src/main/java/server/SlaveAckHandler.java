@@ -4,16 +4,19 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import command.CommandExecuter;
-import command.ResponseWriter.ClientConnection;
 import protocol.RESPParser;
+import server.connection.ClientConnection;
+import util.AppLogger;
 
-public class SlaveAckHandler{
-    
+public class SlaveAckHandler {
+
     private final ClientConnection clientConnection;
     private final CommandExecuter commandExecuter;
     private final String clientId;
+    Logger logger = AppLogger.getLogger(SlaveAckHandler.class);
 
     public SlaveAckHandler(ClientConnection clientConnection, CommandExecuter commandExecuter) {
         this.clientConnection = clientConnection;
@@ -31,16 +34,18 @@ public class SlaveAckHandler{
 
     private void processCommands(ClientConnection clientConnection)
             throws IOException {
+        logger.info("Processing commands for client: " + clientId);
+
         BufferedReader in = clientConnection.getBufferedReader();
         String line;
         while ((line = in.readLine()) != null) {
             if (line.isEmpty() || !line.startsWith("*")) {
                 continue;
             }
-            
+
             int numElements = Integer.parseInt(line.substring(1));
             List<String> commands = RESPParser.parseRequest(numElements, in);
-            
+
             String commandName = commands.get(0);
 
             int startIndexSublist = 1;

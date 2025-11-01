@@ -1,8 +1,8 @@
 package command.impl.query;
 
 import command.CommandStrategy;
-import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
+import server.connection.ClientConnection;
 import storage.DataStore;
 import storage.types.StringValue;
 

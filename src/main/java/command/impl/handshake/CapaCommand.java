@@ -3,8 +3,8 @@ package command.impl.handshake;
 import java.util.List;
 
 import command.CommandStrategy;
-import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
+import server.connection.ClientConnection;
 
 public class CapaCommand implements CommandStrategy {
 

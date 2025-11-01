@@ -1,9 +1,9 @@
 package command.impl.connection;
 
 import command.CommandStrategy;
-import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
 import replication.ReplicationManager;
+import server.connection.ClientConnection;
 
 import java.io.IOException;
 import java.util.List;

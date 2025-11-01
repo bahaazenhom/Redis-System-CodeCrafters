@@ -1,9 +1,9 @@
 package command.impl.writecommands;
 
 import command.CommandStrategy;
-import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
 import replication.ReplicationManager;
+import server.connection.ClientConnection;
 import storage.DataStore;
 import storage.core.RedisValue;
 import storage.types.StringValue;
