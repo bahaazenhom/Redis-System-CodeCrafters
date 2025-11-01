@@ -3,7 +3,6 @@ package server;
 import java.io.BufferedReader;
 import java.io.OutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.net.Socket;
 import java.util.List;
 import java.util.UUID;
@@ -28,16 +27,14 @@ public class ClientHandler implements Runnable {
 
     @Override
     public void run() {
-        BufferedReader in = null;
         OutputStream outputStream = null;
         ClientConnection clientConnection = null;
         
         try {
-            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             outputStream = socket.getOutputStream();
             clientConnection = new ClientConnection(outputStream, socket.getInputStream());
 
-            processCommands(in, clientConnection);
+            processCommands(clientConnection);
             
         } catch (IOException e) {
             System.err.println("Client connection error from : " + e.getMessage());
@@ -45,9 +42,6 @@ public class ClientHandler implements Runnable {
             // Only close if this is NOT a replica connection that completed PSYNC
             // Replica connections are kept alive and handled by SlaveAckHandler
             try {
-                if (in != null && !isReplicaConnection(clientConnection)) {
-                    in.close();
-                }
                 if (outputStream != null && !isReplicaConnection(clientConnection)) {
                     outputStream.close();
                 }
@@ -65,10 +59,12 @@ public class ClientHandler implements Runnable {
         // Check if this connection is registered as a replica
         return replicationManager.getSlaveIdForConnection(clientConnection) != null;
     }
-private void processCommands(BufferedReader in, ClientConnection clientConnection)
-        throws IOException {
 
-    String line;
+    private void processCommands(ClientConnection clientConnection)
+            throws IOException {
+
+        BufferedReader in = clientConnection.getBufferedReader();
+        String line;
     System.out.println("$$$$$ client connection is: " + clientConnection);
     System.out.println("socket port is: " + socket.getPort());
     System.out.println("are you master? " + replicationManager.getMasterNode().getClientSocket().getPort()
