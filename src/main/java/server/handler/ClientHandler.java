@@ -15,7 +15,7 @@ import server.connection.ClientConnection;
 import util.AppLogger;
 
 public class ClientHandler implements Runnable {
-    
+
     private final Socket socket;
     private final CommandExecuter commandExecuter;
     private final String clientId;
@@ -32,13 +32,13 @@ public class ClientHandler implements Runnable {
     public void run() {
         OutputStream outputStream = null;
         ClientConnection clientConnection = null;
-        
+
         try {
             outputStream = socket.getOutputStream();
             clientConnection = new ClientConnection(outputStream, socket.getInputStream());
 
             processCommands(clientConnection);
-            
+
         } catch (IOException e) {
             // Connection closed or error
         } finally {
@@ -56,7 +56,7 @@ public class ClientHandler implements Runnable {
             }
         }
     }
-    
+
     private boolean isReplicaConnection(ClientConnection clientConnection) {
         if (clientConnection == null) {
             return false;
@@ -67,14 +67,13 @@ public class ClientHandler implements Runnable {
 
     private void processCommands(ClientConnection clientConnection)
             throws IOException {
-                logger.info("Processing commands for client: " + clientId);
-            
+        logger.info("Processing commands for client: " + clientId);
 
         BufferedReader in = clientConnection.getBufferedReader();
         String line;
-        
-        while ((line = in.readLine()) != null) {    
-            
+
+        while ((line = in.readLine()) != null) {
+
             if (line.isEmpty() || !line.startsWith("*")) {
                 continue;
             }
@@ -84,7 +83,7 @@ public class ClientHandler implements Runnable {
 
             String commandName = commands.get(0);
             int startIndexSublist = 1;
-            
+
             // Handle REPLCONF subcommands
             if (commandName.equalsIgnoreCase("REPLCONF")) {
                 commandName = commands.get(1);
@@ -98,13 +97,13 @@ public class ClientHandler implements Runnable {
             } catch (Exception e) {
                 // Error executing command
             }
-            
-            // After PSYNC completes, ClientHandler should exit and let SlaveAckHandler take over
-            // if (clientConnection.isHandoverToSlaveAckHandler()) {
-            //     break;
-            // }
+
+            // After PSYNC completes, ClientHandler should exit and let SlaveAckHandler take
+            // over
+            if (clientConnection.isHandoverToSlaveAckHandler()) {
+                break;
+            }
         }
     }
-
 
 }
