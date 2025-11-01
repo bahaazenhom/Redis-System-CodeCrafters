@@ -9,6 +9,9 @@ public class ClientConnection {
     private final InputStream inputStream;
     private final BufferedReader reader;
     private final BufferedWriter writer;
+    
+    // Flag to indicate PSYNC completed - ClientHandler should stop reading
+    private volatile boolean handoverToSlaveAckHandler = false;
 
     public ClientConnection(OutputStream outputStream, InputStream inputStream) {
         this.outputStream = outputStream;
@@ -71,5 +74,22 @@ public class ClientConnection {
 
     public BufferedReader getBufferedReader() {
         return reader;
+    }
+    
+    /* ========== PSYNC HANDOVER ========== */
+    
+    /**
+     * Mark this connection as handed over to SlaveAckHandler after PSYNC.
+     * ClientHandler should stop reading after this is set.
+     */
+    public void markHandoverToSlaveAckHandler() {
+        this.handoverToSlaveAckHandler = true;
+    }
+    
+    /**
+     * Check if PSYNC completed and SlaveAckHandler took over.
+     */
+    public boolean isHandoverToSlaveAckHandler() {
+        return handoverToSlaveAckHandler;
     }
 }

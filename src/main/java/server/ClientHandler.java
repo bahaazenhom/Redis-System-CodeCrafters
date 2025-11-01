@@ -74,6 +74,7 @@ public class ClientHandler implements Runnable {
 
         BufferedReader in = clientConnection.getBufferedReader();
         String line;
+    log.info("ClientHandler starting processCommands for connection: " + clientConnection);
     System.out.println("$$$$$ client connection is: " + clientConnection);
     System.out.println("socket port is: " + socket.getPort());
     System.out.println("are you master? " + replicationManager.getMasterNode().getClientSocket().getPort()
@@ -116,6 +117,12 @@ public class ClientHandler implements Runnable {
         } catch (Exception e) {
             System.out.println("[PROPAGATION] ERROR executing command: " + e.getMessage());
             e.printStackTrace();
+        }
+        
+        // After PSYNC completes, ClientHandler should exit and let SlaveAckHandler take over
+        if (clientConnection.isHandoverToSlaveAckHandler()) {
+            log.info("PSYNC completed - exiting ClientHandler, SlaveAckHandler will take over reading");
+            break;
         }
     }
 

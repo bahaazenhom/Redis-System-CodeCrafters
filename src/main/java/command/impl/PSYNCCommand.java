@@ -45,6 +45,11 @@ public class PSYNCCommand implements CommandStrategy {
             log.info("Replica handshake complete. Registered listening port: "
                     + (slavePort != null ? slavePort : "unknown"));
             
+            // Mark connection as handed over to SlaveAckHandler
+            // ClientHandler should stop reading after PSYNC completes
+            clientConnection.markHandoverToSlaveAckHandler();
+            log.info("Marked connection for handover to SlaveAckHandler");
+            
             log.info("Starting SlaveAckHandler thread for port " + slavePort 
                     + " using connection " + clientConnection);
             new Thread(() -> {
