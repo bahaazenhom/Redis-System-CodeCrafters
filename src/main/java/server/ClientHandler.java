@@ -120,10 +120,10 @@ public class ClientHandler implements Runnable {
         }
         
         // After PSYNC completes, ClientHandler should exit and let SlaveAckHandler take over
-        if (clientConnection.isHandoverToSlaveAckHandler()) {
-            log.info("PSYNC completed - exiting ClientHandler, SlaveAckHandler will take over reading");
-            break;
-        }
+        // if (clientConnection.isHandoverToSlaveAckHandler()) {
+        //     log.info("PSYNC completed - exiting ClientHandler, SlaveAckHandler will take over reading");
+        //     break;
+        // }
     }
 
     System.out.println("[PROPAGATION] Input stream closed, exiting processCommands");
