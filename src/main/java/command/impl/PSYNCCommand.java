@@ -41,9 +41,14 @@ public class PSYNCCommand implements CommandStrategy {
             Integer slavePort = replicationManager.getSlaveIdForConnection(clientConnection);
             System.out.println("Replica handshake complete. Registered listening port: "
                     + (slavePort != null ? slavePort : "unknown"));
+            
+            System.out.println("[PSYNCCommand] Starting SlaveAckHandler thread for port " + slavePort 
+                    + " using connection " + clientConnection);
             new Thread(() -> {
+                System.out.println("[PSYNCCommand] SlaveAckHandler thread STARTED for port " + slavePort);
                 new SlaveAckHandler(clientConnection, replicationManager.getMasterNode().getCommandExecuter()).run();
-            }).start();
+                System.out.println("[PSYNCCommand] SlaveAckHandler thread ENDED for port " + slavePort);
+            }, "SlaveAckHandler-" + slavePort).start();
 
         } catch (Exception e) {
             e.printStackTrace();

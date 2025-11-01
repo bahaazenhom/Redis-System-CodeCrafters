@@ -32,17 +32,23 @@ public class SlaveAckHandler{
 
     private void processCommands(ClientConnection clientConnection)
             throws IOException {
-        System.out.println("SlaveAckHandler processing commands for clientId: " + clientId);
+        System.out.println("[SlaveAckHandler] Starting to process commands for clientId: " + clientId);
         BufferedReader in = clientConnection.getBufferedReader();
+        System.out.println("[SlaveAckHandler] Got BufferedReader, about to enter readLine loop");
         String line;
-        System.out.println("or just here---------------");
         while ((line = in.readLine()) != null) {
-            if (line.isEmpty() || !line.startsWith("*"))
+            System.out.println("[SlaveAckHandler] *** READ LINE: \"" + line + "\"");
+            
+            if (line.isEmpty() || !line.startsWith("*")) {
+                System.out.println("[SlaveAckHandler] Skipping line (empty or not array)");
                 continue;
-                System.out.println("are i am here--------------------------");
+            }
+            
+            System.out.println("[SlaveAckHandler] Processing RESP array");
             int numElements = Integer.parseInt(line.substring(1));
             List<String> commands = RESPParser.parseRequest(numElements, in);
-            System.out.println("--------------------------------SlaveAckHandler received line: " + line);
+            System.out.println("[SlaveAckHandler] Parsed commands: " + commands);
+            
             String commandName = commands.get(0);
 
             int startIndexSublist = 1;
@@ -52,9 +58,10 @@ public class SlaveAckHandler{
             }
 
             List<String> arguments = commands.subList(startIndexSublist, commands.size());
-            System.out.println("Received command from ack handler--------: " + commandName + " with arguments: " + arguments);
+            System.out.println("[SlaveAckHandler] Executing command: " + commandName + " with args: " + arguments);
             commandExecuter.execute(clientId, commandName, arguments, clientConnection);
         }
+        System.out.println("[SlaveAckHandler] Exited readLine loop - stream closed");
     }
 
 }
