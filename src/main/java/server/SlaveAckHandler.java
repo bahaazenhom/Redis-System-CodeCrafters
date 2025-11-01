@@ -19,14 +19,17 @@ public class SlaveAckHandler{
         this.clientConnection = clientConnection;
         this.commandExecuter = commandExecuter;
         this.clientId = UUID.randomUUID().toString();
+        System.out.println("[SlaveAckHandler] Constructor called for clientId: " + clientId + ", connection: " + clientConnection);
     }
 
     public void run() {
         try {
-            System.out.println("Starting SlaveAckHandler for clientId: " + clientId);
+            System.out.println("[SlaveAckHandler] run() method STARTED for clientId: " + clientId);
             processCommands(clientConnection);
+            System.out.println("[SlaveAckHandler] run() method COMPLETED for clientId: " + clientId);
         } catch (IOException e) {
             System.err.println("Client connection error from SlaveAckHandler: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
