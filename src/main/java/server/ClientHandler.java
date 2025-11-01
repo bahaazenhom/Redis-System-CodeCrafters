@@ -6,14 +6,18 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
 import java.util.UUID;
+import java.util.logging.Logger;
 
 import command.CommandExecuter;
 import command.ResponseWriter.ClientConnection;
 import protocol.RESPParser;
 import replication.ReplicationManager;
+import util.AppLogger;
 
 public class ClientHandler implements Runnable {
 
+    private static final Logger log = AppLogger.getLogger(ClientHandler.class);
+    
     private final Socket socket;
     private final CommandExecuter commandExecuter;
     private final String clientId;
@@ -37,7 +41,7 @@ public class ClientHandler implements Runnable {
             processCommands(clientConnection);
             
         } catch (IOException e) {
-            System.err.println("Client connection error from : " + e.getMessage());
+            log.severe("Client connection error: " + e.getMessage());
         } finally {
             // Only close if this is NOT a replica connection that completed PSYNC
             // Replica connections are kept alive and handled by SlaveAckHandler
@@ -55,9 +59,14 @@ public class ClientHandler implements Runnable {
     }
     
     private boolean isReplicaConnection(ClientConnection clientConnection) {
-        if (clientConnection == null) return false;
+        if (clientConnection == null) {
+            log.fine("isReplicaConnection: clientConnection is null");
+            return false;
+        }
         // Check if this connection is registered as a replica
-        return replicationManager.getSlaveIdForConnection(clientConnection) != null;
+        boolean isReplica = replicationManager.getSlaveIdForConnection(clientConnection) != null;
+        log.info("isReplicaConnection check for " + clientConnection + ": " + isReplica);
+        return isReplica;
     }
 
     private void processCommands(ClientConnection clientConnection)

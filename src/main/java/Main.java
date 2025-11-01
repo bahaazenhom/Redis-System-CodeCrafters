@@ -1,16 +1,22 @@
 
 import java.io.IOException;
+import java.util.logging.Level;
 
 import command.CommandExecuter;
 import replication.ReplicationManager;
 import server.ServerInstance;
 import server.ServerManager;
 import storage.impl.InMemoryDataStore;
+import util.AppLogger;
 
 public class Main {
     private static final int DEFAULT_PORT = 6379;
 
     public static void main(String[] args) throws IOException {
+        // Initialize logging system
+        AppLogger.initialize();
+        // Set log level to INFO for production, or FINE/FINEST for debugging
+        AppLogger.setLogLevel(Level.INFO); // Change to Level.FINE for more verbose logs
 
         CommandExecuter commandExecuter = new CommandExecuter(new InMemoryDataStore());
         ServerManager serverManager = ServerManager.create();
