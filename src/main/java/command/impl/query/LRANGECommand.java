@@ -1,4 +1,4 @@
-package command.impl;
+package command.impl.query;
 
 import java.io.IOException;
 import java.util.ArrayList;

@@ -30,7 +30,6 @@ public class WaitRequest implements Comparable<WaitRequest> {
     public boolean ackFromReplica(int replicaId) {
         if (ackedReplicas.add(replicaId)) {
             currentReceivedAcks++;
-            System.out.println("we got ack from replica: "+replicaId+" and the current acks are: "+currentReceivedAcks);
             return true;
         }
         return false;

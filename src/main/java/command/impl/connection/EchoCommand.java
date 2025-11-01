@@ -1,4 +1,4 @@
-package command.impl;
+package command.impl.connection;
 
 import command.CommandStrategy;
 import command.ResponseWriter.ClientConnection;

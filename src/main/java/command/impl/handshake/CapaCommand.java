@@ -1,4 +1,4 @@
-package command.impl;
+package command.impl.handshake;
 
 import java.util.List;
 

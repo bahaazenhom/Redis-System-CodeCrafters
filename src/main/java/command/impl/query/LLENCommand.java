@@ -1,4 +1,4 @@
-package command.impl;
+package command.impl.query;
 
 import java.util.Deque;
 import java.util.List;

@@ -1,19 +1,15 @@
-package command.impl;
+package command.impl.handshake;
 
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
-import java.util.logging.Logger;
 
 import command.CommandStrategy;
 import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
 import replication.ReplicationManager;
 import server.SlaveAckHandler;
-import util.AppLogger;
 
 public class PSYNCCommand implements CommandStrategy {
-    private static final Logger log = AppLogger.getLogger(PSYNCCommand.class);
     private final ReplicationManager replicationManager;
 
     public PSYNCCommand(ReplicationManager replicationManager) {
@@ -31,7 +27,6 @@ public class PSYNCCommand implements CommandStrategy {
             // Send RDB file (empty RDB for simplicity)
             String emptyRdbBase64 = "UkVESVMwMDEx+glyZWRpcy12ZXIFNy4yLjD6CnJlZGlzLWJpdHPAQPoFY3RpbWXCbQi8ZfoIdXNlZC1tZW3CsMQQAPoIYW9mLWJhc2XAAP/wbjv+wP9aog==";
             byte[] rdbData = Base64.getDecoder().decode(emptyRdbBase64);
-            log.fine("Decoded RDB data: " + Arrays.toString(rdbData));
 
             // Write header and binary RDB data
             String header = "$" + rdbData.length + "\r\n";
@@ -39,23 +34,15 @@ public class PSYNCCommand implements CommandStrategy {
             clientConnection.writeBytes(rdbData);
             clientConnection.flush();
 
-            log.info("Sent RDB file (" + rdbData.length + " bytes)");
-
             Integer slavePort = replicationManager.getSlaveIdForConnection(clientConnection);
-            log.info("Replica handshake complete. Registered listening port: "
-                    + (slavePort != null ? slavePort : "unknown"));
             
             // Mark connection as handed over to SlaveAckHandler
             // ClientHandler should stop reading after PSYNC completes
             clientConnection.markHandoverToSlaveAckHandler();
-            log.info("Marked connection for handover to SlaveAckHandler");
             
-            log.info("Starting SlaveAckHandler thread for port " + slavePort 
-                    + " using connection " + clientConnection);
+            // Start thread to handle ACK responses from this replica
             new Thread(() -> {
-                log.info("SlaveAckHandler thread STARTED for port " + slavePort);
                 new SlaveAckHandler(clientConnection, replicationManager.getMasterNode().getCommandExecuter()).run();
-                log.info("SlaveAckHandler thread ENDED for port " + slavePort);
             }, "SlaveAckHandler-" + slavePort).start();
 
         } catch (Exception e) {

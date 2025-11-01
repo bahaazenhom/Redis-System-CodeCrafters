@@ -26,7 +26,7 @@ public class CommandPropagationHandler implements Runnable {
         try {
             processCommands(clientConnection);
         } catch (IOException e) {
-            System.err.println("Client connection error in CommandPropagationHandler: " + e.getMessage());
+            // Connection closed or error
         }
     }
 
@@ -35,7 +35,6 @@ public class CommandPropagationHandler implements Runnable {
         BufferedReader in = clientConnection.getBufferedReader();
         String line;
         while ((line = in.readLine()) != null) {
-            System.out.println("--------------------------------ReplicaHandler received line: " + line);
             if (line.isEmpty() || !line.startsWith("*"))
                 continue;
 
@@ -51,14 +50,11 @@ public class CommandPropagationHandler implements Runnable {
             }
             
             List<String> arguments = commands.subList(startIndexSublist, commands.size());
-            System.out.println("Received command: " + commandName + " with arguments from propagation: " + arguments);
             commandExecuter.execute("clientId", commandName, arguments, clientConnection);
 
             // Update replication offset
             String RESPCommand = RESPSerializer.array(commands);
-            System.out.println("Updating slave offset by: " + RESPCommand.getBytes().length+" for command: "+RESPCommand);
             replicationManager.updateSlaveOffset(RESPCommand.getBytes().length);
-           // replicationManager.responseToMasterWithAckOffset(clientConnection);
         }
     }
 

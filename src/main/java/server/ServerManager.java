@@ -31,20 +31,15 @@ public class ServerManager {
      */
     public boolean startServer(ServerInstance serverInstance) {
         if (runningServers.containsKey(serverInstance.getPort())) {
-            System.out.println("Server already running on port: " + serverInstance.getPort());
             return false;
         }
 
         runningServers.put(serverInstance.getPort(), serverInstance);
 
         Thread serverThread = new Thread(serverInstance, "Server-" + serverInstance.getPort());
-        // serverThread.setDaemon(true); // Daemon thread so it doesn't prevent JVM
-        // shutdown
         serverThread.start();
 
-        System.out.println("Successfully started server on port: " + serverInstance.getPort());
         return true;
-
     }
 
     /**
@@ -58,7 +53,6 @@ public class ServerManager {
         ServerInstance instance = runningServers.remove(port);
         if (instance != null) {
             instance.stop();
-            System.out.println("Stopped server on port: " + port);
             return true;
         }
         return false;

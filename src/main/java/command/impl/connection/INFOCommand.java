@@ -1,4 +1,4 @@
-package command.impl;
+package command.impl.connection;
 
 import java.io.IOException;
 import java.util.List;
@@ -7,6 +7,7 @@ import command.CommandStrategy;
 import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
 import replication.ReplicationManager;
+
 public class INFOCommand implements CommandStrategy {
     private final ReplicationManager replicationManager;
 

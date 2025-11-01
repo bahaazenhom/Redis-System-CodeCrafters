@@ -21,7 +21,6 @@ public class AcksWaitManager {
      * Blocks this client until enough replica ACKs or timeout.
      */
     public int awaitClientForAcks(WaitRequest req) throws InterruptedException {
-        System.out.println("client is waiting-------------");
         req.getLock().lock();
         try {
             if (req.tryComplete()) {
@@ -60,62 +59,43 @@ public class AcksWaitManager {
     public void signalWaiters(int replicaId, long replicaOffset) {
         signalLock.lock();
         try {
-            System.out.println("Signaling waiters for replica " + replicaId + " at offset " + replicaOffset);
-            
             // Process all requests that this replica's offset satisfies
             while (true) {
                 WaitRequest req = waitQueue.peek();
                 if (req == null) {
-                    System.out.println("[AcksWaitManager] No pending wait requests.");
                     return;
                 }
 
                 // If the first waiter requires higher offset than this replica reached, stop.
                 if (req.getOffsetTarget() > replicaOffset) {
-                    System.out.println("[AcksWaitManager] Replica offset " + replicaOffset + 
-                        " < target offset " + req.getOffsetTarget() + ", stopping.");
                     return;
                 }
-                
-                System.out.println(
-                        "the replica offset " + replicaOffset + " reached the target offset " + req.getOffsetTarget());
                 
                 // Remove the request so we can update it
                 req = waitQueue.poll();
                 
                 if (req == null) {
-                    // Request was removed by another thread (shouldn't happen with lock)
                     continue;
                 }
                 
                 req.getLock().lock();
                 try {
                     // Count ACK only once per replica
-                    // This returns false if this replica already ACK'd this request
                     boolean isNewAck = req.ackFromReplica(replicaId);
 
                     if (!isNewAck) {
                         // This replica already ACK'd this request, reinsert and stop
-                        // (single ACK can't satisfy the same request multiple times)
-                        System.out.println("Replica " + replicaId + " already ACK'd this request, reinserting");
                         waitQueue.add(req);
-                        return; // CRITICAL: Stop processing, this ACK is done
+                        return;
                     }
 
                     // If request completed, wake it and DON'T reinsert
                     if (req.tryComplete()) {
-                        System.out.println("Request fulfilled! Waking client thread.");
                         req.getCondition().signal();
-                        // Don't reinsert - request is complete
-                        return; // Exit after completing a request
+                        return;
                     } else {
-                        System.out.println("Not enough replicas yet → reinsert request for future ACKs");
-                        System.out.println("as the current acks are " + req.getCurrentReceivedAcks() + 
-                            " and required acks are " + req.getNumAcksRequired());
                         // Not enough replicas yet → reinsert request for future ACKs
                         waitQueue.add(req);
-                        // CRITICAL: After reinserting, stop processing this ACK
-                        // Next ACK from a different replica will pick this up
                         return;
                     }
 

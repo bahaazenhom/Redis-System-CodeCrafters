@@ -1,4 +1,4 @@
-package command.impl;
+package command.impl.replication;
 
 import java.util.List;
 import java.util.logging.Logger;
@@ -40,8 +40,6 @@ public class WaitCommand implements CommandStrategy {
             }
             
             long targetOffset = currentOffset;
-            System.out.println("[WaitCommand] Waiting for " + numAcksRequired + " replicas at offset " + targetOffset
-                    + " within " + timeoutMillis + " ms");
             WaitRequest req = new WaitRequest(targetOffset, numAcksRequired, timeoutMillis);
             int acknowledgedReplicas = acksWaitManager.awaitClientForAcks(req);
             

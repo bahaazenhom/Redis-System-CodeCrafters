@@ -32,12 +32,9 @@ public class ServerInstance implements Runnable {
 
     @Override
     public void run() {
-        System.out.println("Server started on port " + port + ", waiting for clients...");
-
         while (running) {
             try {
                 clientSocket = serverSocket.accept();
-                System.out.println("New client connected to port " + port + ": " + clientSocket.getInetAddress());
                 // Handle each client in a separate thread
                 Thread clientThread = new Thread(
                         new ClientHandler(clientSocket, commandExecuter),
@@ -45,10 +42,7 @@ public class ServerInstance implements Runnable {
                 clientThread.start();
 
             } catch (IOException e) {
-                if (running) {
-                    System.err.println("Error accepting client connection on port " + port + ": " + e.getMessage());
-                }
-                // If not running, this is expected during shutdown
+                // Expected during shutdown
             }
         }
     }
@@ -58,7 +52,7 @@ public class ServerInstance implements Runnable {
         try {
             serverSocket.close();
         } catch (IOException e) {
-            System.err.println("Error closing server socket on port " + port + ": " + e.getMessage());
+            // Error closing socket
         }
     }
 

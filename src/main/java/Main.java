@@ -46,7 +46,7 @@ public class Main {
                     port = Integer.parseInt(args[1]);
                 }
             } catch (NumberFormatException e) {
-                System.out.println("Invalid port number provided. Using default port " + DEFAULT_PORT);
+                // Use default port if invalid
             }
         }
         return port;
