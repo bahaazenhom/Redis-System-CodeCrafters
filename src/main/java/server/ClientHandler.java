@@ -28,16 +28,42 @@ public class ClientHandler implements Runnable {
 
     @Override
     public void run() {
-        try (BufferedReader in = new BufferedReader(
-                new InputStreamReader(socket.getInputStream()));
-                OutputStream outputStream = socket.getOutputStream()) {
-
-            ClientConnection clientConnection = new ClientConnection(outputStream, socket.getInputStream());
+        BufferedReader in = null;
+        OutputStream outputStream = null;
+        ClientConnection clientConnection = null;
+        
+        try {
+            in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            outputStream = socket.getOutputStream();
+            clientConnection = new ClientConnection(outputStream, socket.getInputStream());
 
             processCommands(in, clientConnection);
+            
         } catch (IOException e) {
             System.err.println("Client connection error from : " + e.getMessage());
+        } finally {
+            // Only close if this is NOT a replica connection that completed PSYNC
+            // Replica connections are kept alive and handled by SlaveAckHandler
+            try {
+                if (in != null && !isReplicaConnection(clientConnection)) {
+                    in.close();
+                }
+                if (outputStream != null && !isReplicaConnection(clientConnection)) {
+                    outputStream.close();
+                }
+                if (!isReplicaConnection(clientConnection)) {
+                    socket.close();
+                }
+            } catch (IOException e) {
+                // Ignore close errors
+            }
         }
+    }
+    
+    private boolean isReplicaConnection(ClientConnection clientConnection) {
+        if (clientConnection == null) return false;
+        // Check if this connection is registered as a replica
+        return replicationManager.getSlaveIdForConnection(clientConnection) != null;
     }
 private void processCommands(BufferedReader in, ClientConnection clientConnection)
         throws IOException {
