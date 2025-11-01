@@ -1,14 +1,17 @@
 package command.impl;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 import command.CommandStrategy;
 import command.ResponseWriter.ClientConnection;
 import protocol.RESPSerializer;
 import replication.ReplicationManager;
 import storage.concurrency.waitcommandmanagement.*;
+import util.AppLogger;
 
 public class WaitCommand implements CommandStrategy {
+    private static final Logger log = AppLogger.getLogger(WaitCommand.class);
     private final ReplicationManager replicationManager;
     private final AcksWaitManager acksWaitManager;
 
@@ -22,20 +25,32 @@ public class WaitCommand implements CommandStrategy {
         try{
             int numAcksRequired = Integer.parseInt(arguments.get(0));
             long timeoutMillis = Long.parseLong(arguments.get(1));
-            if(replicationManager.getMasterNode().getOffset() == 0){
-                clientOutput.write(RESPSerializer.integer(replicationManager.getSlaveNodesSockets().size()));
+            
+            long currentOffset = replicationManager.getMasterNode().getOffset();
+            int replicaCount = replicationManager.getSlaveNodesSockets().size();
+            
+            log.info("WAIT command: need " + numAcksRequired + " ACKs, timeout=" + timeoutMillis 
+                    + "ms, currentOffset=" + currentOffset + ", replicas=" + replicaCount);
+            
+            if(currentOffset == 0){
+                log.info("Master offset is 0 - immediately returning replica count: " + replicaCount);
+                clientOutput.write(RESPSerializer.integer(replicaCount));
                 clientOutput.flush();
                 return;
             }
-            long targetOffset = replicationManager.getMasterNode().getOffset();
+            
+            long targetOffset = currentOffset;
             System.out.println("[WaitCommand] Waiting for " + numAcksRequired + " replicas at offset " + targetOffset
                     + " within " + timeoutMillis + " ms");
             WaitRequest req = new WaitRequest(targetOffset, numAcksRequired, timeoutMillis);
             int acknowledgedReplicas = acksWaitManager.awaitClientForAcks(req);
+            
+            log.info("WAIT command completed: received " + acknowledgedReplicas + " ACKs");
             clientOutput.write(RESPSerializer.integer(acknowledgedReplicas));
             clientOutput.flush();
         }
         catch (Exception e) {
+            log.severe("WAIT command failed: " + e.getMessage());
             throw new RuntimeException(e);
         }
     }

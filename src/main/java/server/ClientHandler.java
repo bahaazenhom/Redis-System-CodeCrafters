@@ -77,8 +77,15 @@ public class ClientHandler implements Runnable {
     log.info("ClientHandler starting processCommands for connection: " + clientConnection);
     System.out.println("$$$$$ client connection is: " + clientConnection);
     System.out.println("socket port is: " + socket.getPort());
-    System.out.println("are you master? " + replicationManager.getMasterNode().getClientSocket().getPort()
-            + " compared to " + socket.getPort());
+    
+    // Only check master socket if this instance is running as master
+    if (replicationManager.getMasterNode() != null) {
+        System.out.println("are you master? " + replicationManager.getMasterNode().getClientSocket().getPort()
+                + " compared to " + socket.getPort());
+    } else {
+        System.out.println("Running as replica - no master node");
+    }
+    
     while ((line = in.readLine()) != null) {    
         
         System.out.println("-------------------------------------------------");
@@ -120,10 +127,10 @@ public class ClientHandler implements Runnable {
         }
         
         // After PSYNC completes, ClientHandler should exit and let SlaveAckHandler take over
-        // if (clientConnection.isHandoverToSlaveAckHandler()) {
-        //     log.info("PSYNC completed - exiting ClientHandler, SlaveAckHandler will take over reading");
-        //     break;
-        // }
+        if (clientConnection.isHandoverToSlaveAckHandler()) {
+            log.info("PSYNC completed - exiting ClientHandler, SlaveAckHandler will take over reading");
+            break;
+        }
     }
 
     System.out.println("[PROPAGATION] Input stream closed, exiting processCommands");
