@@ -1,5 +1,6 @@
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.logging.Level;
 
 import command.CommandExecuter;
@@ -22,6 +23,7 @@ public class Main {
 
         //AppLogger.setLogLevel(Level.FINEST); // Uncomment for maximum verbosity during debugging
         ServerConfiguration config = new ServerConfiguration(args);
+        System.out.println(Arrays.toString(args));
         AppLogger.getLogger(Main.class.getName()).info("Starting server with configuration: " + config.toString());
 
         // Initialize ServerContext singleton

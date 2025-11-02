@@ -129,6 +129,7 @@ public class ServerConfiguration {
 
     @Override
     public String toString() {
+    
         return "ServerConfiguration [port=" + port + ", serverRole=" + serverRole + ", masterHost=" + masterHost
                 + ", masterPort=" + masterPort + ", rdbFileDir=" + rdbFileDir + ", rdbFileName=" + rdbFileName + "]";
     }
