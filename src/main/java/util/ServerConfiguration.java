@@ -50,10 +50,12 @@ public class ServerConfiguration {
                     
                 case "--replicaof":
                     // Format: --replicaof <master_host> <master_port>
-                    if (i + 2 < args.length) {
+                    if (i + 1 < args.length) {
+                        String masterHostAndPort = args[++i];
+                        String[] parts = masterHostAndPort.split(" ");
                         builder.serverRole = ROLE_SLAVE;
-                        builder.masterHost = args[++i];
-                        builder.masterPort = parsePort(args[++i]);
+                        builder.masterHost = parts[0];
+                        builder.masterPort = parsePort(parts[1]);
                     }
                     break;
                     
