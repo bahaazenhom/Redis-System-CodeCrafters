@@ -22,6 +22,7 @@ public class Main {
 
         //AppLogger.setLogLevel(Level.FINEST); // Uncomment for maximum verbosity during debugging
         ServerConfiguration config = new ServerConfiguration(args);
+        AppLogger.getLogger(Main.class.getName()).info("Starting server with configuration: " + config.toString());
 
         // Initialize ServerContext singleton
         ServerContext serverContext = ServerContext.getInstance();

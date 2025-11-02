@@ -126,4 +126,12 @@ public class ServerConfiguration {
         String rdbFileDir = null;
         String rdbFileName = null;
     }
+
+    @Override
+    public String toString() {
+        return "ServerConfiguration [port=" + port + ", serverRole=" + serverRole + ", masterHost=" + masterHost
+                + ", masterPort=" + masterPort + ", rdbFileDir=" + rdbFileDir + ", rdbFileName=" + rdbFileName + "]";
+    }
+
+    
 }
