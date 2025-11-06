@@ -231,6 +231,11 @@ public class RDBManager {
                         RDBLengthEncoding.decodeLength(bufferedIn); // expire hash table size
                         break;
                         
+                    case RDBConstants.AUX_OPCODE:
+                        // Auxiliary field (metadata) - read and discard
+                        reader.readAuxField();
+                        break;
+                        
                     default:
                         // Assume it's a value type opcode
                         if (isValueType(opcode)) {
@@ -400,6 +405,11 @@ public class RDBManager {
                     case RDBConstants.RESIZEDB_OPCODE:
                         RDBLengthEncoding.decodeLength(bufferedIn);
                         RDBLengthEncoding.decodeLength(bufferedIn);
+                        break;
+                        
+                    case RDBConstants.AUX_OPCODE:
+                        // Auxiliary field (metadata) - read and discard
+                        reader.readAuxField();
                         break;
                         
                     default:

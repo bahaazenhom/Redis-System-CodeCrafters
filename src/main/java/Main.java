@@ -4,10 +4,13 @@ import java.util.Arrays;
 import java.util.logging.Level;
 
 import command.CommandExecuter;
+import rdb.RDBException;
+import rdb.RDBManager;
 import replication.ReplicationManager;
 import server.core.ServerContext;
 import server.core.ServerInstance;
 import server.core.ServerManager;
+import storage.DataStore;
 import storage.impl.InMemoryDataStore;
 import util.AppLogger;
 import util.ServerConfiguration;
@@ -33,7 +36,28 @@ public class Main {
         serverContext.setConfiguration(config);
 
         // Log server startup information
-        CommandExecuter commandExecuter = new CommandExecuter(new InMemoryDataStore());
+        DataStore dataStore = new InMemoryDataStore();
+        
+        // Load RDB file if configured
+        String rdbFileDir = config.getRdbFileDir();
+        String rdbFileName = config.getRdbFileName();
+        if (rdbFileDir != null && rdbFileName != null && !rdbFileDir.isEmpty() && !rdbFileName.isEmpty()) {
+            try {
+                RDBManager rdbManager = new RDBManager(dataStore, rdbFileDir, rdbFileName);
+                if (rdbManager.fileExists()) {
+                    AppLogger.getLogger(Main.class.getName()).info("Loading RDB file: " + rdbManager.getFilePath());
+                    rdbManager.load();
+                    AppLogger.getLogger(Main.class.getName()).info("RDB file loaded successfully");
+                } else {
+                    AppLogger.getLogger(Main.class.getName()).info("RDB file not found, starting with empty database");
+                }
+            } catch (RDBException e) {
+                AppLogger.getLogger(Main.class.getName()).severe("Failed to load RDB file: " + e.getMessage());
+                // Continue with empty database
+            }
+        }
+        
+        CommandExecuter commandExecuter = new CommandExecuter(dataStore);
         ServerManager serverManager = ServerManager.create();
 
         // Extract configuration parameters

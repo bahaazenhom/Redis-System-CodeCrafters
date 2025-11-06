@@ -116,6 +116,24 @@ public class RDBReader {
     }
     
     /**
+     * Reads an AUX field (auxiliary metadata).
+     * Format: key (string) + value (string)
+     * These fields contain metadata like redis-ver, redis-bits, etc.
+     * We read and discard them for now.
+     * 
+     * @throws IOException If an I/O error occurs
+     */
+    @SuppressWarnings("unused")
+    public void readAuxField() throws IOException {
+        // Read key (string)
+        String key = RDBStringDecoder.decodeString(in);
+        // Read value (string)
+        String value = RDBStringDecoder.decodeString(in);
+        // Currently just discard - could log if needed
+        // System.out.println("AUX field: " + key + " = " + value);
+    }
+    
+    /**
      * Reads a key-value pair from the RDB file.
      * 
      * @param valueType The type of the value (read from previous opcode)

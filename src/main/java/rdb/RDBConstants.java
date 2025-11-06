@@ -46,6 +46,11 @@ public class RDBConstants {
      */
     public static final int EXPIRETIMEMS_OPCODE = 0xFC;
     
+    /**
+     * 0xFA - Auxiliary field (metadata: redis-ver, redis-bits, etc.)
+     */
+    public static final int AUX_OPCODE = 0xFA;
+    
     
     // ===== Value Type Codes =====
     /**
