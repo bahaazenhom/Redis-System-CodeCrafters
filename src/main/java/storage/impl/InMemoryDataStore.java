@@ -14,9 +14,11 @@ import java.util.ArrayList;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NavigableMap;
+import java.util.Set;
 import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
@@ -110,6 +112,19 @@ public class InMemoryDataStore implements DataStore {
             return false;
         }
         return redisValue.getType() == dataType;
+    }
+
+    @Override
+    public Set<String> getAllKeys() {
+        // Return a defensive copy to prevent external modification
+        // Also filters out expired keys
+        Set<String> keys = new HashSet<>();
+        for (Map.Entry<String, RedisValue> entry : store.entrySet()) {
+            if (!entry.getValue().isExpired()) {
+                keys.add(entry.getKey());
+            }
+        }
+        return keys;
     }
 
     // ============================================

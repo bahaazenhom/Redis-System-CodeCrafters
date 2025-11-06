@@ -54,6 +54,7 @@ public class CommandFactory {
             case "MULTI" -> new MULTICommand();
             case "EXEC" -> new EXECCommand();
             case "DISCARD" -> new DISCARDCommand();
+            case "SAVE" -> new SAVECommand(dataStore);
             case "INFO" -> new INFOCommand(replicationManager);
             case "LISTENING-PORT" -> new ListeningPortCommand(replicationManager);
             case "CAPA" -> new CapaCommand();
@@ -61,6 +62,7 @@ public class CommandFactory {
             case "GETACK" -> new GetAckCommand(replicationManager);
             case "ACK" -> new AckCommand(acksWaitManager, replicationManager);
             case "WAIT" -> new WaitCommand(replicationManager, acksWaitManager);
+            case "KEYS" -> new KEYCommand(dataStore);
             default -> null;
         };
     }
