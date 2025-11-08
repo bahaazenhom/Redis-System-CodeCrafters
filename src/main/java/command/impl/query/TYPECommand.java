@@ -30,7 +30,7 @@ public class TYPECommand implements CommandStrategy {
                 clientOutput.write(RESPSerializer.bulkString("none"));
             else {
                 String type = dataStore.getType(key).toString().toLowerCase();
-                clientOutput.write(RESPSerializer.bulkString(type));
+                clientOutput.write(RESPSerializer.simpleString(type));
             }
             clientOutput.flush();
         } catch (IOException exception) {
