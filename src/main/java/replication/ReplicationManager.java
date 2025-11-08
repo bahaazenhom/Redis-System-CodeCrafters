@@ -55,7 +55,7 @@ public class ReplicationManager {
     private void masterHandshake(int slavePort, String masterHost, int masterPort) {
         try {
             Socket socket = new Socket(masterHost, masterPort);
-            ClientConnection clientConnection = new ClientConnection(socket.getOutputStream(),
+            ClientConnection clientConnection = new ClientConnection("replica",socket.getOutputStream(),
                     socket.getInputStream());
 
             // helper lambda to read a CRLF-terminated line from InputStream

@@ -35,7 +35,7 @@ public class ClientHandler implements Runnable {
 
         try {
             outputStream = socket.getOutputStream();
-            clientConnection = new ClientConnection(outputStream, socket.getInputStream());
+            clientConnection = new ClientConnection(clientId, outputStream, socket.getInputStream());
 
             processCommands(clientConnection);
 

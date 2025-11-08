@@ -5,15 +5,18 @@ import java.nio.charset.StandardCharsets;
 
 public class ClientConnection {
 
+    private final String clientId;
+
     private final OutputStream outputStream;
     private final InputStream inputStream;
     private final BufferedReader reader;
     private final BufferedWriter writer;
-    
+
     // Flag to indicate PSYNC completed - ClientHandler should stop reading
     private volatile boolean handoverToSlaveAckHandler = false;
 
-    public ClientConnection(OutputStream outputStream, InputStream inputStream) {
+    public ClientConnection(String clientId, OutputStream outputStream, InputStream inputStream) {
+        this.clientId = clientId;
         this.outputStream = outputStream;
         this.inputStream = inputStream;
         this.reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
@@ -24,7 +27,7 @@ public class ClientConnection {
 
     public synchronized void write(String response) throws IOException {
         outputStream.write(response.getBytes(StandardCharsets.UTF_8));
-       // writer.write(response);
+        // writer.write(response);
     }
 
     public synchronized void flush() throws IOException {
@@ -59,9 +62,18 @@ public class ClientConnection {
     /* ========== CONNECTION MGMT ========== */
 
     public void close() {
-        try { reader.close(); } catch (IOException ignored) {}
-        try { inputStream.close(); } catch (IOException ignored) {}
-        try { outputStream.close(); } catch (IOException ignored) {}
+        try {
+            reader.close();
+        } catch (IOException ignored) {
+        }
+        try {
+            inputStream.close();
+        } catch (IOException ignored) {
+        }
+        try {
+            outputStream.close();
+        } catch (IOException ignored) {
+        }
     }
 
     public OutputStream getOutputStream() {
@@ -75,9 +87,9 @@ public class ClientConnection {
     public BufferedReader getBufferedReader() {
         return reader;
     }
-    
+
     /* ========== PSYNC HANDOVER ========== */
-    
+
     /**
      * Mark this connection as handed over to SlaveAckHandler after PSYNC.
      * ClientHandler should stop reading after this is set.
@@ -85,11 +97,15 @@ public class ClientConnection {
     public void markHandoverToSlaveAckHandler() {
         this.handoverToSlaveAckHandler = true;
     }
-    
+
     /**
      * Check if PSYNC completed and SlaveAckHandler took over.
      */
     public boolean isHandoverToSlaveAckHandler() {
         return handoverToSlaveAckHandler;
+    }
+
+    public String getClientId() {
+        return clientId;
     }
 }

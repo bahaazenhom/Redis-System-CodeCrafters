@@ -7,6 +7,7 @@ import storage.core.DataType;
 import storage.core.RedisValue;
 import storage.exception.InvalidStreamEntryException;
 import storage.types.StringValue;
+import storage.types.ChannelManager;
 import storage.types.ListValue;
 import storage.types.StreamValue;
 
@@ -31,6 +32,7 @@ public class InMemoryDataStore implements DataStore {
     private final Map<String, RedisValue> store = new ConcurrentHashMap<>();
     private final ListWaitRegistry listWaitRegistry = new ListWaitRegistry();
     private final StreamWaitRegistry streamWaitRegistry = new StreamWaitRegistry();
+    private final ChannelManager channelManager = new ChannelManager();
 
     public InMemoryDataStore() {
     }
@@ -482,6 +484,22 @@ public class InMemoryDataStore implements DataStore {
             throw new InvalidStreamEntryException(
                     "The ID specified in XADD is equal or smaller than the target stream top item");
         }
+    }
+
+    // ============================================
+    // Channel Operations
+    // ============================================
+
+    @Override
+    public void subscribe(String subscriberId, String channel) {
+        // Use the single global channel manager instead of creating separate Channel objects
+        channelManager.subscribe(channel, subscriberId);
+    }
+
+    @Override
+    public int getSubscriberCount(String subscriberId) {
+        // O(1) lookup from the single channel manager
+        return channelManager.getSubscriberCount(subscriberId);
     }
 
 }

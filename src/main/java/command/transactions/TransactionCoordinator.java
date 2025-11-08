@@ -150,7 +150,7 @@ public class TransactionCoordinator {
             try {
                 // Use a StringWriter to capture the command output
                 StringWriter stringWriter = new StringWriter();
-                ClientConnection tempWriter = new ClientConnection(new java.io.OutputStream() {
+                ClientConnection tempWriter = new ClientConnection(clientId, new java.io.OutputStream() {
                     @Override
                     public void write(int b) {
                         stringWriter.write(b);
