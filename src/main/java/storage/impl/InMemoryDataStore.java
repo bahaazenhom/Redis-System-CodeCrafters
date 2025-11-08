@@ -493,14 +493,17 @@ public class InMemoryDataStore implements DataStore {
 
     @Override
     public void subscribe(String subscriberId, String channel) {
-        // Use the single global channel manager instead of creating separate Channel objects
         channelManager.subscribe(channel, subscriberId);
     }
 
     @Override
-    public int getSubscriberCount(String subscriberId) {
-        // O(1) lookup from the single channel manager
-        return channelManager.getSubscriberCount(subscriberId);
+    public int getChannelsCount(String subscriberId) {
+        return channelManager.getChannelsCount(subscriberId);
+    }
+
+    @Override
+    public int getSubscribersCount(String channelName) {
+        return channelManager.getSubscribersCount(channelName);
     }
 
 }

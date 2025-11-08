@@ -14,7 +14,7 @@ public class ChannelManager {
     }
 
     public static ChannelManager getInstance() {
-        if(instance == null){
+        if (instance == null) {
             instance = new ChannelManager();
         }
         return instance;
@@ -27,9 +27,14 @@ public class ChannelManager {
         channelSubscribers.computeIfAbsent(subscriberId, k -> new HashSet<>()).add(channelName);
     }
 
-    public int getSubscriberCount(String subscriberId) {
+    public int getChannelsCount(String subscriberId) {
         HashSet<String> subscribedChannels = channelSubscribers.get(subscriberId);
         return subscribedChannels != null ? subscribedChannels.size() : 0;
+    }
+
+    public int getSubscribersCount(String channelName) {
+        List<String> subscribers = channels.get(channelName);
+        return subscribers != null ? subscribers.size() : 0;
     }
 
     public ConcurrentHashMap<String, List<String>> getChannels() {
