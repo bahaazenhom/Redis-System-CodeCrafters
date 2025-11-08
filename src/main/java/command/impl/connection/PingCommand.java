@@ -29,7 +29,7 @@ public class PingCommand implements CommandStrategy {
 
             if (channelManager.isInSubscribeMode(clientOutput.getClientId())) {
                 List<String> response = new ArrayList<>();
-                response.add("PONG");
+                response.add("pong");
                 response.add("");
                 clientOutput.write(RESPSerializer.array(response));
             } else
