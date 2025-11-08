@@ -11,6 +11,7 @@ import command.impl.handshake.ListeningPortCommand;
 import command.impl.handshake.PSYNCCommand;
 import command.impl.query.*;
 import command.impl.replication.WaitCommand;
+import command.impl.sub.pub.PublishCommand;
 import command.impl.sub.pub.SubscribeCommand;
 import command.impl.transaction.*;
 import command.impl.writecommands.*;
@@ -65,6 +66,7 @@ public class CommandFactory {
             case "WAIT" -> new WaitCommand(replicationManager, acksWaitManager);
             case "KEYS" -> new KEYCommand(dataStore);
             case "SUBSCRIBE" -> new SubscribeCommand(dataStore);
+            case "PUBLISH" -> new PublishCommand();
             default -> null;
         };
     }
