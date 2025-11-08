@@ -79,7 +79,7 @@ public class TransactionCoordinator {
             transactionManager.enqueueCommand(clientId, new CommandRequest(commandName, arguments));
 
             // Send QUEUED response
-            clientConnection.write(RESPSerializer.bulkString("QUEUED"));
+            clientConnection.write(RESPSerializer.simpleString("QUEUED"));
             clientConnection.flush();
         } catch (IllegalArgumentException e) {
             // Validation error during queuing - discard transaction
