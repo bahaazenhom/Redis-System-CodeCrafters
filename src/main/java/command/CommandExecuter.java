@@ -1,6 +1,7 @@
 package command;
 
 import protocol.RESPSerializer;
+import pub.sub.ChannelManager;
 import replication.ReplicationManager;
 import server.connection.ClientConnection;
 import storage.DataStore;
@@ -21,22 +22,33 @@ public class CommandExecuter {
     private final Map<String, CommandStrategy> commandMap = new HashMap<>();
     private final CommandFactory commandFactory;
     private final TransactionCoordinator transactionCoordinator;
+    private final ChannelManager channelManager;
 
     public CommandExecuter(DataStore dataStore) {
         this.commandFactory = new CommandFactory(dataStore, ReplicationManager.create());
         TransactionManager transactionManager = new TransactionManager();
         this.transactionCoordinator = new TransactionCoordinator(transactionManager, commandFactory);
+        this.channelManager = ChannelManager.getInstance();
     }
 
     public void register(String commandName, CommandStrategy command) {
         commandMap.put(commandName.toUpperCase(), command);
     }
 
-    public void execute(String clientId, String commandName, List<String> arguments, ClientConnection clientConnection) {
+    public void execute(String clientId, String commandName, List<String> arguments,
+            ClientConnection clientConnection) {
         CommandStrategy command = commandFactory.getCommandStrategy(commandName);
 
         if (command != null) {
             try {
+
+                // Check if the client is in subscribe mode
+                if (channelManager.isInSubscribeMode(clientId) && !channelManager.isSubscribeModeCommand(commandName)){
+                    clientConnection.write(RESPSerializer.error("ERR Can't execute '" + commandName.toLowerCase() + "': only (P|S)SUBSCRIBE / (P|S)UNSUBSCRIBE / PING / QUIT / RESET are allowed in this context"));
+                    clientConnection.flush();
+                    return;
+                }
+
                 // Delegate transaction control commands to TransactionCoordinator
                 if (transactionCoordinator.isTransactionControlCommand(commandName)) {
                     transactionCoordinator.handleTransactionControlCommand(clientId, commandName, arguments, command,

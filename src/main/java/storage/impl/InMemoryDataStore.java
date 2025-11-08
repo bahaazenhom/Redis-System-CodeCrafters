@@ -7,7 +7,6 @@ import storage.core.DataType;
 import storage.core.RedisValue;
 import storage.exception.InvalidStreamEntryException;
 import storage.types.StringValue;
-import storage.types.ChannelManager;
 import storage.types.ListValue;
 import storage.types.StreamValue;
 
@@ -24,6 +23,8 @@ import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
+import pub.sub.ChannelManager;
+
 public class InMemoryDataStore implements DataStore {
 
     // ============================================
@@ -32,7 +33,7 @@ public class InMemoryDataStore implements DataStore {
     private final Map<String, RedisValue> store = new ConcurrentHashMap<>();
     private final ListWaitRegistry listWaitRegistry = new ListWaitRegistry();
     private final StreamWaitRegistry streamWaitRegistry = new StreamWaitRegistry();
-    private final ChannelManager channelManager = new ChannelManager();
+    private final ChannelManager channelManager = ChannelManager.getInstance();
 
     public InMemoryDataStore() {
     }
