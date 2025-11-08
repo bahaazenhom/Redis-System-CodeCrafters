@@ -44,7 +44,7 @@ public class CommandExecuter {
 
                 // Check if the client is in subscribe mode
                 if (channelManager.isInSubscribeMode(clientId) && !channelManager.isSubscribeModeCommand(commandName)){
-                    clientConnection.write(RESPSerializer.error("ERR Can't execute '" + commandName.toLowerCase() + "': only (P|S)SUBSCRIBE / (P|S)UNSUBSCRIBE / PING / QUIT / RESET are allowed in this context"));
+                    clientConnection.write(RESPSerializer.error("Can't execute '" + commandName.toLowerCase() + "': only (P|S)SUBSCRIBE / (P|S)UNSUBSCRIBE / PING / QUIT / RESET are allowed in this context"));
                     clientConnection.flush();
                     return;
                 }
