@@ -44,6 +44,8 @@ public class ChannelManager {
         return commandName.equalsIgnoreCase("SUBSCRIBE") ||
                 commandName.equalsIgnoreCase("PSUBSCRIBE") ||
                 commandName.equalsIgnoreCase("UNSUBSCRIBE") ||
-                commandName.equalsIgnoreCase("PUNSUBSCRIBE");
+                commandName.equalsIgnoreCase("PUNSUBSCRIBE") ||
+                commandName.equalsIgnoreCase("PING") ||
+                commandName.equalsIgnoreCase("QUIT");
     }
 }
