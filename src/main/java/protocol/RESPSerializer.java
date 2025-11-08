@@ -120,4 +120,19 @@ public class RESPSerializer {
         return "*0\r\n"; // Empty array
     }
 
+    public static String arraySubCommand(List<String> response) {
+        if (response == null || response.isEmpty()) {
+            return emptyArray();
+        }
+        StringBuilder respBuilder = new StringBuilder();
+        respBuilder.append("*").append(response.size()).append("\r\n");
+        for (int i=0;i<response.size()-1;i++) {
+            String value = response.get(i);
+            respBuilder.append(bulkString(value));
+        }
+        int channelsNumber = Integer.parseInt(response.get(response.size()-1));
+        respBuilder.append(integer(channelsNumber));
+        return respBuilder.toString();
+    }
+
 }
