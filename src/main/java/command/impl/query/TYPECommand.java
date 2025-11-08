@@ -27,7 +27,7 @@ public class TYPECommand implements CommandStrategy {
         try {
             String key = arguments.get(0);
             if (!dataStore.exists(key))
-                clientOutput.write(RESPSerializer.bulkString("none"));
+                clientOutput.write(RESPSerializer.simpleString("none"));
             else {
                 String type = dataStore.getType(key).toString().toLowerCase();
                 clientOutput.write(RESPSerializer.simpleString(type));
