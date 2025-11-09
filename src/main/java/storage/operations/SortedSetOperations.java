@@ -12,4 +12,6 @@ public interface SortedSetOperations {
     List<String> zrange(String key, int start, int end);
 
     int zcard(String key);
+
+    double zscore(String key, String memberName);
 }

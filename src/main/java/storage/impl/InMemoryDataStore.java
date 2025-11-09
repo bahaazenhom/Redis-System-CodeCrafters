@@ -541,4 +541,14 @@ public class InMemoryDataStore implements DataStore {
         SortedSetValue sortedSetValue = (SortedSetValue) redisValue;
         return sortedSetValue.getSize();
     }
+
+    @Override
+    public double zscore(String key, String memberName) {
+        RedisValue redisValue = store.get(key);
+        if (redisValue == null || !(redisValue instanceof SortedSetValue)) {
+            return -1;
+        }
+        SortedSetValue sortedSetValue = (SortedSetValue) redisValue;
+        return sortedSetValue.getScore(memberName);
+    }
 }
