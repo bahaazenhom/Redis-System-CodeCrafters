@@ -8,6 +8,8 @@ import storage.core.RedisValue;
 import storage.exception.InvalidStreamEntryException;
 import storage.types.StringValue;
 import storage.types.ListValue;
+import storage.types.Member;
+import storage.types.SortedSetValue;
 import storage.types.StreamValue;
 
 import java.util.ArrayList;
@@ -485,6 +487,34 @@ public class InMemoryDataStore implements DataStore {
             throw new InvalidStreamEntryException(
                     "The ID specified in XADD is equal or smaller than the target stream top item");
         }
+    }
+
+
+    
+    // ============================================
+    // SORTED SET OPERATIONS
+    // ============================================
+
+    @Override
+    public int zadd(String key, List<Member> members) {
+        RedisValue redisValue = store.putIfAbsent(key, new SortedSetValue(DataType.SORTED_SET));
+        SortedSetValue sortedSetValue = (SortedSetValue) (redisValue != null ? redisValue : store.get(key));
+        for (Member member : members) {
+            sortedSetValue.addMember(member);
+        }
+        return members.size();
+    }
+
+    @Override
+    public void zrem(String key, String memberName) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'zrem'");
+    }
+
+    @Override
+    public Double zscore(String key, String memberName) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'zscore'");
     }
 
 }

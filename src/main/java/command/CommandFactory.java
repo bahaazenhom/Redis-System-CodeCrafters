@@ -69,6 +69,7 @@ public class CommandFactory {
             case "SUBSCRIBE" -> new SubscribeCommand();
             case "PUBLISH" -> new PublishCommand();
             case "UNSUBSCRIBE" -> new UnsubscribeCommand();
+            case "ZADD" -> new ZADDCommand(dataStore);
             default -> null;
         };
     }

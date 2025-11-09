@@ -4,5 +4,5 @@ public enum DataType {
     STRING,
     LIST,
     STREAM,
-    CHANNEL
+    SORTED_SET
 }
