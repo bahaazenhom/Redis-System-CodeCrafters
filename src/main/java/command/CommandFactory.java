@@ -74,6 +74,7 @@ public class CommandFactory {
             case "ZRANGE" -> new ZRANGECommand(dataStore);
             case "ZCARD" -> new ZCARDCommand(dataStore);
             case "ZSCORE" -> new ZSCORECommand(dataStore);
+            case "ZREM" -> new ZREMCommand(dataStore);
             default -> null;
         };
     }

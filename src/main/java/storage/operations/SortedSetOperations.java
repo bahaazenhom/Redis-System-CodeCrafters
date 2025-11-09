@@ -14,4 +14,6 @@ public interface SortedSetOperations {
     int zcard(String key);
 
     double zscore(String key, String memberName);
+
+    int zrem(String key, String memberName);
 }

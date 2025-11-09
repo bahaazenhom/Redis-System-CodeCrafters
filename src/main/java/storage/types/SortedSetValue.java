@@ -52,6 +52,16 @@ public class SortedSetValue extends RedisValue {
         return -1; // or throw exception if member not found
     }
 
+    public int removeMember(String name) {
+        Member member = membersByName.get(name);
+        if (member != null) {
+            members.remove(member);
+            membersByName.remove(name);
+            return 1; // Indicate that a member was removed
+        }
+        return 0; // Indicate that no member was removed
+    }
+
     public List<String> getRange(int start, int end) {
         if (start < 0)
             start = members.size() + start;
