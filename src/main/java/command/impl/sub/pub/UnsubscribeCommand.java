@@ -1,5 +1,8 @@
 package command.impl.sub.pub;
 
+import java.lang.reflect.Array;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import command.CommandStrategy;
@@ -21,7 +24,8 @@ public class UnsubscribeCommand implements CommandStrategy {
             List<String> channels = arguments;
             int remainingChannels = channelManager.unsubscribe(subscriberId, channels);
 
-            List<String> response = List.of("unsubscribe");
+            List<String> response = new ArrayList<>();
+            response.add("unsubscribe");
             response.addAll(channels);
             response.add(String.valueOf(remainingChannels));
 
