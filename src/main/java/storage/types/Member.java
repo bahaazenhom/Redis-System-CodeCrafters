@@ -27,7 +27,7 @@ public class Member implements Comparable<Member> {
         if (scoreComparison != 0) {
             return scoreComparison;
         }
-        return this.name.compareTo(o.name) * -1;
+        return this.name.compareTo(o.name);
     }
 
     @Override
