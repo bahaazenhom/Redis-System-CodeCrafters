@@ -66,7 +66,7 @@ public class CommandFactory {
             case "WAIT" -> new WaitCommand(replicationManager, acksWaitManager);
             case "KEYS" -> new KEYCommand(dataStore);
             case "SUBSCRIBE" -> new SubscribeCommand(dataStore);
-            case "PUBLISH" -> new PublishCommand();
+            case "PUBLISH" -> new PublishCommand(dataStore);
             default -> null;
         };
     }

@@ -24,6 +24,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import pub.sub.ChannelManager;
+import server.connection.ClientConnection;
 
 public class InMemoryDataStore implements DataStore {
 
@@ -492,8 +493,8 @@ public class InMemoryDataStore implements DataStore {
     // ============================================
 
     @Override
-    public void subscribe(String subscriberId, String channel) {
-        channelManager.subscribe(channel, subscriberId);
+    public void subscribe(String channel, ClientConnection clientConnection) {
+        channelManager.subscribe(channel, clientConnection);
     }
 
     @Override
@@ -504,6 +505,11 @@ public class InMemoryDataStore implements DataStore {
     @Override
     public int getSubscribersCount(String channelName) {
         return channelManager.getSubscribersCount(channelName);
+    }
+
+    @Override
+    public int publishMessageToChannel(String channelName, String message) {
+        return channelManager.publishMessageToChannel(channelName, message);
     }
 
 }

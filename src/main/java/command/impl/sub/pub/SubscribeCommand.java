@@ -20,12 +20,13 @@ public class SubscribeCommand implements CommandStrategy {
             List<String> channels = arguments;
             String subscriberId = clientOutput.getClientId();
             for(String channel : channels) {
-                dataStore.subscribe(subscriberId, channel);
+                dataStore.subscribe(channel, clientOutput);
                 int subscriberChannelsCount = dataStore.getChannelsCount(subscriberId);
 
                 List<String> response = List.of("subscribe", channel, String.valueOf(subscriberChannelsCount));
                 clientOutput.write(RESPSerializer.arraySubCommand(response));
                 clientOutput.flush();
+                
             }
 
 
