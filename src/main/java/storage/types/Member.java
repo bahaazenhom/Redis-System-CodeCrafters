@@ -19,11 +19,20 @@ public class Member implements Comparable<Member> {
 
     @Override
     public int compareTo(Member o) {
+        int nameComparison = this.name.compareTo(o.name);
+        if (nameComparison == 0) {
+            return nameComparison;
+        }
         int scoreComparison = Double.compare(this.score, o.score);
         if (scoreComparison != 0) {
             return scoreComparison;
         }
         return this.name.compareTo(o.name);
+    }
+
+    @Override
+    public String toString() {
+        return "Member [name=" + name + ", score=" + score + "]";
     }
 
 }

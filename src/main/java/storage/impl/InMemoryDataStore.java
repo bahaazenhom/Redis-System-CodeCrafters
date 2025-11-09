@@ -489,8 +489,6 @@ public class InMemoryDataStore implements DataStore {
         }
     }
 
-
-    
     // ============================================
     // SORTED SET OPERATIONS
     // ============================================
@@ -499,10 +497,17 @@ public class InMemoryDataStore implements DataStore {
     public int zadd(String key, List<Member> members) {
         RedisValue redisValue = store.putIfAbsent(key, new SortedSetValue(DataType.SORTED_SET));
         SortedSetValue sortedSetValue = (SortedSetValue) (redisValue != null ? redisValue : store.get(key));
+        int sizeBefore = sortedSetValue.getMembers().size();
         for (Member member : members) {
+            if (sortedSetValue.getMembers().contains(member)) {
+                sortedSetValue.removeMember(sortedSetValue.getMember(member.getName()));
+                sortedSetValue.addMember(member);
+                continue;
+            }
             sortedSetValue.addMember(member);
         }
-        return members.size();
+        System.out.println(sortedSetValue.getMembers());
+        return sortedSetValue.getMembers().size() - sizeBefore;
     }
 
     @Override
