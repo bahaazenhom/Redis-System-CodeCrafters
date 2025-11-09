@@ -45,6 +45,11 @@ public class SortedSetValue extends RedisValue {
     }
 
     public List<String> getRange(int start, int end) {
+        if(start < 0) start = members.size() + start;
+        if(end < 0) end = members.size() + end;
+        if(start < 0) start = 0;
+        if(end < 0) end = 0;
+        
         List<String> rangeMembers = new ArrayList<>();
         int index = 0;
         if (members.isEmpty() || start > end) {
