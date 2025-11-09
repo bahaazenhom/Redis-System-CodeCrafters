@@ -1,6 +1,5 @@
 package storage;
 
-import storage.operations.ChannelOperations;
 import storage.operations.CommonOperations;
 import storage.operations.ListOperations;
 import storage.operations.StreamOperations;
@@ -10,6 +9,5 @@ public interface DataStore extends
     CommonOperations,
     StringOperations, 
     ListOperations, 
-    StreamOperations,
-    ChannelOperations {
+    StreamOperations{
 }

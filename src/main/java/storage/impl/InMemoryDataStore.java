@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 import pub.sub.ChannelManager;
-import server.connection.ClientConnection;
 
 public class InMemoryDataStore implements DataStore {
 
@@ -486,30 +485,6 @@ public class InMemoryDataStore implements DataStore {
             throw new InvalidStreamEntryException(
                     "The ID specified in XADD is equal or smaller than the target stream top item");
         }
-    }
-
-    // ============================================
-    // Channel Operations
-    // ============================================
-
-    @Override
-    public void subscribe(String channel, ClientConnection clientConnection) {
-        channelManager.subscribe(channel, clientConnection);
-    }
-
-    @Override
-    public int getChannelsCount(String subscriberId) {
-        return channelManager.getChannelsCount(subscriberId);
-    }
-
-    @Override
-    public int getSubscribersCount(String channelName) {
-        return channelManager.getSubscribersCount(channelName);
-    }
-
-    @Override
-    public int publishMessageToChannel(String channelName, String message) {
-        return channelManager.publishMessageToChannel(channelName, message);
     }
 
 }

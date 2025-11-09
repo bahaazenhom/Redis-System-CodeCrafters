@@ -7,27 +7,22 @@ import protocol.RESPSerializer;
 import pub.sub.ChannelManager;
 import server.connection.ClientConnection;
 
-public class SubscribeCommand implements CommandStrategy {
+public class UnsubscribeCommand implements CommandStrategy {
     private ChannelManager channelManager;
 
-    public SubscribeCommand() {
+    public UnsubscribeCommand() {
         this.channelManager = ChannelManager.getInstance();
     }
 
     @Override
     public void execute(List<String> arguments, ClientConnection clientOutput) {
         try {
-            List<String> channels = arguments;
             String subscriberId = clientOutput.getClientId();
-            for (String channel : channels) {
-                channelManager.subscribe(channel, clientOutput);
-                int subscriberChannelsCount = channelManager.getChannelsCount(subscriberId);
-
-                List<String> response = List.of("subscribe", channel, String.valueOf(subscriberChannelsCount));
-                clientOutput.write(RESPSerializer.arraySubCommand(response));
-                clientOutput.flush();
-
-            }
+            List<String> channels = arguments;
+            int remainingChannels = channelManager.unsubscribe(subscriberId, channels);
+            
+            clientOutput.write(RESPSerializer.integer(remainingChannels));
+            clientOutput.flush();
 
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -37,7 +32,7 @@ public class SubscribeCommand implements CommandStrategy {
     @Override
     public void validateArguments(List<String> arguments) throws IllegalArgumentException {
         if (arguments.size() < 1)
-            throw new IllegalArgumentException("SUBSCRIBE command requires at least one argument.");
+            throw new IllegalArgumentException("UNSUBSCRIBE command requires at least one argument.");
     }
 
 }

@@ -9,7 +9,7 @@ import server.connection.ClientConnection;
 
 public class ChannelManager {
 
-    private final ConcurrentHashMap<String, List<ClientConnection>> channels = new ConcurrentHashMap<>();
+    private final ConcurrentHashMap<String, HashSet<ClientConnection>> channels = new ConcurrentHashMap<>();
     private final ConcurrentHashMap<String, HashSet<String>> channelSubscribers = new ConcurrentHashMap<>();
     private static ChannelManager instance = new ChannelManager();
 
@@ -24,7 +24,7 @@ public class ChannelManager {
     }
 
     public void subscribe(String channelName, ClientConnection subscriber) {
-        channels.computeIfAbsent(channelName, k -> new java.util.concurrent.CopyOnWriteArrayList<>())
+        channels.computeIfAbsent(channelName, k -> new HashSet<>())
                 .add(subscriber);
 
         channelSubscribers.computeIfAbsent(subscriber.getClientId(), k -> new HashSet<>()).add(channelName);
@@ -36,11 +36,11 @@ public class ChannelManager {
     }
 
     public int getSubscribersCount(String channelName) {
-        List<ClientConnection> subscribers = channels.get(channelName);
+        HashSet<ClientConnection> subscribers = channels.get(channelName);
         return subscribers != null ? subscribers.size() : 0;
     }
 
-    public ConcurrentHashMap<String, List<ClientConnection>> getChannels() {
+    public ConcurrentHashMap<String, HashSet<ClientConnection>> getChannels() {
         return channels;
     }
 
@@ -58,13 +58,13 @@ public class ChannelManager {
     }
 
     public int publishMessageToChannel(String channelName, String message) {
-        List<ClientConnection> subscribers = channels.get(channelName);
+        HashSet<ClientConnection> subscribers = channels.get(channelName);
         if (subscribers == null) {
             return 0;
         }
 
         for (ClientConnection subscriber : subscribers) {
-            try{
+            try {
                 List<String> response = List.of("message", channelName, message);
                 subscriber.write(RESPSerializer.array(response));
                 subscriber.flush();
@@ -75,4 +75,20 @@ public class ChannelManager {
         }
         return subscribers.size();
     }
+
+    public int unsubscribe(String subscriberId, List<String> channelsToUnsubscribe) {
+        for (String channel : channelsToUnsubscribe) {
+            HashSet<ClientConnection> subscribers = channels.get(channel);
+            if (subscribers != null) {
+                subscribers.removeIf(subscriber -> subscriber.getClientId().equals(subscriberId));
+            }
+
+            HashSet<String> subscribedChannels = channelSubscribers.get(subscriberId);
+            if (subscribedChannels != null) {
+                subscribedChannels.remove(channel);
+            }
+        }
+        return getChannelsCount(subscriberId);
+    }
+
 }

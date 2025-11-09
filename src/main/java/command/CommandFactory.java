@@ -13,6 +13,7 @@ import command.impl.query.*;
 import command.impl.replication.WaitCommand;
 import command.impl.sub.pub.PublishCommand;
 import command.impl.sub.pub.SubscribeCommand;
+import command.impl.sub.pub.UnsubscribeCommand;
 import command.impl.transaction.*;
 import command.impl.writecommands.*;
 import replication.ReplicationManager;
@@ -65,8 +66,9 @@ public class CommandFactory {
             case "ACK" -> new AckCommand(acksWaitManager, replicationManager);
             case "WAIT" -> new WaitCommand(replicationManager, acksWaitManager);
             case "KEYS" -> new KEYCommand(dataStore);
-            case "SUBSCRIBE" -> new SubscribeCommand(dataStore);
-            case "PUBLISH" -> new PublishCommand(dataStore);
+            case "SUBSCRIBE" -> new SubscribeCommand();
+            case "PUBLISH" -> new PublishCommand();
+            case "UNSUBSCRIBE" -> new UnsubscribeCommand();
             default -> null;
         };
     }

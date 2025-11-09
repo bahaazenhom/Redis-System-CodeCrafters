@@ -7,13 +7,12 @@ import command.CommandStrategy;
 import protocol.RESPSerializer;
 import pub.sub.ChannelManager;
 import server.connection.ClientConnection;
-import storage.DataStore;
 
 public class PublishCommand implements CommandStrategy {
-        private final DataStore dataStore;
+    private ChannelManager channelManager;
 
-    public PublishCommand(DataStore dataStore) {
-        this.dataStore = dataStore;
+    public PublishCommand() {
+        this.channelManager = ChannelManager.getInstance();
     }
 
     @Override
@@ -21,10 +20,10 @@ public class PublishCommand implements CommandStrategy {
         try {
             String channelName = arguments.get(0);
             String messageContent = arguments.get(1);
-            int receiversCount = dataStore.publishMessageToChannel(channelName, messageContent);
+            int receiversCount = channelManager.publishMessageToChannel(channelName, messageContent);
             clientOutput.write(RESPSerializer.integer(receiversCount));
             clientOutput.flush();
-            
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
