@@ -514,12 +514,12 @@ public class InMemoryDataStore implements DataStore {
     public Integer zrank(String key, String memberName) {
         RedisValue redisValue = store.get(key);
         if (redisValue == null || !(redisValue instanceof SortedSetValue)) {
-            return null;
+            return -1;
         }
         SortedSetValue sortedSetValue = (SortedSetValue) redisValue;
         Member member = sortedSetValue.getMember(memberName);
         if (member == null) {
-            return null;
+            return -1;
         }
         return sortedSetValue.getRank(member);
     }
