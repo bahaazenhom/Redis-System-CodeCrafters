@@ -11,7 +11,10 @@ public class RESPSerializer {
         return "-ERR " + message + "\r\n";
     }
 
-    public static String integer(long number) {
+    public static String integer(Integer number) {
+        if(number == null) {
+            return nullBulkString();
+        }
         return ":" + number + "\r\n";
     }
 

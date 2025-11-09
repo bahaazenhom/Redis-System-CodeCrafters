@@ -20,7 +20,7 @@ public class ZRANKCommand implements CommandStrategy {
         try{
             String key = arguments.get(0);
             String memberName = arguments.get(1);
-            int rank = dataStore.zrank(key, memberName);
+            Integer rank = dataStore.zrank(key, memberName);
 
             clientOutput.write(RESPSerializer.integer(rank));
             clientOutput.flush();
