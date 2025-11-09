@@ -511,15 +511,15 @@ public class InMemoryDataStore implements DataStore {
     }
 
     @Override
-    public int zrank(String key, String memberName) {
+    public Integer zrank(String key, String memberName) {
         RedisValue redisValue = store.get(key);
         if (redisValue == null || !(redisValue instanceof SortedSetValue)) {
-            return -1;
+            return null;
         }
         SortedSetValue sortedSetValue = (SortedSetValue) redisValue;
         Member member = sortedSetValue.getMember(memberName);
         if (member == null) {
-            return -1;
+            return null;
         }
         return sortedSetValue.getRank(member);
     }
