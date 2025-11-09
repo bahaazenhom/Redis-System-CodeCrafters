@@ -20,8 +20,12 @@ public class UnsubscribeCommand implements CommandStrategy {
             String subscriberId = clientOutput.getClientId();
             List<String> channels = arguments;
             int remainingChannels = channelManager.unsubscribe(subscriberId, channels);
-            
-            clientOutput.write(RESPSerializer.integer(remainingChannels));
+
+            List<String> response = List.of("unsubscribe");
+            response.addAll(channels);
+            response.add(String.valueOf(remainingChannels));
+
+            clientOutput.write(RESPSerializer.arraySubCommand(response));
             clientOutput.flush();
 
         } catch (Exception e) {
