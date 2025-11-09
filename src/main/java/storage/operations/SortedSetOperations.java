@@ -10,4 +10,6 @@ public interface SortedSetOperations {
     Integer zrank(String key, String memberName);
 
     List<String> zrange(String key, int start, int end);
+
+    int zcard(String key);
 }

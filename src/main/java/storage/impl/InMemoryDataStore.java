@@ -532,4 +532,13 @@ public class InMemoryDataStore implements DataStore {
         return sortedSetValue.getRange(start, end);
     }
 
+    @Override
+    public int zcard(String key) {
+        RedisValue redisValue = store.get(key);
+        if (redisValue == null || !(redisValue instanceof SortedSetValue)) {
+            return 0;
+        }
+        SortedSetValue sortedSetValue = (SortedSetValue) redisValue;
+        return sortedSetValue.getSize();
+    }
 }

@@ -49,7 +49,7 @@ public class SortedSetValue extends RedisValue {
         if(end < 0) end = members.size() + end;
         if(start < 0) start = 0;
         if(end < 0) end = 0;
-        
+
         List<String> rangeMembers = new ArrayList<>();
         int index = 0;
         if (members.isEmpty() || start > end) {
@@ -65,6 +65,10 @@ public class SortedSetValue extends RedisValue {
             index++;
         }
         return rangeMembers;
+    }
+
+    public int getSize() {
+        return members.size();
     }
 
     @Override

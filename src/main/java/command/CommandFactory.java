@@ -72,6 +72,7 @@ public class CommandFactory {
             case "ZADD" -> new ZADDCommand(dataStore);
             case "ZRANK" -> new ZRANKCommand(dataStore);   
             case "ZRANGE" -> new ZRANGECommand(dataStore); 
+            case "ZCARD" -> new ZCARDCommand(dataStore);
             default -> null;
         };
     }
