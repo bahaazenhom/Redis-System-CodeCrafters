@@ -498,14 +498,12 @@ public class InMemoryDataStore implements DataStore {
         RedisValue redisValue = store.putIfAbsent(key, new SortedSetValue(DataType.SORTED_SET));
         SortedSetValue sortedSetValue = (SortedSetValue) (redisValue != null ? redisValue : store.get(key));
         int sizeBefore = sortedSetValue.getMembers().size();
+        
+        // addMember() now handles removing old member with same name automatically
         for (Member member : members) {
-            if (sortedSetValue.getMembers().contains(member)) {
-                sortedSetValue.removeMember(sortedSetValue.getMember(member.getName()));
-                sortedSetValue.addMember(member);
-                continue;
-            }
             sortedSetValue.addMember(member);
         }
+        
         System.out.println(sortedSetValue.getMembers());
         return sortedSetValue.getMembers().size() - sizeBefore;
     }
