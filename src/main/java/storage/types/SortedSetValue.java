@@ -30,6 +30,11 @@ public class SortedSetValue extends RedisValue {
         return null;
     }
 
+    public int getRank(Member member) {
+        int rank = members.headSet(member).size();
+        return rank;
+    }
+
     @Override
     public Object getValue() {
         return members;

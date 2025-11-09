@@ -511,6 +511,20 @@ public class InMemoryDataStore implements DataStore {
     }
 
     @Override
+    public int zrank(String key, String memberName) {
+        RedisValue redisValue = store.get(key);
+        if (redisValue == null || !(redisValue instanceof SortedSetValue)) {
+            return -1;
+        }
+        SortedSetValue sortedSetValue = (SortedSetValue) redisValue;
+        Member member = sortedSetValue.getMember(memberName);
+        if (member == null) {
+            return -1;
+        }
+        return sortedSetValue.getRank(member);
+    }
+
+    @Override
     public void zrem(String key, String memberName) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'zrem'");
