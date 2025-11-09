@@ -9,7 +9,5 @@ public interface SortedSetOperations {
 
     Integer zrank(String key, String memberName);
 
-    void zrem(String key, String memberName);
-
-    Double zscore(String key, String memberName);
+    List<String> zrange(String key, int start, int end);
 }

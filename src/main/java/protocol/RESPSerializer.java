@@ -12,7 +12,7 @@ public class RESPSerializer {
     }
 
     public static String integer(long number) {
-        if(number == -1) {
+        if (number == -1) {
             return nullBulkString();
         }
         return ":" + number + "\r\n";
@@ -30,6 +30,11 @@ public class RESPSerializer {
     }
 
     public static String array(List<String> values) {
+        if (values == null) {
+            return nullArray();
+        } else if (values.isEmpty()) {
+            return emptyArray();
+        }
         StringBuilder respBuilder = new StringBuilder();
         respBuilder.append("*" + values.size() + "\r\n");
         for (String value : values)
@@ -103,8 +108,7 @@ public class RESPSerializer {
     public static String execArray(List<String> values) {
         if (values == null) {
             return nullArray();
-        }
-        else if(values.isEmpty()) {
+        } else if (values.isEmpty()) {
             return emptyArray();
         }
         StringBuilder respBuilder = new StringBuilder();
@@ -129,11 +133,11 @@ public class RESPSerializer {
         }
         StringBuilder respBuilder = new StringBuilder();
         respBuilder.append("*").append(response.size()).append("\r\n");
-        for (int i=0;i<response.size()-1;i++) {
+        for (int i = 0; i < response.size() - 1; i++) {
             String value = response.get(i);
             respBuilder.append(bulkString(value));
         }
-        int channelsNumber = Integer.parseInt(response.get(response.size()-1));
+        int channelsNumber = Integer.parseInt(response.get(response.size() - 1));
         respBuilder.append(integer(channelsNumber));
         return respBuilder.toString();
     }

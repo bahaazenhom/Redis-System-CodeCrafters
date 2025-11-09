@@ -1,6 +1,8 @@
 package storage.types;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.TreeSet;
 
 import storage.core.DataType;
@@ -40,6 +42,24 @@ public class SortedSetValue extends RedisValue {
     public int getRank(Member member) {
         int rank = members.headSet(member).size();
         return rank;
+    }
+
+    public List<String> getRange(int start, int end) {
+        List<String> rangeMembers = new ArrayList<>();
+        int index = 0;
+        if (members.isEmpty() || start > end) {
+            return rangeMembers;
+        }
+        for (Member member : members) {
+            if (index >= start && index <= end) {
+                rangeMembers.add(member.getName());
+            }
+            if (index > end) {
+                break;
+            }
+            index++;
+        }
+        return rangeMembers;
     }
 
     @Override

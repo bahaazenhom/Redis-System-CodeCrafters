@@ -498,12 +498,12 @@ public class InMemoryDataStore implements DataStore {
         RedisValue redisValue = store.putIfAbsent(key, new SortedSetValue(DataType.SORTED_SET));
         SortedSetValue sortedSetValue = (SortedSetValue) (redisValue != null ? redisValue : store.get(key));
         int sizeBefore = sortedSetValue.getMembers().size();
-        
+
         // addMember() now handles removing old member with same name automatically
         for (Member member : members) {
             sortedSetValue.addMember(member);
         }
-        
+
         System.out.println(sortedSetValue.getMembers());
         return sortedSetValue.getMembers().size() - sizeBefore;
     }
@@ -523,15 +523,13 @@ public class InMemoryDataStore implements DataStore {
     }
 
     @Override
-    public void zrem(String key, String memberName) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'zrem'");
-    }
-
-    @Override
-    public Double zscore(String key, String memberName) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'zscore'");
+    public List<String> zrange(String key, int start, int end) {
+        RedisValue redisValue = store.get(key);
+        if (redisValue == null || !(redisValue instanceof SortedSetValue)) {
+            return new ArrayList<>();
+        }
+        SortedSetValue sortedSetValue = (SortedSetValue) redisValue;
+        return sortedSetValue.getRange(start, end);
     }
 
 }
