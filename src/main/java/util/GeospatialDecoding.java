@@ -19,26 +19,24 @@ public class GeospatialDecoding {
         }
     }
 
-    private static int compactInt64ToInt32(long v) {
+    private static long compactInt64(long v) {
         v = v & 0x5555555555555555L;
         v = (v | (v >> 1)) & 0x3333333333333333L;
         v = (v | (v >> 2)) & 0x0F0F0F0F0F0F0F0FL;
         v = (v | (v >> 4)) & 0x00FF00FF00FF00FFL;
         v = (v | (v >> 8)) & 0x0000FFFF0000FFFFL;
         v = (v | (v >> 16)) & 0x00000000FFFFFFFFL;
-        return (int) v;
+        return v;
     }
 
-    private static double[] convertGridNumbersToCoordinates(int gridLatitudeNumber, int gridLongitudeNumber) {
-        // Calculate the grid boundaries
-        double gridLatitudeMin = MIN_LATITUDE + LATITUDE_RANGE * (gridLatitudeNumber / Math.pow(2, 26));
-        double gridLatitudeMax = MIN_LATITUDE + LATITUDE_RANGE * ((gridLatitudeNumber + 1) / Math.pow(2, 26));
-        double gridLongitudeMin = MIN_LONGITUDE + LONGITUDE_RANGE * (gridLongitudeNumber / Math.pow(2, 26));
-        double gridLongitudeMax = MIN_LONGITUDE + LONGITUDE_RANGE * ((gridLongitudeNumber + 1) / Math.pow(2, 26));
+    private static double[] convertGridNumbersToCoordinates(long gridLatitudeNumber, long gridLongitudeNumber) {
+        // Use double precision throughout to avoid truncation errors
+        double normalizedLatitude = gridLatitudeNumber / Math.pow(2, 26);
+        double normalizedLongitude = gridLongitudeNumber / Math.pow(2, 26);
 
-        // Calculate the center point of the grid cell
-        double latitude = (gridLatitudeMin + gridLatitudeMax) / 2;
-        double longitude = (gridLongitudeMin + gridLongitudeMax) / 2;
+        // Convert normalized values back to actual coordinates
+        double latitude = MIN_LATITUDE + LATITUDE_RANGE * normalizedLatitude;
+        double longitude = MIN_LONGITUDE + LONGITUDE_RANGE * normalizedLongitude;
 
         double[] coords = new double[2];
         coords[0] = latitude;
@@ -51,9 +49,9 @@ public class GeospatialDecoding {
         long y = geoCode >> 1;
         long x = geoCode;
 
-        // Compact bits back to 32-bit ints
-        int gridLatitudeNumber = compactInt64ToInt32(x);
-        int gridLongitudeNumber = compactInt64ToInt32(y);
+        // Compact bits back to full precision longs (no truncation to int)
+        long gridLatitudeNumber = compactInt64(x);
+        long gridLongitudeNumber = compactInt64(y);
 
         return convertGridNumbersToCoordinates(gridLatitudeNumber, gridLongitudeNumber);
     }
