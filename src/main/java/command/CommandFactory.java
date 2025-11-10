@@ -3,33 +3,29 @@ package command;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import command.impl.acks.AckCommand;
-import command.impl.acks.GetAckCommand;
-import command.impl.connection.*;
-import command.impl.handshake.CapaCommand;
-import command.impl.handshake.ListeningPortCommand;
-import command.impl.handshake.PSYNCCommand;
-import command.impl.query.*;
-import command.impl.replication.WaitCommand;
-import command.impl.sub.pub.PublishCommand;
-import command.impl.sub.pub.SubscribeCommand;
-import command.impl.sub.pub.UnsubscribeCommand;
-import command.impl.transaction.*;
-import command.impl.writecommands.*;
+import command.handlers.connection.*;
+import command.handlers.geospatial.GEOADDCommand;
+import command.handlers.list.*;
+import command.handlers.pubsub.*;
+import command.handlers.replication.*;
+import command.handlers.sortedset.*;
+import command.handlers.stream.*;
+import command.handlers.string.*;
+import command.handlers.transaction.*;
 import replication.ReplicationManager;
 import storage.DataStore;
-import storage.concurrency.waitcommandmanagement.AcksWaitManager;
+import replication.sync.WaitRequestManager;
 
 public class CommandFactory {
     private final DataStore dataStore;
     private final Map<String, CommandStrategy> commandMapCache = new ConcurrentHashMap<>();
     private final ReplicationManager replicationManager;
-    private final AcksWaitManager acksWaitManager;
+    private final WaitRequestManager WaitRequestManager;
 
     public CommandFactory(DataStore dataStore, ReplicationManager replicationManager) {
         this.dataStore = dataStore;
         this.replicationManager = replicationManager;
-        this.acksWaitManager = new AcksWaitManager(replicationManager);
+        this.WaitRequestManager = new WaitRequestManager(replicationManager);
     }
 
     public CommandStrategy getCommandStrategy(String commandName) {
@@ -38,43 +34,44 @@ public class CommandFactory {
 
     private CommandStrategy createCommandInstance(String commandName) {
         return switch (commandName.toUpperCase()) {
-            case "PING" -> new PingCommand();
-            case "ECHO" -> new EchoCommand();
-            case "SET" -> new SetCommand(dataStore, replicationManager);
-            case "GET" -> new GetCommand(dataStore);
-            case "CONFIG" -> new CONFIGCommand();
-            case "RPUSH" -> new RPUSHCommand(dataStore, replicationManager);
-            case "LRANGE" -> new LRANGECommand(dataStore);
-            case "LPUSH" -> new LPUSHCommand(dataStore, replicationManager);
-            case "LLEN" -> new LLENCommand(dataStore);
-            case "LPOP" -> new LPOPCommand(dataStore, replicationManager);
-            case "BLPOP" -> new BLPOPCommand(dataStore, replicationManager);
-            case "TYPE" -> new TYPECommand(dataStore);
-            case "XADD" -> new XADDCommand(dataStore, replicationManager);
-            case "XRANGE" -> new XRANGECommand(dataStore);
-            case "XREAD" -> new XREADCommand(dataStore);
-            case "INCR" -> new INCRCommand(dataStore, replicationManager);
-            case "MULTI" -> new MULTICommand();
-            case "EXEC" -> new EXECCommand();
-            case "DISCARD" -> new DISCARDCommand();
-            case "SAVE" -> new SAVECommand(dataStore);
-            case "INFO" -> new INFOCommand(replicationManager);
-            case "LISTENING-PORT" -> new ListeningPortCommand(replicationManager);
-            case "CAPA" -> new CapaCommand();
-            case "PSYNC" -> new PSYNCCommand(replicationManager);
-            case "GETACK" -> new GetAckCommand(replicationManager);
-            case "ACK" -> new AckCommand(acksWaitManager, replicationManager);
-            case "WAIT" -> new WaitCommand(replicationManager, acksWaitManager);
-            case "KEYS" -> new KEYCommand(dataStore);
-            case "SUBSCRIBE" -> new SubscribeCommand();
-            case "PUBLISH" -> new PublishCommand();
-            case "UNSUBSCRIBE" -> new UnsubscribeCommand();
-            case "ZADD" -> new ZADDCommand(dataStore);
-            case "ZRANK" -> new ZRANKCommand(dataStore);
-            case "ZRANGE" -> new ZRANGECommand(dataStore);
-            case "ZCARD" -> new ZCARDCommand(dataStore);
-            case "ZSCORE" -> new ZSCORECommand(dataStore);
-            case "ZREM" -> new ZREMCommand(dataStore);
+            case "PING" -> new PingHandler();
+            case "ECHO" -> new EchoHandler();
+            case "SET" -> new SetHandler(dataStore, replicationManager);
+            case "GET" -> new GetHandler(dataStore);
+            case "CONFIG" -> new CONFIGHandler();
+            case "RPUSH" -> new RPUSHHandler(dataStore, replicationManager);
+            case "LRANGE" -> new LRANGEHandler(dataStore);
+            case "LPUSH" -> new LPUSHHandler(dataStore, replicationManager);
+            case "LLEN" -> new LLENHandler(dataStore);
+            case "LPOP" -> new LPOPHandler(dataStore, replicationManager);
+            case "BLPOP" -> new BLPOPHandler(dataStore, replicationManager);
+            case "TYPE" -> new TYPEHandler(dataStore);
+            case "XADD" -> new XADDHandler(dataStore, replicationManager);
+            case "XRANGE" -> new XRANGEHandler(dataStore);
+            case "XREAD" -> new XREADHandler(dataStore);
+            case "INCR" -> new INCRHandler(dataStore, replicationManager);
+            case "MULTI" -> new MULTIHandler();
+            case "EXEC" -> new EXECHandler();
+            case "DISCARD" -> new DISCARDHandler();
+            case "SAVE" -> new SAVEHandler(dataStore);
+            case "INFO" -> new INFOHandler(replicationManager);
+            case "LISTENING-PORT" -> new ListeningPortHandler(replicationManager);
+            case "CAPA" -> new CapaHandler();
+            case "PSYNC" -> new PSYNCHandler(replicationManager);
+            case "GETACK" -> new GetAckHandler(replicationManager);
+            case "ACK" -> new AckHandler(WaitRequestManager, replicationManager);
+            case "WAIT" -> new WaitHandler(replicationManager, WaitRequestManager);
+            case "KEYS" -> new KEYHandler(dataStore);
+            case "SUBSCRIBE" -> new SubscribeHandler();
+            case "PUBLISH" -> new PublishHandler();
+            case "UNSUBSCRIBE" -> new UnsubscribeHandler();
+            case "ZADD" -> new ZADDHandler(dataStore);
+            case "ZRANK" -> new ZRANKHandler(dataStore);
+            case "ZRANGE" -> new ZRANGEHandler(dataStore);
+            case "ZCARD" -> new ZCARDHandler(dataStore);
+            case "ZSCORE" -> new ZSCOREHandler(dataStore);
+            case "ZREM" -> new ZREMHandler(dataStore);
+            case "GEOADD" -> new GEOADDCommand(dataStore);
             default -> null;
         };
     }

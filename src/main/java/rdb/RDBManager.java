@@ -2,9 +2,9 @@ package rdb;
 
 import rdb.util.RDBLengthEncoding;
 import storage.DataStore;
-import storage.core.DataType;
-import storage.core.RedisValue;
-import storage.types.StringValue;
+import domain.DataType;
+import domain.RedisValue;
+import domain.values.StringValue;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

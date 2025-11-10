@@ -1,15 +1,15 @@
 package storage;
 
-import storage.operations.CommonOperations;
-import storage.operations.ListOperations;
-import storage.operations.SortedSetOperations;
-import storage.operations.StreamOperations;
-import storage.operations.StringOperations;
+import storage.repository.CommonRepository;
+import storage.repository.StringRepository;
+import storage.repository.ListRepository;
+import storage.repository.StreamRepository;
+import storage.repository.SortedSetRepository;
 
 public interface DataStore extends 
-    CommonOperations,
-    StringOperations, 
-    ListOperations, 
-    StreamOperations,
-    SortedSetOperations {
+    CommonRepository,
+    StringRepository, 
+    ListRepository, 
+    StreamRepository,
+    SortedSetRepository {
 }

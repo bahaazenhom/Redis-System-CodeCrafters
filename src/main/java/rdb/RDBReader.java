@@ -2,7 +2,7 @@ package rdb;
 
 import rdb.util.RDBLengthEncoding;
 import rdb.util.RDBStringDecoder;
-import storage.core.DataType;
+import domain.DataType;
 
 import java.io.IOException;
 import java.io.InputStream;

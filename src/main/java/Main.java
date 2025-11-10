@@ -11,7 +11,7 @@ import server.core.ServerContext;
 import server.core.ServerInstance;
 import server.core.ServerManager;
 import storage.DataStore;
-import storage.impl.InMemoryDataStore;
+import storage.InMemoryDataStore;
 import util.AppLogger;
 import util.ServerConfiguration;
 

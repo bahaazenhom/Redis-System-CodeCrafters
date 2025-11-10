@@ -2,8 +2,8 @@ package rdb;
 
 import rdb.util.RDBLengthEncoding;
 import rdb.util.RDBStringEncoder;
-import storage.core.RedisValue;
-import storage.types.StringValue;
+import domain.RedisValue;
+import domain.values.StringValue;
 
 import java.io.IOException;
 import java.io.OutputStream;

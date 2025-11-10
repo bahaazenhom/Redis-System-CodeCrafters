@@ -1,0 +1,18 @@
+package storage.repository;
+
+import domain.values.Member;
+import java.util.List;
+
+public interface SortedSetRepository {
+    int zadd(String key, List<Member> members);
+
+    Integer zrank(String key, String memberName);
+
+    List<String> zrange(String key, int start, int end);
+
+    int zcard(String key);
+
+    double zscore(String key, String memberName);
+
+    int zrem(String key, String memberName);
+}
