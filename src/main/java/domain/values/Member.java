@@ -1,5 +1,7 @@
 package domain.values;
 
+import util.GeospatialEncoding;
+
 public class Member implements Comparable<Member> {
     private final String name;
     private final double score;
@@ -11,7 +13,7 @@ public class Member implements Comparable<Member> {
 
     public Member(String name, double longitude, double latitude) {
         this.name = name;
-        this.score = longitude + (latitude / 1000.0);
+        this.score = GeospatialEncoding.encode(latitude, longitude);
     }
 
     public String getName() {
