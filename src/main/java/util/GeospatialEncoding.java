@@ -27,9 +27,9 @@ public class GeospatialEncoding {
     }
 
     public static long encode(double latitude, double longitude) {
-        // Normalize to the range 0-2^26 with full double precision
-        double normalizedLatitude = Math.pow(2, 26) * (latitude - MIN_LATITUDE) / LATITUDE_RANGE;
-        double normalizedLongitude = Math.pow(2, 26) * (longitude - MIN_LONGITUDE) / LONGITUDE_RANGE;
+        // Normalize to the range 0-2^32 for maximum precision (32 bits per coordinate)
+        double normalizedLatitude = Math.pow(2, 32) * (latitude - MIN_LATITUDE) / LATITUDE_RANGE;
+        double normalizedLongitude = Math.pow(2, 32) * (longitude - MIN_LONGITUDE) / LONGITUDE_RANGE;
 
         // Convert to long for maximum precision (no truncation to int)
         long latLong = (long) normalizedLatitude;

@@ -30,9 +30,9 @@ public class GeospatialDecoding {
     }
 
     private static double[] convertGridNumbersToCoordinates(long gridLatitudeNumber, long gridLongitudeNumber) {
-        // Use double precision throughout to avoid truncation errors
-        double normalizedLatitude = gridLatitudeNumber / Math.pow(2, 26);
-        double normalizedLongitude = gridLongitudeNumber / Math.pow(2, 26);
+        // Use double precision throughout with 32-bit precision per coordinate
+        double normalizedLatitude = gridLatitudeNumber / Math.pow(2, 32);
+        double normalizedLongitude = gridLongitudeNumber / Math.pow(2, 32);
 
         // Convert normalized values back to actual coordinates
         double latitude = MIN_LATITUDE + LATITUDE_RANGE * normalizedLatitude;
