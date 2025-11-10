@@ -20,20 +20,26 @@ public class GEOPOSHandler implements CommandStrategy {
     public void execute(List<String> arguments, ClientConnection clientOutput) {
         try {
             String key = arguments.get(0);
-            String member = arguments.get(1);
+            List<String> members = arguments.subList(1, arguments.size());
+            List<List<String>> results = new java.util.ArrayList<>();
+            for (String member : members) {
 
-            long geoScore = (long) dataStore.zscore(key, member);
-            if (geoScore == -1) {
-                clientOutput.write(RESPSerializer.nullArray());
-                clientOutput.flush();
-                return;
+                long geoScore = (long) dataStore.zscore(key, member);
+                if (geoScore == -1) {
+                    results.add(null);
+                    continue;
+                }
+
+                double[] coordinates = GeospatialDecoding.decode(geoScore);
+                List<String> coordList = Arrays.asList(
+                        String.valueOf(coordinates[0]),
+                        String.valueOf(coordinates[1]));
+
+                results.add(coordList);
             }
-            
-            double[] coordinates = GeospatialDecoding.decode(geoScore);
-            List<String> coordList = Arrays.asList(
-                    String.valueOf(coordinates[0]),
-                    String.valueOf(coordinates[1]));
-            clientOutput.write(RESPSerializer.array(coordList));
+
+            // Send response back to client
+            clientOutput.write(RESPSerializer.arrayOfArrays(results));
             clientOutput.flush();
         } catch (Exception e) {
             throw new IllegalArgumentException("An error occurred while processing GEOPOS command.");

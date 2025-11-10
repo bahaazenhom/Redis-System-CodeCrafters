@@ -142,4 +142,20 @@ public class RESPSerializer {
         return respBuilder.toString();
     }
 
+    public static String arrayOfArrays(List<List<String>> results) {
+        if (results == null) {
+            return nullArray();
+        }
+        StringBuilder respBuilder = new StringBuilder();
+        respBuilder.append("*").append(results.size()).append("\r\n");
+        for (List<String> innerList : results) {
+            if (innerList == null) {
+                respBuilder.append(nullArray());
+            } else {
+                respBuilder.append(array(innerList));
+            }
+        }
+        return respBuilder.toString();
+    }
+
 }
