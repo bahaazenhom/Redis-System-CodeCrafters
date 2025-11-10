@@ -31,9 +31,10 @@ public class GEOPOSHandler implements CommandStrategy {
                 }
 
                 double[] coordinates = GeospatialDecoding.decode(geoScore);
+                // Redis GEOPOS returns [longitude, latitude], but decode() returns [latitude, longitude]
                 List<String> coordList = Arrays.asList(
-                        String.valueOf(coordinates[0]),
-                        String.valueOf(coordinates[1]));
+                        String.valueOf(coordinates[1]), // longitude first
+                        String.valueOf(coordinates[0])); // latitude second
 
                 results.add(coordList);
             }
