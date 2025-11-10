@@ -3,6 +3,7 @@ package command.handlers.geospatial;
 import java.util.List;
 
 import command.CommandStrategy;
+import protocol.RESPSerializer;
 import server.connection.ClientConnection;
 import storage.DataStore;
 
@@ -25,7 +26,7 @@ public class GEODISTHandler implements CommandStrategy {
                 clientOutput.write("$-1\r\n"); // Null bulk string
             } else {
                 double distance = Math.abs(member2Score - member1Score);
-                clientOutput.write("+" + distance + "\r\n"); // Simple string response
+                clientOutput.write(RESPSerializer.bulkString(String.valueOf(distance))); // Simple string response
             }
             clientOutput.flush();
         } catch (Exception e) {
