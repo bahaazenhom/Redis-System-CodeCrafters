@@ -1,6 +1,5 @@
 package storage;
 
-import storage.DataStore;
 import storage.impl.CommonRepositoryImpl;
 import storage.impl.ListRepositoryImpl;
 import storage.impl.SortedSetRepositoryImpl;

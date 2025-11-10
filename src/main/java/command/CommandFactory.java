@@ -7,6 +7,7 @@ import command.handlers.connection.*;
 import command.handlers.geospatial.GEOADDHandler;
 import command.handlers.geospatial.GEODISTHandler;
 import command.handlers.geospatial.GEOPOSHandler;
+import command.handlers.geospatial.GEOSEARCHHandler;
 import command.handlers.list.*;
 import command.handlers.pubsub.*;
 import command.handlers.replication.*;
@@ -76,6 +77,7 @@ public class CommandFactory {
             case "GEOADD" -> new GEOADDHandler(dataStore);
             case "GEOPOS" -> new GEOPOSHandler(dataStore);
             case "GEODIST" -> new GEODISTHandler(dataStore);
+            case "GEOSEARCH" -> new GEOSEARCHHandler(dataStore);
             default -> null;
         };
     }
