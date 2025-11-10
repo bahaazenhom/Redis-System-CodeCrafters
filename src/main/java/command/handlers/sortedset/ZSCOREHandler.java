@@ -24,8 +24,19 @@ public class ZSCOREHandler implements CommandStrategy {
             
             if (score == -1)
                 clientOutput.write(RESPSerializer.nullBulkString());
-            else
-                clientOutput.write(RESPSerializer.bulkString(String.valueOf(score)));
+            else {
+                // Format score: if it's a whole number (like geohash), format as integer
+                // Otherwise, format as decimal
+                String scoreStr;
+                if (score == Math.floor(score) && !Double.isInfinite(score)) {
+                    // It's a whole number, format as long to avoid scientific notation
+                    scoreStr = String.valueOf((long) score);
+                } else {
+                    // It's a decimal, use regular formatting
+                    scoreStr = String.valueOf(score);
+                }
+                clientOutput.write(RESPSerializer.bulkString(scoreStr));
+            }
 
             clientOutput.flush();
         } catch (IOException e) {
