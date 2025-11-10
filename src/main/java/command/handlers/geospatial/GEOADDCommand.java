@@ -52,6 +52,20 @@ public class GEOADDCommand implements CommandStrategy {
             throw new IllegalArgumentException(
                     "GEOADD requires at least 4 arguments and the number of arguments after the key must be a multiple of 3.");
         }
+        for (int i = 1; i < arguments.size(); i += 3) {
+            try {
+                double longitude = Double.parseDouble(arguments.get(i));
+                double latitude = Double.parseDouble(arguments.get(i + 1));
+                if (longitude < -180.0 || longitude > 180.0) {
+                    throw new IllegalArgumentException("invalid longitude,latitude pair " + longitude + "," + latitude);
+                }
+                if (latitude < -85.05112878 || latitude > 85.05112878) {
+                    throw new IllegalArgumentException("invalid longitude,latitude pair " + longitude + "," + latitude);
+                }
+            } catch (NumberFormatException e) {
+                throw new IllegalArgumentException("Longitude and latitude must be valid floating point numbers.");
+            }
+        }
     }
 
 }
