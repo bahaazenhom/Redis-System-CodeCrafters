@@ -48,7 +48,7 @@ public class GEOADDCommand implements CommandStrategy {
 
     @Override
     public void validateArguments(List<String> arguments) throws IllegalArgumentException {
-        if (arguments.size() < 4 || (arguments.size() - 2) % 3 != 0) {
+        if (arguments.size() < 4 || (arguments.size() - 1) % 3 != 0) {
             throw new IllegalArgumentException(
                     "GEOADD requires at least 4 arguments and the number of arguments after the key must be a multiple of 3.");
         }
