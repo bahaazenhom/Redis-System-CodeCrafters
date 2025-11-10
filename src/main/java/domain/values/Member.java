@@ -9,6 +9,11 @@ public class Member implements Comparable<Member> {
         this.score = score;
     }
 
+    public Member(String name, double longitude, double latitude) {
+        this.name = name;
+        this.score = longitude + (latitude / 1000.0);
+    }
+
     public String getName() {
         return name;
     }
@@ -57,7 +62,5 @@ public class Member implements Comparable<Member> {
             return false;
         return true;
     }
-
-    
 
 }

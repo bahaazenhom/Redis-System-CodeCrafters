@@ -1,16 +1,18 @@
 package command.handlers.geospatial;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import command.CommandStrategy;
+import domain.values.Member;
 import protocol.RESPSerializer;
 import server.connection.ClientConnection;
 import storage.DataStore;
 
-public class GEOADDCommand implements CommandStrategy {
+public class GEOADDHandler implements CommandStrategy {
     private final DataStore dataStore;
 
-    public GEOADDCommand(DataStore dataStore) {
+    public GEOADDHandler(DataStore dataStore) {
         this.dataStore = dataStore;
     }
 
@@ -21,6 +23,7 @@ public class GEOADDCommand implements CommandStrategy {
             String key = arguments.get(0);
             int numAdded = 0;
 
+            List<Member> members = new ArrayList<>();
             // Process each (longitude, latitude, member) triplet
             for (int i = 1; i < arguments.size(); i += 3) {
                 String longitudeStr = arguments.get(i);
@@ -30,8 +33,10 @@ public class GEOADDCommand implements CommandStrategy {
                 double longitude = Double.parseDouble(longitudeStr);
                 double latitude = Double.parseDouble(latitudeStr);
 
-                numAdded++;
+                Member geoMember = new Member(member, longitude, latitude);
+                members.add(geoMember);
             }
+            numAdded = dataStore.zadd(key, members);
 
             // Send response back to client
             clientOutput.write(RESPSerializer.integer(numAdded));

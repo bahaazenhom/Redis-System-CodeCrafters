@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import command.handlers.connection.*;
-import command.handlers.geospatial.GEOADDCommand;
+import command.handlers.geospatial.GEOADDHandler;
 import command.handlers.list.*;
 import command.handlers.pubsub.*;
 import command.handlers.replication.*;
@@ -71,7 +71,7 @@ public class CommandFactory {
             case "ZCARD" -> new ZCARDHandler(dataStore);
             case "ZSCORE" -> new ZSCOREHandler(dataStore);
             case "ZREM" -> new ZREMHandler(dataStore);
-            case "GEOADD" -> new GEOADDCommand(dataStore);
+            case "GEOADD" -> new GEOADDHandler(dataStore);
             default -> null;
         };
     }
