@@ -29,7 +29,7 @@ public class GeospatialDecoding {
         return (int) v;
     }
 
-    private static Coordinates convertGridNumbersToCoordinates(int gridLatitudeNumber, int gridLongitudeNumber) {
+    private static double[] convertGridNumbersToCoordinates(int gridLatitudeNumber, int gridLongitudeNumber) {
         // Calculate the grid boundaries
         double gridLatitudeMin = MIN_LATITUDE + LATITUDE_RANGE * (gridLatitudeNumber / Math.pow(2, 26));
         double gridLatitudeMax = MIN_LATITUDE + LATITUDE_RANGE * ((gridLatitudeNumber + 1) / Math.pow(2, 26));
@@ -40,10 +40,13 @@ public class GeospatialDecoding {
         double latitude = (gridLatitudeMin + gridLatitudeMax) / 2;
         double longitude = (gridLongitudeMin + gridLongitudeMax) / 2;
 
-        return new Coordinates(latitude, longitude);
+        double[] coords = new double[2];
+        coords[0] = latitude;
+        coords[1] = longitude;
+        return coords;
     }
 
-    public static Coordinates decode(long geoCode) {
+    public static double[] decode(long geoCode) {
         // Align bits of both latitude and longitude to take even-numbered position
         long y = geoCode >> 1;
         long x = geoCode;
