@@ -45,13 +45,13 @@ public class GeospatialDecoding {
     }
 
     public static double[] decode(long geoCode) {
-        // Align bits of both latitude and longitude to take even-numbered position
-        long y = geoCode >> 1;
-        long x = geoCode;
+        // Extract bits: latitude is on even positions, longitude is on odd positions
+        long latitudeBits = geoCode;        // Extract latitude from even bits
+        long longitudeBits = geoCode >> 1;  // Extract longitude from odd bits
 
         // Compact bits back to full precision longs (no truncation to int)
-        long gridLatitudeNumber = compactInt64(x);
-        long gridLongitudeNumber = compactInt64(y);
+        long gridLatitudeNumber = compactInt64(latitudeBits);
+        long gridLongitudeNumber = compactInt64(longitudeBits);
 
         return convertGridNumbersToCoordinates(gridLatitudeNumber, gridLongitudeNumber);
     }
