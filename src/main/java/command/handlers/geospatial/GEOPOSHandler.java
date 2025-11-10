@@ -48,7 +48,7 @@ public class GEOPOSHandler implements CommandStrategy {
 
     @Override
     public void validateArguments(List<String> arguments) throws IllegalArgumentException {
-        if (arguments.size() != 2) {
+        if (arguments.size() < 2) {
             throw new IllegalArgumentException("GEOPOS requires at least 2 arguments: key and one or more members.");
         }
     }
