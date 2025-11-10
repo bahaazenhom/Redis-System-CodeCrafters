@@ -5,6 +5,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import command.handlers.connection.*;
 import command.handlers.geospatial.GEOADDHandler;
+import command.handlers.geospatial.GEODISTHandler;
 import command.handlers.geospatial.GEOPOSHandler;
 import command.handlers.list.*;
 import command.handlers.pubsub.*;
@@ -74,6 +75,7 @@ public class CommandFactory {
             case "ZREM" -> new ZREMHandler(dataStore);
             case "GEOADD" -> new GEOADDHandler(dataStore);
             case "GEOPOS" -> new GEOPOSHandler(dataStore);
+            case "GEODIST" -> new GEODISTHandler(dataStore);
             default -> null;
         };
     }
