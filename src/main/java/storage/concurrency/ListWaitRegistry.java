@@ -83,14 +83,14 @@ public class ListWaitRegistry {
             return;// there's no any waiting clients
         queue.lock.lock();
         try {
-            while (!queue.waiters.isEmpty()) {// we go through all the waiting clients to give them their values
+            // Only fulfill the FIRST waiter, not all waiters
+            if (!queue.waiters.isEmpty()) {
                 WaitToken token = queue.waiters.poll();
                 String value = popSupplier.get();
-                if (value == null)
-                    return;// no more elements to pop
-                token.fulfill(value);//
-
-                queue.condition.signal();// signal the most waiting client
+                if (value != null) {
+                    token.fulfill(value);
+                    queue.condition.signal();// signal only ONE waiting client
+                }
             }
         } finally {
             queue.lock.unlock();
