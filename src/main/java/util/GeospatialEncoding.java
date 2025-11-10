@@ -31,9 +31,9 @@ public class GeospatialEncoding {
         double normalizedLatitude = Math.pow(2, 26) * (latitude - MIN_LATITUDE) / LATITUDE_RANGE;
         double normalizedLongitude = Math.pow(2, 26) * (longitude - MIN_LONGITUDE) / LONGITUDE_RANGE;
 
-        // Use rounding instead of truncation for better precision
-        long latLong = Math.round(normalizedLatitude);
-        long lonLong = Math.round(normalizedLongitude);
+        // Use floor (truncation) as per Redis geohash implementation
+        long latLong = (long) normalizedLatitude;
+        long lonLong = (long) normalizedLongitude;
 
         return interleave(latLong, lonLong);
     }
