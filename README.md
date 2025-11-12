@@ -141,6 +141,91 @@ The implementation has been tested with the CodeCrafters test suite across all m
 - **Reduced Lock Contention**: Fine-grained locking strategy with concurrent collections minimizing global synchronization overhead
 - **Wait Registry Pattern**: Efficient blocking list and stream operations using event-driven callbacks instead of busy-waiting
 
+## Design Patterns
+
+### Structural Patterns
+
+#### **Repository Pattern**
+- **Usage**: Data access abstraction layer
+- **Implementation**: `DataStore` interface composed of domain-specific repositories
+  - `StringRepository` - String operations
+  - `ListRepository` - List operations
+  - `StreamRepository` - Stream operations
+  - `SortedSetRepository` - Sorted set operations
+  - `CommonRepository` - Key management
+- **Benefit**: Decouples business logic from data storage implementation
+- **Location**: `src/main/java/storage/` and `src/main/java/storage/repository/`
+
+#### **Facade Pattern**
+- **Usage**: Command factory and protocol handling
+- **Implementation**: 
+  - `CommandFactory` provides simplified interface to command creation
+  - `RESPParser` and `RESPSerializer` provide facade over protocol details
+  - `ReplicationManager` provides facade over complex replication logic
+- **Benefit**: Hides complexity of underlying systems
+- **Location**: `src/main/java/command/CommandFactory.java`, `src/main/java/protocol/`
+
+### Creational Patterns
+
+#### **Factory Pattern**
+- **Usage**: Command instantiation
+- **Implementation**: `CommandFactory` uses switch expressions to create command handlers
+- **Optimization**: Caches instantiated commands in `ConcurrentHashMap` to avoid recreation
+- **Benefit**: Centralized command creation logic, easy to add new commands
+- **Location**: `src/main/java/command/CommandFactory.java`
+
+#### **Singleton Pattern**
+- **Usage**: Global state management
+- **Implementation**:
+  - `ReplicationManager.create()` - Manages replication state (thread-safe)
+  - `ServerContext.getInstance()` - Holds server configuration (synchronized double-checked locking)
+  - `ChannelManager.getInstance()` - Manages pub/sub channels
+- **Benefit**: Ensures single point of access to shared resources
+- **Location**: Various managers across the codebase
+
+### Behavioral Patterns
+
+#### **Strategy Pattern**
+- **Usage**: Command execution framework
+- **Implementation**: `CommandStrategy` interface with 30+ concrete implementations (handlers)
+- **Benefit**: Encapsulates different command algorithms, allowing them to vary independently
+- **Location**: `src/main/java/command/` and `src/main/java/command/handlers/`
+- **Example**: `SetHandler`, `GetHandler`, `LPUSHHandler` all implement `CommandStrategy`
+
+#### **Observer Pattern**
+- **Usage**: Pub/Sub messaging system
+- **Implementation**: 
+  - `ChannelManager` maintains channels as observers
+  - `PublishHandler` notifies all subscribers on a channel
+  - `SubscribeHandler` registers clients as observers
+- **Benefit**: Loose coupling between publishers and subscribers
+- **Location**: `src/main/java/pub/sub/ChannelManager.java`, `src/main/java/command/handlers/pubsub/`
+
+#### **Command Pattern**
+- **Usage**: Transaction queuing and delayed execution
+- **Implementation**:
+  - `TransactionManager` queues commands with `CommandRequest` wrapper
+  - Commands execute atomically in `EXEC` after being queued in `MULTI` mode
+- **Benefit**: Encapsulates requests as objects, enables queuing and delayed execution
+- **Location**: `src/main/java/command/transactions/`
+
+#### **State Pattern**
+- **Usage**: Transaction and replication states
+- **Implementation**:
+  - `TransactionContext` maintains multi/normal mode state
+  - `MasterNode` / `SlaveNode` maintain replication role states
+  - `ReplicaSyncState` enum tracks synchronization progress
+- **Benefit**: Allows objects to change behavior based on internal state
+- **Location**: `src/main/java/command/transactions/`, `src/main/java/replication/`
+
+#### **Event-Driven Wait Registry Pattern**
+- **Usage**: Non-blocking blocking operations (BLPOP, XREAD)
+- **Implementation**: 
+  - Clients register wait handlers
+  - Events trigger callbacks instead of polling
+  - `WaitRequestManager` coordinates waiting clients
+- **Benefit**: Efficient blocking without busy-waiting or thread suspension
+- **Location**: `src/main/java/replication/sync/WaitRequestManager.java`
+
 ## Notes
 The entry point for the Redis implementation is in `src/main/java/Main.java`.
-
