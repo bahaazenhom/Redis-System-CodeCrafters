@@ -1,6 +1,7 @@
 package command.handlers.connection;
 
 import command.CommandStrategy;
+import protocol.RESPSerializer;
 import server.connection.ClientConnection;
 
 import java.util.List;
@@ -10,7 +11,7 @@ public class ACLWhoAmIHandler implements CommandStrategy {
     public void execute(List<String> arguments, ClientConnection clientOutput) {
         try{
             String username = clientOutput.getUsername();
-            clientOutput.write(username);
+            clientOutput.write(RESPSerializer.bulkString(username));
             clientOutput.flush();
         }
         catch (Exception e){
