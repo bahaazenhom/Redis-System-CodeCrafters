@@ -1,6 +1,5 @@
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.logging.Level;
 
 import command.CommandExecuter;
@@ -17,59 +16,107 @@ import util.ServerConfiguration;
 
 public class Main {
 
-    public static void main(String[] args) throws IOException {
-        // Initialize logging system
-        AppLogger.initialize();
 
-        // Set log level to INFO for production, or FINE/FINEST for debugging
-        AppLogger.setLogLevel(Level.INFO); // Change to Level.FINE for more verbose logs
+    public static void main(String[] args) {
+        try {
+            // Initialize logging system
+            AppLogger.initialize();
+            AppLogger.setLogLevel(Level.INFO); // Change to Level.FINE for more verbose logs
 
-        //AppLogger.setLogLevel(Level.FINEST); // Uncomment for maximum verbosity during debugging
-        ServerConfiguration config = new ServerConfiguration(args);
-        System.out.println(Arrays.toString(args));
-        AppLogger.getLogger(Main.class.getName()).info("Starting server with configuration: " + config.toString());
+            var logger = AppLogger.getLogger(Main.class.getName());
+            logger.info("=== Redis Server Starting ===");
 
-        // Initialize ServerContext singleton
-        ServerContext serverContext = ServerContext.getInstance();
-        
-        // Store configuration in ServerContext for global access
-        serverContext.setConfiguration(config);
+            // Parse and validate configuration
+            ServerConfiguration config = new ServerConfiguration(args);
+            logger.info("Configuration loaded: " + config.toString());
 
-        // Log server startup information
-        DataStore dataStore = new InMemoryDataStore();
-        
-        // Load RDB file if configured
+            // Initialize ServerContext singleton
+            ServerContext serverContext = ServerContext.getInstance();
+            serverContext.setConfiguration(config);
+
+            // Initialize in-memory data store
+            DataStore dataStore = new InMemoryDataStore();
+            serverContext.setDataStore(dataStore);
+
+            // Load RDB file if configured
+            loadRDBFile(dataStore, config, logger);
+
+            // Create core components
+            CommandExecuter commandExecuter = new CommandExecuter(dataStore);
+            ServerManager serverManager = ServerManager.create();
+            ReplicationManager replicationManager = ReplicationManager.create();
+
+            // Create and start server instance
+            logger.info("Creating server instance on port " + config.getPort());
+            ServerInstance serverInstance = replicationManager.createReplica(
+                commandExecuter,
+                config.getPort(),
+                config.getServerRole(),
+                config.getMasterPort(),
+                config.getMasterHost()
+            );
+
+            // Register shutdown hook for graceful shutdown
+            registerShutdownHook(serverManager, serverInstance, logger);
+
+            // Start the server
+            logger.info("Starting server...");
+            serverManager.startServer(serverInstance);
+            logger.info("=== Redis Server Started Successfully ===");
+
+        } catch (IOException e) {
+            AppLogger.getLogger(Main.class.getName()).severe("I/O error during server initialization: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        } catch (Exception e) {
+            AppLogger.getLogger(Main.class.getName()).severe("Unexpected error during server initialization: " + e.getMessage());
+            e.printStackTrace();
+            System.exit(1);
+        }
+    }
+
+    /**
+     * Load RDB file if configured and exists
+     */
+    private static void loadRDBFile(DataStore dataStore, ServerConfiguration config, java.util.logging.Logger logger) {
         String rdbFileDir = config.getRdbFileDir();
         String rdbFileName = config.getRdbFileName();
-        if (rdbFileDir != null && rdbFileName != null && !rdbFileDir.isEmpty() && !rdbFileName.isEmpty()) {
-            try {
-                RDBManager rdbManager = new RDBManager(dataStore, rdbFileDir, rdbFileName);
-                if (rdbManager.fileExists()) {
-                    AppLogger.getLogger(Main.class.getName()).info("Loading RDB file: " + rdbManager.getFilePath());
-                    rdbManager.load();
-                    AppLogger.getLogger(Main.class.getName()).info("RDB file loaded successfully");
-                } else {
-                    AppLogger.getLogger(Main.class.getName()).info("RDB file not found, starting with empty database");
-                }
-            } catch (RDBException e) {
-                AppLogger.getLogger(Main.class.getName()).severe("Failed to load RDB file: " + e.getMessage());
-                // Continue with empty database
-            }
+
+        if (rdbFileDir == null || rdbFileName == null || rdbFileDir.isEmpty() || rdbFileName.isEmpty()) {
+            return;
         }
-        
-        CommandExecuter commandExecuter = new CommandExecuter(dataStore);
-        ServerManager serverManager = ServerManager.create();
 
-        // Extract configuration parameters
-        int port = config.getPort();
-        int masterPort = config.getMasterPort();
-        String serverRole = config.getServerRole();
-        String masterHost = config.getMasterHost();
+        try {
+            RDBManager rdbManager = new RDBManager(dataStore, rdbFileDir, rdbFileName);
+            if (rdbManager.fileExists()) {
+                logger.info("Loading RDB file: " + rdbManager.getFilePath());
+                rdbManager.load();
+                logger.info("RDB file loaded successfully");
+            } else {
+                logger.info("RDB file not found, starting with empty database");
+            }
+        } catch (RDBException e) {
+            logger.severe("Failed to load RDB file: " + e.getMessage());
+            logger.info("Continuing with empty database");
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
 
-        // Create and start server instance
-        ReplicationManager replicationManager = ReplicationManager.create();
-        ServerInstance serverInstance = replicationManager.createReplica(commandExecuter, port, serverRole, masterPort, masterHost);
-        serverManager.startServer(serverInstance);
+    /**
+     * Register shutdown hook for graceful server shutdown
+     */
+    private static void registerShutdownHook(ServerManager serverManager, ServerInstance serverInstance, java.util.logging.Logger logger) {
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            logger.info("=== Redis Server Shutting Down ===");
+            try {
+                serverManager.stopServer(serverInstance);
+                logger.info("Server stopped gracefully");
+            } catch (Exception e) {
+                logger.severe("Error during server shutdown: " + e.getMessage());
+                e.printStackTrace();
+            }
+        }));
     }
 
 

@@ -11,6 +11,7 @@ public class ClientConnection {
     private final InputStream inputStream;
     private final BufferedReader reader;
     private final BufferedWriter writer;
+    private String username;
 
     // Flag to indicate PSYNC completed - ClientHandler should stop reading
     private volatile boolean handoverToSlaveAckHandler = false;
@@ -21,6 +22,7 @@ public class ClientConnection {
         this.inputStream = inputStream;
         this.reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         this.writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
+        this.username = "default";
     }
 
     /* ========== WRITE ========== */
@@ -107,5 +109,8 @@ public class ClientConnection {
 
     public String getClientId() {
         return clientId;
+    }
+    public String getUsername() {
+        return username;
     }
 }

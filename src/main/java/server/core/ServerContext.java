@@ -1,5 +1,6 @@
 package server.core;
 
+import storage.DataStore;
 import util.ServerConfiguration;
 
 /**
@@ -10,6 +11,7 @@ import util.ServerConfiguration;
 public class ServerContext {
     private static ServerContext instance;
     private ServerConfiguration configuration;
+    private DataStore dataStore = null;
 
     private ServerContext() {
         // Private constructor for singleton
@@ -55,5 +57,14 @@ public class ServerContext {
      */
     public boolean isConfigured() {
         return configuration != null;
+    }
+
+    public void setDataStore(DataStore dataStore) {
+        // Placeholder for setting DataStore if needed in future
+        this.dataStore = dataStore;
+    }
+
+    public DataStore getDataStore() {
+        return dataStore;
     }
 }

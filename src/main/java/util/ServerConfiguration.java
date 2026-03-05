@@ -3,8 +3,7 @@ package util;
 /**
  * ServerConfiguration parses and holds Redis server startup configuration
  * from command-line arguments.
- * 
- * Supported arguments:
+ *
  * - --port <port>: Server port (default: 6379)
  * - --replicaof <host> <port>: Configure as replica of specified master
  * - --dir <path>: Directory for RDB file
@@ -28,7 +27,8 @@ public class ServerConfiguration {
     public ServerConfiguration(String[] args) {
         ConfigBuilder builder = new ConfigBuilder();
         parseArgs(args, builder);
-        
+
+        // Assign parsed values to final fields
         this.port = builder.port;
         this.serverRole = builder.serverRole;
         this.masterHost = builder.masterHost;
@@ -43,6 +43,7 @@ public class ServerConfiguration {
             
             switch (arg) {
                 case "--port":
+                    // Format: --port <port>
                     if (i + 1 < args.length) {
                         builder.port = parsePort(args[++i]);
                     }
@@ -60,12 +61,14 @@ public class ServerConfiguration {
                     break;
                     
                 case "--dir":
+                    // Format: --dir <rdb_file_directory>
                     if (i + 1 < args.length) {
                         builder.rdbFileDir = args[++i];
                     }
                     break;
                     
                 case "--dbfilename":
+                    // Format: --dbfilename <rdb_file_name>
                     if (i + 1 < args.length) {
                         builder.rdbFileName = args[++i];
                     }

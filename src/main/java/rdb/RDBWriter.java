@@ -30,6 +30,7 @@ public class RDBWriter {
      * @throws IOException If an I/O error occurs
      */
     public void writeHeader() throws IOException {
+        // Write "REDIS" magic string and version "0009" as ASCII, ex: "REDIS0009" ==> [52 45 44 49 53 30 30 30 39]
         out.write(RDBConstants.MAGIC_STRING.getBytes(StandardCharsets.US_ASCII));
         out.write(RDBConstants.VERSION.getBytes(StandardCharsets.US_ASCII));
     }

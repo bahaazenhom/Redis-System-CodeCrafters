@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.util.List;
+import java.util.Objects;
 import java.util.UUID;
 import java.util.logging.Logger;
 
@@ -89,6 +90,7 @@ public class ClientHandler implements Runnable {
                 commandName = commands.get(1);
                 startIndexSublist = 2;
             }
+            if(Objects.equals(commandName, "ACL"))commandName+=commands.get(1);
 
             List<String> arguments = commands.subList(startIndexSublist, commands.size());
 

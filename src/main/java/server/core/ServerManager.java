@@ -1,6 +1,7 @@
 package server.core;
 
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -27,7 +28,7 @@ public class ServerManager {
     /**
      * Start a new server on the specified port
      * 
-     * @param port The port number to bind to
+     * @param serverInstance The server instance to start
      * @return true if server started successfully, false if port is already in use
      */
     public boolean startServer(ServerInstance serverInstance) {
@@ -46,11 +47,12 @@ public class ServerManager {
     /**
      * Stop a server running on the specified port
      * 
-     * @param port The port number of the server to stop
+     * @param serverInstance The server instance to stop
      * @return true if server was stopped, false if no server was running on that
      *         port
      */
-    public boolean stopServer(int port) {
+    public boolean stopServer(ServerInstance serverInstance) {
+        int port = serverInstance.getPort();
         ServerInstance instance = runningServers.remove(port);
         if (instance != null) {
             instance.stop();
@@ -69,7 +71,7 @@ public class ServerManager {
     /**
      * Get all running server ports
      */
-    public java.util.Set<Integer> getRunningPorts() {
+    public Set<Integer> getRunningPorts() {
         return runningServers.keySet();
     }
 
