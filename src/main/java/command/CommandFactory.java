@@ -3,7 +3,6 @@ package command;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import command.handlers.authentication.ACLWhoAmIHandler;
 import command.handlers.connection.*;
 import command.handlers.geospatial.GEOADDHandler;
 import command.handlers.geospatial.GEODISTHandler;
