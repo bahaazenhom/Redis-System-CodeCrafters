@@ -12,6 +12,7 @@ public class ACLWhoAmIHandler implements CommandStrategy {
         try{
             String username = clientOutput.getUsername();
             clientOutput.write(RESPSerializer.bulkString(username));
+
             clientOutput.flush();
         }
         catch (Exception e){
