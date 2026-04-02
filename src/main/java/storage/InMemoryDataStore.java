@@ -1,10 +1,8 @@
 package storage;
 
-import storage.impl.CommonRepositoryImpl;
-import storage.impl.ListRepositoryImpl;
-import storage.impl.SortedSetRepositoryImpl;
-import storage.impl.StreamRepositoryImpl;
-import storage.impl.StringRepositoryImpl;
+import domain.values.UserProperties;
+import server.connection.ClientConnection;
+import storage.impl.*;
 import storage.concurrency.ListWaitRegistry;
 import storage.concurrency.StreamWaitRegistry;
 import domain.DataType;
@@ -27,6 +25,7 @@ public class InMemoryDataStore implements DataStore {
     private final ListRepositoryImpl listRepository;
     private final StreamRepositoryImpl streamRepository;
     private final SortedSetRepositoryImpl sortedSetRepository;
+    private final AuthenticationRepositoryImpl authenticationRepository;
 
     public InMemoryDataStore() {
         ListWaitRegistry listWaitRegistry = new ListWaitRegistry();
@@ -37,6 +36,7 @@ public class InMemoryDataStore implements DataStore {
         this.listRepository = new ListRepositoryImpl(store, listWaitRegistry);
         this.streamRepository = new StreamRepositoryImpl(store, streamWaitRegistry);
         this.sortedSetRepository = new SortedSetRepositoryImpl(store);
+        this.authenticationRepository = new AuthenticationRepositoryImpl(ClientConnection.getInstance(),store);
     }
 
     // ============================================
@@ -179,5 +179,20 @@ public class InMemoryDataStore implements DataStore {
     @Override
     public int zrem(String key, String memberName) {
         return sortedSetRepository.zrem(key, memberName);
+    }
+
+
+    // ============================================
+    // DELEGATE TO Authentication REPOSITORY
+    // ============================================
+
+    @Override
+    public String getCurrentUser() {
+        return "";
+    }
+
+    @Override
+    public UserProperties getUserProperties(String currentUser) {
+        return null;
     }
 }

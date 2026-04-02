@@ -1,6 +1,7 @@
 package protocol;
 
 import java.util.List;
+import java.util.Map;
 
 public class RESPSerializer {
     public static String simpleString(String message) {
@@ -155,6 +156,35 @@ public class RESPSerializer {
                 respBuilder.append(array(innerList));
             }
         }
+        return respBuilder.toString();
+    }
+
+    public static String writeUserProperties(Map<String, List<String>> userProperties) {
+        if (userProperties == null) {
+            return nullArray();
+        }
+
+        StringBuilder respBuilder = new StringBuilder();
+
+        respBuilder.append("*").append(userProperties.size()).append("\r\n");
+
+        for (Map.Entry<String, List<String>> entry : userProperties.entrySet()) {
+            List<String> values = entry.getValue();
+
+            int subArraySize = (values == null) ? 1 : 1 + values.size();
+            respBuilder.append("*").append(subArraySize).append("\r\n");
+
+            // Append the Key
+            respBuilder.append(bulkString(entry.getKey()));
+
+            // Append the Values
+            if (values != null) {
+                for (String value : values) {
+                    respBuilder.append(bulkString(value));
+                }
+            }
+        }
+
         return respBuilder.toString();
     }
 
