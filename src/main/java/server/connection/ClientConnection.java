@@ -24,7 +24,7 @@ public class ClientConnection {
         this.reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         this.writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
         this.username = "default";
-        clientConnection = new ClientConnection(clientId, outputStream, inputStream);
+        clientConnection = this;
     }
 
 
