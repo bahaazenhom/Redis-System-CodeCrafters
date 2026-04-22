@@ -6,5 +6,7 @@ public interface AuthenticationRepository {
     String getCurrentUser();
     UserProperties getUserProperties(String currentUser);
 
-    void addUserPassword(String userName, String password);
+    boolean addUserPassword(String userName, String password);
+
+    boolean checkUserCredentials(String userName, String password);
 }

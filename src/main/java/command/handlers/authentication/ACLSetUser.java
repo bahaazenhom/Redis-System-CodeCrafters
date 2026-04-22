@@ -1,4 +1,4 @@
-package command.handlers.connection;
+package command.handlers.authentication;
 
 import command.CommandStrategy;
 import protocol.RESPSerializer;
@@ -19,8 +19,9 @@ public class ACLSetUser implements CommandStrategy {
         try{
             String userName = arguments.get(0);
             String password = arguments.get(1);
-            store.addUserPassword(userName, password);
-            clientOutput.write(RESPSerializer.simpleString("OK"));
+            boolean isAdded = store.addUserPassword(userName, password);
+            if(isAdded) clientOutput.write(RESPSerializer.simpleString("OK"));
+            else clientOutput.write(RESPSerializer.error("WRONGPASS invalid username or user is disabled."));
             clientOutput.flush();
         }
         catch (Exception e){

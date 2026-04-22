@@ -3,6 +3,10 @@ package command;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import command.handlers.authentication.ACLGetUser;
+import command.handlers.authentication.ACLSetUser;
+import command.handlers.authentication.ACLWhoAmIHandler;
+import command.handlers.authentication.AUTHHandler;
 import command.handlers.connection.*;
 import command.handlers.geospatial.GEOADDHandler;
 import command.handlers.geospatial.GEODISTHandler;
@@ -81,6 +85,7 @@ public class CommandFactory {
             case "ACLWHOAMI" -> new ACLWhoAmIHandler();
             case "ACLGETUSER" -> new ACLGetUser(dataStore);
             case "ACLSETUSER" -> new ACLSetUser(dataStore);
+            case "AUTH" -> new AUTHHandler(dataStore);
             default -> null;
         };
     }

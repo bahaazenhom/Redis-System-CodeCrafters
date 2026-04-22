@@ -32,14 +32,33 @@ public class AuthenticationRepositoryImpl implements AuthenticationRepository {
     }
 
     @Override
-    public void addUserPassword(String userName, String password) {
+    public boolean addUserPassword(String userName, String password) {
         // Ensuring that "nopass" flag is removed, as we are adding a password to this user now.
+        if(getUserProperties(userName) == null)return false;
         List<String> flags = getUserProperties(userName).getValue().get("flags");
         if (!flags.isEmpty() && flags.get(0).equals("nopass")) flags.remove(0);
 
         String sha256Password = SHA256Util.hashToHex(password.substring(1));
         getUserProperties(userName).getValue().get("passwords").add(sha256Password);
+        return true;
     }
+
+    @Override
+    public boolean checkUserCredentials(String userName, String password) {
+        UserProperties userProperties = getUserProperties(userName);
+        if(userProperties == null)return false;
+        if(userProperties.getValue().get("flags").contains("nopass")){
+            return true; // No password required for this user
+        }
+        List<String> passwords = userProperties.getValue().get("passwords");
+        for(String storedPassword:passwords){
+            if(storedPassword.equals(SHA256Util.hashToHex(password))){
+                return true;
+            }
+        }
+        return false;
+    }
+
     private void populateDefaultUser(){
         UserProperties userProperties = new UserProperties();
         // Default Flags Population

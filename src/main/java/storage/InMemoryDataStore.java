@@ -197,7 +197,12 @@ public class InMemoryDataStore implements DataStore {
     }
 
     @Override
-    public void addUserPassword(String userName, String password) {
-        authenticationRepository.addUserPassword(userName, password);
+    public boolean addUserPassword(String userName, String password) {
+        return authenticationRepository.addUserPassword(userName, password);
+    }
+
+    @Override
+    public boolean checkUserCredentials(String userName, String password) {
+        return authenticationRepository.checkUserCredentials(userName, password);
     }
 }

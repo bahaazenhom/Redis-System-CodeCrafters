@@ -1,4 +1,4 @@
-package command.handlers.connection;
+package command.handlers.authentication;
 
 import command.CommandStrategy;
 import protocol.RESPSerializer;

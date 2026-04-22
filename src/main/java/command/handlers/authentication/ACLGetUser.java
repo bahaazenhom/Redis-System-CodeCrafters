@@ -1,8 +1,7 @@
-package command.handlers.connection;
+package command.handlers.authentication;
 
 import command.CommandStrategy;
 import domain.values.UserProperties;
-import protocol.RESPParser;
 import protocol.RESPSerializer;
 import server.connection.ClientConnection;
 import storage.DataStore;
@@ -22,11 +21,15 @@ public class ACLGetUser implements CommandStrategy {
     public void execute(List<String> arguments, ClientConnection clientOutput) {
         try {
             String userName = arguments.get(0);
-            Map<String, List<String>> userProperties = dataStore.getUserProperties(userName).getValue();
-            clientOutput.write(RESPSerializer.writeUserProperties(userProperties));
+            UserProperties userProperties = dataStore.getUserProperties(userName);
+            if (userProperties == null)
+                clientOutput.write(RESPSerializer.error("WRONGPASS invalid username or user is disabled."));
+            else {
+                Map<String, List<String>> userPropertiesData = userProperties.getValue();
+                clientOutput.write(RESPSerializer.writeUserProperties(userPropertiesData));
+            }
             clientOutput.flush();
-        }
-        catch (Exception e){
+        } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
@@ -36,7 +39,7 @@ public class ACLGetUser implements CommandStrategy {
     public void validateArguments(List<String> arguments) throws IllegalArgumentException {
         // I want to use logging here
         System.out.println("Validating arguments for ACL GETUSER command: " + arguments);
-        if(arguments.size()!=1){
+        if (arguments.size() != 1) {
             throw new IllegalArgumentException("Wrong number of arguments for 'ACL GETUSER' command");
         }
     }
