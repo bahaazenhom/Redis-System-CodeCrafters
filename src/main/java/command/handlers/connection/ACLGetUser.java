@@ -22,10 +22,7 @@ public class ACLGetUser implements CommandStrategy {
     public void execute(List<String> arguments, ClientConnection clientOutput) {
         try {
             String userName = arguments.get(0);
-            System.out.println("Executing ACL GETUSER for user: " + userName);
             Map<String, List<String>> userProperties = dataStore.getUserProperties(userName).getValue();
-            System.out.println("Retrieved user properties for " + userName + ": " + userProperties);
-           // clientOutput.write(RESPSerializer.bulkString(userName));
             clientOutput.write(RESPSerializer.writeUserProperties(userProperties));
             clientOutput.flush();
         }

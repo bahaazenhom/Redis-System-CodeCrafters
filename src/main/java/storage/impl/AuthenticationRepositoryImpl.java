@@ -30,17 +30,17 @@ public class AuthenticationRepositoryImpl implements AuthenticationRepository {
 
     @Override
     public UserProperties getUserProperties(String currentUser) {
-        System.out.println("hello from Authentication impl");
-        System.out.println("Current user: " + currentUser);
-        System.out.println("Store contents: " + store);
-        System.out.println("User properties in store: " + store.get(currentUser));
         return (UserProperties) store.get(currentUser);
     }
 
     private void populateDefaultUser(){
         UserProperties userProperties = new UserProperties();
+        // Default Flags Population
         userProperties.getValue().put("flags", new ArrayList<>());
         userProperties.getValue().get("flags").add("nopass");
+
+        // Default Passwords Population
+        userProperties.getValue().put("passwords", new ArrayList<>());
         store.put("default", userProperties);
     }
 }

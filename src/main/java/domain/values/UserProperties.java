@@ -5,6 +5,7 @@ import domain.RedisValue;
 
 import java.sql.SQLOutput;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -13,7 +14,7 @@ public class UserProperties extends RedisValue {
 
     public UserProperties() {
         super(DataType.PROPERTY_VALUE);
-        this.userProperties = new HashMap<>();
+        this.userProperties = new LinkedHashMap<>();
     }
 
     public UserProperties(Long expiryTime) {
