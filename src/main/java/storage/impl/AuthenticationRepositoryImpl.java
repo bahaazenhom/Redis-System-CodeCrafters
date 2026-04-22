@@ -40,6 +40,7 @@ public class AuthenticationRepositoryImpl implements AuthenticationRepository {
     private void populateDefaultUser(){
         UserProperties userProperties = new UserProperties();
         userProperties.getValue().put("flags", new ArrayList<>());
+        userProperties.getValue().get("flags").add("nopass");
         store.put("default", userProperties);
     }
 }
