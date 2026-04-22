@@ -80,6 +80,7 @@ public class CommandFactory {
             case "GEOSEARCH" -> new GEOSEARCHHandler(dataStore);
             case "ACLWHOAMI" -> new ACLWhoAmIHandler();
             case "ACLGETUSER" -> new ACLGetUser(dataStore);
+            case "ACLSETUSER" -> new ACLSetUser(dataStore);
             default -> null;
         };
     }
