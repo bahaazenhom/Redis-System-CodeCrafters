@@ -1,6 +1,7 @@
 package command;
 
 import protocol.RESPSerializer;
+import protocol.errorenum.ErrorType;
 import pub.sub.ChannelManager;
 import replication.ReplicationManager;
 import server.connection.entity.ClientConnection;
@@ -46,7 +47,7 @@ public class CommandExecuter {
             try {
                 // Check if user is authenticated for commands other than ACLSETUSER
                 if(!isUserAuthenticated(commandName, clientConnection)){
-                    clientConnection.write(RESPSerializer.error("NOAUTH Authentication required."));
+                    clientConnection.write(RESPSerializer.error(ErrorType.NOAUTH,"Authentication required."));
                     clientConnection.flush();
                     return;
                 }
