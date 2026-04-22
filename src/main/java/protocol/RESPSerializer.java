@@ -11,6 +11,7 @@ public class RESPSerializer {
     public static String error(String message) {
         return "-ERR " + message + "\r\n";
     }
+    public static String wrongPass(String message){return "-WRONGPASS "+message+"\r\n";}
 
     public static String integer(long number) {
         if (number == -1) {

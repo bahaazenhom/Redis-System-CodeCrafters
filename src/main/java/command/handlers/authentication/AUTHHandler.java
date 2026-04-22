@@ -21,7 +21,7 @@ public class AUTHHandler implements CommandStrategy {
             String password = arguments.get(1);
             boolean authedUser = store.checkUserCredentials(userName, password);
             if(authedUser)clientOutput.write(RESPSerializer.simpleString("OK"));
-            else clientOutput.write(RESPSerializer.error("WRONGPASS invalid username-password pair or user is disabled."));
+            else clientOutput.write(RESPSerializer.wrongPass("invalid username-password pair or user is disabled."));
             clientOutput.flush();
         }
         catch (Exception e){
