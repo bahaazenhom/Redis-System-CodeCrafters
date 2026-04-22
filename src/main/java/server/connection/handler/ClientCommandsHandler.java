@@ -41,9 +41,6 @@ public class ClientCommandsHandler implements Runnable {
             // the creation point of Client Connection
             clientConnection = new ClientConnection(clientId, outputStream, socket.getInputStream());
 
-            // set the userName of the default client for authentication purposes.
-            if(Thread.currentThread().getName().contains("DefaultClient"))clientConnection.setUserName("default");
-
             processCommands(clientConnection);
 
         } catch (IOException e) {

@@ -98,8 +98,11 @@ public class CommandExecuter {
     }
 
     private boolean isUserAuthenticated(String commandName, ClientConnection clientConnection) {
-        if (commandName.equals("ACLSETUSER")) return true;
+        if (commandName.equals("AUTH")) return true;
 
-        return clientConnection.getUsername() != null;
+        String userName = clientConnection.getUsername();
+        String userPassword = clientConnection.getUserPassword();
+
+        return ServerContext.getInstance().getDataStore().authenticateUser(userName, userPassword);
     }
 }

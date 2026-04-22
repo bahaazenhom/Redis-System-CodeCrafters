@@ -10,8 +10,8 @@ public class ClientConnection {
     private final OutputStream outputStream;
     private final InputStream inputStream;
     private final BufferedReader reader;
-    private final BufferedWriter writer;
-    private String userName;
+    private String userName = "default";
+    private String userPassword = "";
     private static ClientConnection clientConnection;
 
     // Flag to indicate PSYNC completed - ClientHandler should stop reading
@@ -22,7 +22,6 @@ public class ClientConnection {
         this.outputStream = outputStream;
         this.inputStream = inputStream;
         this.reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-        this.writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
         clientConnection = this;
     }
 
@@ -122,5 +121,13 @@ public class ClientConnection {
 
     public void setUserName(String userName) {
         this.userName = userName;
+    }
+
+    public String getUserPassword() {
+        return userPassword;
+    }
+
+    public void setUserPassword(String userPassword) {
+        this.userPassword = userPassword;
     }
 }

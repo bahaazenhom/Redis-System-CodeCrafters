@@ -7,6 +7,7 @@ import storage.repository.AuthenticationRepository;
 import util.AppLogger;
 import util.SHA256Util;
 
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -45,7 +46,11 @@ public class AuthenticationRepositoryImpl implements AuthenticationRepository {
 
         String sha256Password = SHA256Util.hashToHex(password.substring(1));
         getUserProperties(userName).getValue().get("passwords").add(sha256Password);
-        ClientConnection.getInstance().setUserName(userName);
+
+        ClientConnection clientConnection = ClientConnection.getInstance();
+        clientConnection.setUserName(userName);
+        clientConnection.setUserPassword(password.substring(1));
+
         return true;
 
     }
@@ -61,8 +66,12 @@ public class AuthenticationRepositoryImpl implements AuthenticationRepository {
             return true; // No password required for this user
         }
         List<String> passwords = userProperties.getValue().get("passwords");
+        System.out.println("passwords = " + passwords);
+        System.out.println(SHA256Util.hashToHex(password));
         for(String storedPassword:passwords){
             if(storedPassword.equals(SHA256Util.hashToHex(password))){
+                ClientConnection.getInstance().setUserPassword(password.substring(1));
+                ClientConnection.getInstance().setUserName(userName);
                 return true;
             }
         }

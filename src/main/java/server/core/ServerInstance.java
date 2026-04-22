@@ -38,18 +38,10 @@ public class ServerInstance implements Runnable {
             try {
                 clientSocket = serverSocket.accept();
 
-                // flags whether this client is the first client to connect or not (default client or not).
-                // just for authentication purposes.
-                String clientName = "Client";
-                if(isDefaultClient){
-                    clientName = "DefaultClient";
-                    isDefaultClient = false;
-                }
-
                 // Handle each client in a separate thread
                 Thread clientThread = new Thread(
                         new ClientCommandsHandler(clientSocket, commandExecuter),
-                        clientName+"-" + port + "-" + clientSocket.getPort());
+                        "Client-" + port + "-" + clientSocket.getPort());
                 clientThread.start();
 
             } catch (IOException e) {
