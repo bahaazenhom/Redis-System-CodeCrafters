@@ -20,7 +20,7 @@ public class ACLSetUser implements CommandStrategy {
             String userName = arguments.get(0);
             String password = arguments.get(1);
             store.addUserPassword(userName, password);
-            clientOutput.write(RESPSerializer.bulkString("OK"));
+            clientOutput.write(RESPSerializer.simpleString("OK"));
             clientOutput.flush();
         }
         catch (Exception e){
