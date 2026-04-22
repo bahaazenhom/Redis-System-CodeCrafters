@@ -4,7 +4,7 @@ import command.CommandStrategy;
 import protocol.RESPSerializer;
 import pub.sub.ChannelManager;
 import replication.ReplicationManager;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 
 import java.io.IOException;
 import java.util.ArrayList;

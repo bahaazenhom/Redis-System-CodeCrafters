@@ -6,7 +6,7 @@ import java.util.List;
 import command.CommandStrategy;
 import protocol.RESPSerializer;
 import rdb.RDBManager;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 import server.core.ServerContext;
 import storage.DataStore;
 import util.ServerConfiguration;

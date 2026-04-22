@@ -34,6 +34,10 @@ public class Main {
             ServerContext serverContext = ServerContext.getInstance();
             serverContext.setConfiguration(config);
 
+            // Create core components
+            ServerManager serverManager = ServerManager.create();
+            ReplicationManager replicationManager = ReplicationManager.create();
+
             // Initialize in-memory data store
             DataStore dataStore = new InMemoryDataStore();
             serverContext.setDataStore(dataStore);
@@ -43,8 +47,6 @@ public class Main {
 
             // Create core components
             CommandExecuter commandExecuter = new CommandExecuter(dataStore);
-            ServerManager serverManager = ServerManager.create();
-            ReplicationManager replicationManager = ReplicationManager.create();
 
             // Create and start server instance
             logger.info("Creating server instance on port " + config.getPort());

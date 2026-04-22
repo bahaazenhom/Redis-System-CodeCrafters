@@ -1,7 +1,6 @@
 package storage;
 
 import domain.values.UserProperties;
-import server.connection.ClientConnection;
 import storage.impl.*;
 import storage.concurrency.ListWaitRegistry;
 import storage.concurrency.StreamWaitRegistry;
@@ -36,7 +35,7 @@ public class InMemoryDataStore implements DataStore {
         this.listRepository = new ListRepositoryImpl(store, listWaitRegistry);
         this.streamRepository = new StreamRepositoryImpl(store, streamWaitRegistry);
         this.sortedSetRepository = new SortedSetRepositoryImpl(store);
-        this.authenticationRepository = new AuthenticationRepositoryImpl(ClientConnection.getInstance(),store);
+        this.authenticationRepository = new AuthenticationRepositoryImpl(store);
     }
 
     // ============================================
@@ -197,12 +196,12 @@ public class InMemoryDataStore implements DataStore {
     }
 
     @Override
-    public boolean addUserPassword(String userName, String password) {
-        return authenticationRepository.addUserPassword(userName, password);
+    public boolean setUserPassword(String userName, String password) {
+        return authenticationRepository.setUserPassword(userName, password);
     }
 
     @Override
-    public boolean checkUserCredentials(String userName, String password) {
-        return authenticationRepository.checkUserCredentials(userName, password);
+    public boolean authenticateUser(String userName, String password) {
+        return authenticationRepository.authenticateUser(userName, password);
     }
 }

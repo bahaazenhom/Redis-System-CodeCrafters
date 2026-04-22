@@ -5,8 +5,7 @@ import domain.values.UserProperties;
 public interface AuthenticationRepository {
     String getCurrentUser();
     UserProperties getUserProperties(String currentUser);
+    boolean setUserPassword(String userName, String password);
 
-    boolean addUserPassword(String userName, String password);
-
-    boolean checkUserCredentials(String userName, String password);
+    boolean authenticateUser(String userName, String password);
 }

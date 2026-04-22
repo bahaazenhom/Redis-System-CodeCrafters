@@ -2,9 +2,8 @@ package command.handlers.authentication;
 
 import command.CommandStrategy;
 import protocol.RESPSerializer;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 import storage.DataStore;
-import storage.repository.AuthenticationRepository;
 
 import java.util.List;
 
@@ -19,7 +18,7 @@ public class AUTHHandler implements CommandStrategy {
         try{
             String userName = arguments.get(0);
             String password = arguments.get(1);
-            boolean authedUser = store.checkUserCredentials(userName, password);
+            boolean authedUser = store.authenticateUser(userName, password);
             if(authedUser)clientOutput.write(RESPSerializer.simpleString("OK"));
             else clientOutput.write(RESPSerializer.wrongPass("invalid username-password pair or user is disabled."));
             clientOutput.flush();

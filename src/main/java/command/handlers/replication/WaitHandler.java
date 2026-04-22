@@ -6,7 +6,7 @@ import java.util.logging.Logger;
 import command.CommandStrategy;
 import protocol.RESPSerializer;
 import replication.ReplicationManager;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 import replication.sync.WaitRequestManager;
 import replication.sync.WaitRequest;
 import util.AppLogger;

@@ -1,14 +1,12 @@
 package command.handlers.pubsub;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import command.CommandStrategy;
 import protocol.RESPSerializer;
 import pub.sub.ChannelManager;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 
 public class UnsubscribeHandler implements CommandStrategy {
     private ChannelManager channelManager;

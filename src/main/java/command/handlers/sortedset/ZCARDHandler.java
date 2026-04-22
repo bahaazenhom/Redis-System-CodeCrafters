@@ -3,11 +3,9 @@ package command.handlers.sortedset;
 import java.io.IOException;
 import java.util.List;
 
-import javax.xml.crypto.Data;
-
 import command.CommandStrategy;
 import protocol.RESPSerializer;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 import storage.DataStore;
 
 public class ZCARDHandler implements CommandStrategy {

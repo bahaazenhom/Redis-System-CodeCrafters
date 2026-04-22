@@ -4,7 +4,7 @@ import java.util.List;
 
 import command.CommandStrategy;
 import replication.ReplicationManager;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 import replication.sync.WaitRequestManager;
 
 public class AckHandler implements CommandStrategy {

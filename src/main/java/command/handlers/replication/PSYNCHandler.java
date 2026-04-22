@@ -6,8 +6,8 @@ import java.util.List;
 import command.CommandStrategy;
 import protocol.RESPSerializer;
 import replication.ReplicationManager;
-import server.connection.ClientConnection;
-import server.handler.SlaveAckHandler;
+import server.connection.entity.ClientConnection;
+import server.connection.handler.SlaveAckHandler;
 
 public class PSYNCHandler implements CommandStrategy {
     private final ReplicationManager replicationManager;

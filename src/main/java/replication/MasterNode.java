@@ -3,19 +3,24 @@ package replication;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 import command.CommandExecuter;
+import server.connection.handler.ClientCommandsHandler;
 import server.core.ServerInstance;
+import util.AppLogger;
 
 public class MasterNode extends ServerInstance {
     private final String role = "master";
     private final List<SlaveNode> connectedSlaves = new ArrayList<>();
     private final String id = "8371b4fb1155b71f4a04d3e1bc3e18c4a990aeeb";
     private long offset = 0L;
+    Logger logger = AppLogger.getLogger(MasterNode.class);
+
 
     public MasterNode(String host, int port, CommandExecuter commandExecuter, String serverRole) throws IOException {
         super(host, port, commandExecuter, serverRole);
-        System.out.println("Initializing Master Node on port " + port);
+        logger.info("Initializing Master Node on port " + port);
     }
 
     public void addSlave(SlaveNode slave) {

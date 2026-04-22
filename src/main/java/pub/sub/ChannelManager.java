@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 import protocol.RESPSerializer;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 
 public class ChannelManager {
 

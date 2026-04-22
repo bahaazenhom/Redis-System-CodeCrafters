@@ -1,4 +1,4 @@
-package server.handler;
+package server.connection.handler;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,7 +8,7 @@ import command.CommandExecuter;
 import protocol.RESPParser;
 import protocol.RESPSerializer;
 import replication.ReplicationManager;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 
 public class CommandPropagationHandler implements Runnable {
 

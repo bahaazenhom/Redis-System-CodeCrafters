@@ -2,7 +2,7 @@ package command.handlers.connection;
 
 import command.CommandStrategy;
 import protocol.RESPSerializer;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 
 import java.io.IOException;
 import java.util.List;

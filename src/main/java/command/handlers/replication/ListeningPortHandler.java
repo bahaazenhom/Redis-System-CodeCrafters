@@ -5,7 +5,7 @@ import java.util.List;
 import command.CommandStrategy;
 import protocol.RESPSerializer;
 import replication.ReplicationManager;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 
 public class ListeningPortHandler implements CommandStrategy {
     private final ReplicationManager replicationManager;

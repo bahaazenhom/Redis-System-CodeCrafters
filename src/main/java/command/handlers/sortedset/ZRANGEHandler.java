@@ -4,7 +4,7 @@ import java.util.List;
 
 import command.CommandStrategy;
 import protocol.RESPSerializer;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 import storage.DataStore;
 
 public class ZRANGEHandler implements CommandStrategy {

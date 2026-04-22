@@ -1,4 +1,4 @@
-package server.handler;
+package server.connection.handler;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -8,7 +8,7 @@ import java.util.logging.Logger;
 
 import command.CommandExecuter;
 import protocol.RESPParser;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 import util.AppLogger;
 
 public class SlaveAckHandler {

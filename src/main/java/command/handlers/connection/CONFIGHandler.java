@@ -5,7 +5,7 @@ import java.util.List;
 
 import command.CommandStrategy;
 import protocol.RESPSerializer;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 import server.core.ServerContext;
 import util.ServerConfiguration;
 

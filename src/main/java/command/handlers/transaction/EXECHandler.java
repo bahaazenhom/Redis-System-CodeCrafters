@@ -3,7 +3,7 @@ package command.handlers.transaction;
 import java.util.List;
 
 import command.CommandStrategy;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 
 /**
  * EXEC command implementation.

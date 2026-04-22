@@ -2,7 +2,7 @@ package command.handlers.string;
 
 import command.CommandStrategy;
 import protocol.RESPSerializer;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 import storage.DataStore;
 import domain.values.StringValue;
 

@@ -1,4 +1,4 @@
-package server.handler;
+package server.connection.handler;
 
 import java.io.BufferedReader;
 import java.io.OutputStream;
@@ -12,18 +12,19 @@ import java.util.logging.Logger;
 import command.CommandExecuter;
 import protocol.RESPParser;
 import replication.ReplicationManager;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
+import server.core.ServerContext;
 import util.AppLogger;
 
-public class ClientHandler implements Runnable {
+public class ClientCommandsHandler implements Runnable {
 
     private final Socket socket;
     private final CommandExecuter commandExecuter;
     private final String clientId;
     private final ReplicationManager replicationManager = ReplicationManager.create();
-    Logger logger = AppLogger.getLogger(ClientHandler.class);
+    Logger logger = AppLogger.getLogger(ClientCommandsHandler.class);
 
-    public ClientHandler(Socket socket, CommandExecuter commandExecuter) {
+    public ClientCommandsHandler(Socket socket, CommandExecuter commandExecuter) {
         this.socket = socket;
         this.commandExecuter = commandExecuter;
         this.clientId = UUID.randomUUID().toString();
@@ -36,7 +37,12 @@ public class ClientHandler implements Runnable {
 
         try {
             outputStream = socket.getOutputStream();
+
+            // the creation point of Client Connection
             clientConnection = new ClientConnection(clientId, outputStream, socket.getInputStream());
+
+            // set the userName of the default client for authentication purposes.
+            if(Thread.currentThread().getName().contains("DefaultClient"))clientConnection.setUserName("default");
 
             processCommands(clientConnection);
 
@@ -70,6 +76,7 @@ public class ClientHandler implements Runnable {
             throws IOException {
         logger.info("Processing commands for client: " + clientId);
 
+
         BufferedReader in = clientConnection.getBufferedReader();
         String line;
 
@@ -83,20 +90,20 @@ public class ClientHandler implements Runnable {
             List<String> commands = RESPParser.parseRequest(numElements, in);
 
             String commandName = commands.get(0);
-            int startIndexSublist = 1;
+            int startIndexInTheCommandList = 1;
 
             // Handle REPLCONF subcommands
             if (commandName.equalsIgnoreCase("REPLCONF")) {
                 commandName = commands.get(1);
-                startIndexSublist = 2;
+                startIndexInTheCommandList = 2;
             }
             if (Objects.equals(commandName, "ACL")) {
                 commandName += commands.get(1);
-                startIndexSublist = 2;
+                startIndexInTheCommandList = 2;
             }
 
 
-            List<String> arguments = commands.subList(startIndexSublist, commands.size());
+            List<String> arguments = commands.subList(startIndexInTheCommandList, commands.size());
 
             try {
                 commandExecuter.execute(clientId, commandName, arguments, clientConnection);

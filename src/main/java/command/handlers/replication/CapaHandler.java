@@ -4,7 +4,7 @@ import java.util.List;
 
 import command.CommandStrategy;
 import protocol.RESPSerializer;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 
 public class CapaHandler implements CommandStrategy {
 

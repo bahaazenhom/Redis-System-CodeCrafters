@@ -2,7 +2,7 @@ package command;
 
 import java.util.List;
 
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 
 public interface CommandStrategy {
     void execute(List<String> arguments, ClientConnection clientOutput);

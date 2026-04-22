@@ -3,7 +3,7 @@ package command.handlers.authentication;
 import command.CommandStrategy;
 import domain.values.UserProperties;
 import protocol.RESPSerializer;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 import storage.DataStore;
 
 import java.util.List;
@@ -37,8 +37,6 @@ public class ACLGetUser implements CommandStrategy {
 
     @Override
     public void validateArguments(List<String> arguments) throws IllegalArgumentException {
-        // I want to use logging here
-        System.out.println("Validating arguments for ACL GETUSER command: " + arguments);
         if (arguments.size() != 1) {
             throw new IllegalArgumentException("Wrong number of arguments for 'ACL GETUSER' command");
         }

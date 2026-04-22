@@ -5,7 +5,7 @@ import java.util.List;
 import command.CommandStrategy;
 import protocol.RESPSerializer;
 import pub.sub.ChannelManager;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 
 public class SubscribeHandler implements CommandStrategy {
     private ChannelManager channelManager;

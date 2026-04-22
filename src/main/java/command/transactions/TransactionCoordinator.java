@@ -4,7 +4,7 @@ import command.CommandFactory;
 import command.CommandRequest;
 import command.CommandStrategy;
 import protocol.RESPSerializer;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 
 import java.io.IOException;
 import java.io.StringWriter;

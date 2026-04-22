@@ -2,7 +2,7 @@ package command.handlers.authentication;
 
 import command.CommandStrategy;
 import protocol.RESPSerializer;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 
 import java.util.List;
 

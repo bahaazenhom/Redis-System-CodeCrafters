@@ -1,4 +1,4 @@
-package server.connection;
+package server.connection.entity;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
@@ -11,7 +11,7 @@ public class ClientConnection {
     private final InputStream inputStream;
     private final BufferedReader reader;
     private final BufferedWriter writer;
-    private String username;
+    private String userName;
     private static ClientConnection clientConnection;
 
     // Flag to indicate PSYNC completed - ClientHandler should stop reading
@@ -23,7 +23,6 @@ public class ClientConnection {
         this.inputStream = inputStream;
         this.reader = new BufferedReader(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
         this.writer = new BufferedWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
-        this.username = "default";
         clientConnection = this;
     }
 
@@ -118,6 +117,10 @@ public class ClientConnection {
         return clientId;
     }
     public String getUsername() {
-        return username;
+        return userName;
+    }
+
+    public void setUserName(String userName) {
+        this.userName = userName;
     }
 }

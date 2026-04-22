@@ -5,7 +5,7 @@ import java.net.ServerSocket;
 import java.net.Socket;
 
 import command.CommandExecuter;
-import server.handler.ClientHandler;
+import server.connection.handler.ClientCommandsHandler;
 
 public class ServerInstance implements Runnable {
     private final String host;
@@ -13,6 +13,7 @@ public class ServerInstance implements Runnable {
     private final CommandExecuter commandExecuter;
     private final ServerSocket serverSocket;
     private Socket clientSocket;
+    private boolean isDefaultClient = true;
 
     private volatile boolean running = true;
     private final String serverRole;
@@ -36,10 +37,19 @@ public class ServerInstance implements Runnable {
         while (running) {
             try {
                 clientSocket = serverSocket.accept();
+
+                // flags whether this client is the first client to connect or not (default client or not).
+                // just for authentication purposes.
+                String clientName = "Client";
+                if(isDefaultClient){
+                    clientName = "DefaultClient";
+                    isDefaultClient = false;
+                }
+
                 // Handle each client in a separate thread
                 Thread clientThread = new Thread(
-                        new ClientHandler(clientSocket, commandExecuter),
-                        "Client-" + port + "-" + clientSocket.getPort());
+                        new ClientCommandsHandler(clientSocket, commandExecuter),
+                        clientName+"-" + port + "-" + clientSocket.getPort());
                 clientThread.start();
 
             } catch (IOException e) {

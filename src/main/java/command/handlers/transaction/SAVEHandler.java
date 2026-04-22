@@ -4,7 +4,7 @@ import command.CommandStrategy;
 import protocol.RESPSerializer;
 import rdb.RDBException;
 import rdb.RDBManager;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 import server.core.ServerContext;
 import storage.DataStore;
 import util.ServerConfiguration;

@@ -5,7 +5,7 @@ import command.handlers.Replicable;
 import command.CommandStrategy;
 import protocol.RESPSerializer;
 import replication.ReplicationManager;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 import storage.DataStore;
 import domain.RedisValue;
 import domain.values.StringValue;

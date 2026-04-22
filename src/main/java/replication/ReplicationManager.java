@@ -11,8 +11,8 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import command.CommandExecuter;
 import protocol.RESPSerializer;
-import server.connection.ClientConnection;
-import server.handler.CommandPropagationHandler;
+import server.connection.entity.ClientConnection;
+import server.connection.handler.CommandPropagationHandler;
 import server.core.ServerInstance;
 
 public class ReplicationManager {

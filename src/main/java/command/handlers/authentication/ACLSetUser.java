@@ -2,13 +2,16 @@ package command.handlers.authentication;
 
 import command.CommandStrategy;
 import protocol.RESPSerializer;
-import server.connection.ClientConnection;
+import server.connection.entity.ClientConnection;
 import storage.DataStore;
+import util.AppLogger;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 public class ACLSetUser implements CommandStrategy {
     private final DataStore store;
+    Logger logger = AppLogger.getLogger(ACLSetUser.class);
 
     public ACLSetUser(DataStore dataStore){
         this.store = dataStore;
@@ -17,11 +20,12 @@ public class ACLSetUser implements CommandStrategy {
     @Override
     public void execute(List<String> arguments, ClientConnection clientOutput) {
         try{
+            logger.info("Executing ACL SETUSER with arguments: " + arguments);
             String userName = arguments.get(0);
             String password = arguments.get(1);
-            boolean isAdded = store.addUserPassword(userName, password);
-            if(isAdded) clientOutput.write(RESPSerializer.simpleString("OK"));
-            else clientOutput.write(RESPSerializer.error("WRONGPASS invalid username or user is disabled."));
+            boolean isPasswordSet = store.setUserPassword(userName, password);
+            if(isPasswordSet) clientOutput.write(RESPSerializer.simpleString("OK"));
+            else clientOutput.write(RESPSerializer.error("NOAUTH Authentication required."));
             clientOutput.flush();
         }
         catch (Exception e){
