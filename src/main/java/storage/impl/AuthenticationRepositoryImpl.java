@@ -6,6 +6,7 @@ import server.connection.ClientConnection;
 import storage.DataStore;
 import storage.repository.AuthenticationRepository;
 
+import java.sql.SQLOutput;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -29,11 +30,16 @@ public class AuthenticationRepositoryImpl implements AuthenticationRepository {
 
     @Override
     public UserProperties getUserProperties(String currentUser) {
+        System.out.println("hello from Authentication impl");
+        System.out.println("Current user: " + currentUser);
+        System.out.println("Store contents: " + store);
+        System.out.println("User properties in store: " + store.get(currentUser));
         return (UserProperties) store.get(currentUser);
     }
 
     private void populateDefaultUser(){
-        store.put("default",new UserProperties());
-        ((Map<String, List<String>>)((UserProperties)store.get("default")).getValue()).put("flags",new ArrayList<>());
+        UserProperties userProperties = new UserProperties();
+        userProperties.getValue().put("flags", new ArrayList<>());
+        store.put("default", userProperties);
     }
 }

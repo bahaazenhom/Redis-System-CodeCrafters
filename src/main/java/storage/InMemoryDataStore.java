@@ -188,11 +188,12 @@ public class InMemoryDataStore implements DataStore {
 
     @Override
     public String getCurrentUser() {
-        return "";
+        return authenticationRepository.getCurrentUser();
     }
 
     @Override
     public UserProperties getUserProperties(String currentUser) {
-        return null;
+        System.out.println("Hello from in-memory");
+        return authenticationRepository.getUserProperties(currentUser);
     }
 }

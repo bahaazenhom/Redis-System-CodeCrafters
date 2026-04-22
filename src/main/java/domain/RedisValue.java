@@ -1,6 +1,6 @@
 package domain;
 
-public abstract class RedisValue {
+public abstract class RedisValue<T> {
     protected final DataType type;
     protected Long expiryTime;
 
@@ -15,7 +15,7 @@ public abstract class RedisValue {
         this.type = type;
     }
 
-    public abstract Object getValue();
+    public abstract T getValue();
 
     public DataType getType() {
         return type;

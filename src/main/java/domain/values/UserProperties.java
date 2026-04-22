@@ -3,6 +3,7 @@ package domain.values;
 import domain.DataType;
 import domain.RedisValue;
 
+import java.sql.SQLOutput;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,7 +23,8 @@ public class UserProperties extends RedisValue {
 
 
     @Override
-    public Object getValue() {
+    public Map<String, List<String>> getValue() {
+        System.out.println("userProperties = " + userProperties);
         return userProperties;
     }
 }

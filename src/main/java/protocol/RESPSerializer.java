@@ -166,23 +166,12 @@ public class RESPSerializer {
 
         StringBuilder respBuilder = new StringBuilder();
 
-        respBuilder.append("*").append(userProperties.size()).append("\r\n");
+        // Flat structure: key, value-array, key2, value2-array, ...
+        respBuilder.append("*").append(userProperties.size() * 2).append("\r\n");
 
         for (Map.Entry<String, List<String>> entry : userProperties.entrySet()) {
-            List<String> values = entry.getValue();
-
-            int subArraySize = (values == null) ? 1 : 1 + values.size();
-            respBuilder.append("*").append(subArraySize).append("\r\n");
-
-            // Append the Key
             respBuilder.append(bulkString(entry.getKey()));
-
-            // Append the Values
-            if (values != null) {
-                for (String value : values) {
-                    respBuilder.append(bulkString(value));
-                }
-            }
+            respBuilder.append(array(entry.getValue()));
         }
 
         return respBuilder.toString();

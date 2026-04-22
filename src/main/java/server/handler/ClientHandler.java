@@ -86,11 +86,11 @@ public class ClientHandler implements Runnable {
             int startIndexSublist = 1;
 
             // Handle REPLCONF subcommands
-            if (commandName.equalsIgnoreCase("REPLCONF")) {
-                commandName = commands.get(1);
+            if (commandName.equalsIgnoreCase("REPLCONF") || Objects.equals(commandName, "ACL")) {
+                commandName += commands.get(1);
                 startIndexSublist = 2;
             }
-            if(Objects.equals(commandName, "ACL"))commandName+=commands.get(1);
+
 
             List<String> arguments = commands.subList(startIndexSublist, commands.size());
 
