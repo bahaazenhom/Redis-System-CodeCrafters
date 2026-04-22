@@ -1,5 +1,7 @@
 package protocol;
 
+import protocol.errorenum.ErrorType;
+
 import java.util.List;
 import java.util.Map;
 
@@ -9,9 +11,12 @@ public class RESPSerializer {
     }
 
     public static String error(String message) {
-        return "-ERR " + message + "\r\n";
+        return "-" + ErrorType.ERR + " " + message + "\r\n";
     }
-    public static String wrongPass(String message){return "-WRONGPASS "+message+"\r\n";}
+
+    public static String error(ErrorType errorType, String message) {
+        return "-" + errorType + " " + message + "\r\n";
+    }
 
     public static String integer(long number) {
         if (number == -1) {

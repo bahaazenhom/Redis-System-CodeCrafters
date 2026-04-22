@@ -2,6 +2,7 @@ package command.handlers.authentication;
 
 import command.CommandStrategy;
 import protocol.RESPSerializer;
+import protocol.errorenum.ErrorType;
 import server.connection.entity.ClientConnection;
 import storage.DataStore;
 
@@ -20,7 +21,7 @@ public class AUTHHandler implements CommandStrategy {
             String password = arguments.get(1);
             boolean authedUser = store.authenticateUser(userName, password);
             if(authedUser)clientOutput.write(RESPSerializer.simpleString("OK"));
-            else clientOutput.write(RESPSerializer.wrongPass("invalid username-password pair or user is disabled."));
+            else clientOutput.write(RESPSerializer.error(ErrorType.WRONGPASS,"invalid username-password pair or user is disabled."));
             clientOutput.flush();
         }
         catch (Exception e){

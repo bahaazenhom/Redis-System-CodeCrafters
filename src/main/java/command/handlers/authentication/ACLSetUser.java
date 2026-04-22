@@ -2,6 +2,7 @@ package command.handlers.authentication;
 
 import command.CommandStrategy;
 import protocol.RESPSerializer;
+import protocol.errorenum.ErrorType;
 import server.connection.entity.ClientConnection;
 import storage.DataStore;
 import util.AppLogger;
@@ -25,7 +26,7 @@ public class ACLSetUser implements CommandStrategy {
             String password = arguments.get(1);
             boolean isPasswordSet = store.setUserPassword(userName, password);
             if(isPasswordSet) clientOutput.write(RESPSerializer.simpleString("OK"));
-            else clientOutput.write(RESPSerializer.error("NOAUTH Authentication required."));
+            else clientOutput.write(RESPSerializer.error(ErrorType.NOAUTH,"Authentication required."));
             clientOutput.flush();
         }
         catch (Exception e){
