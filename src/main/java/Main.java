@@ -16,7 +16,9 @@ import util.ServerConfiguration;
 
 public class Main {
 
-
+    git add .
+    git commit --allow-empty -m "Last Auth Stage Testing"
+    git push origin master
     public static void main(String[] args) {
         try {
             // Initialize logging system
