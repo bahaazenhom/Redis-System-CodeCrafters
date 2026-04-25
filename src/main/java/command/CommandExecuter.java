@@ -98,7 +98,7 @@ public class CommandExecuter {
     }
 
     private boolean isUserAuthenticated(String commandName, ClientConnection clientConnection) {
-        if (commandName.equals("AUTH")) return true;
+        if (commandName.equalsIgnoreCase("auth")) return true;
 
         String userName = clientConnection.getUsername();
         String userPassword = clientConnection.getUserPassword();

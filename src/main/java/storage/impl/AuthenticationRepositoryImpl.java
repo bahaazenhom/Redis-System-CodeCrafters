@@ -37,6 +37,7 @@ public class AuthenticationRepositoryImpl implements AuthenticationRepository {
     @Override
     public boolean setUserPassword(String userName, String password) {
 
+        // this user is not authorized to make changes to another user data
         if(!ClientConnection.getInstance().getUsername().equals(userName))return false;
 
 
@@ -68,10 +69,12 @@ public class AuthenticationRepositoryImpl implements AuthenticationRepository {
         List<String> passwords = userProperties.getValue().get("passwords");
         System.out.println("passwords = " + passwords);
         System.out.println(SHA256Util.hashToHex(password));
+        ClientConnection clientConnection = ClientConnection.getInstance();
+        logger.info("current client: "+ clientConnection.toString());
         for(String storedPassword:passwords){
             if(storedPassword.equals(SHA256Util.hashToHex(password))){
-                ClientConnection.getInstance().setUserPassword(password.substring(1));
-                ClientConnection.getInstance().setUserName(userName);
+                clientConnection.setUserPassword(password);
+                clientConnection.setUserName(userName);
                 return true;
             }
         }

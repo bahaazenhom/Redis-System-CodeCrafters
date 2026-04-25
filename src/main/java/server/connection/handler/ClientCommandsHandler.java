@@ -94,7 +94,7 @@ public class ClientCommandsHandler implements Runnable {
                 commandName = commands.get(1);
                 startIndexInTheCommandList = 2;
             }
-            if (Objects.equals(commandName, "ACL")) {
+            if (commandName.equalsIgnoreCase("ACL")) {
                 commandName += commands.get(1);
                 startIndexInTheCommandList = 2;
             }
