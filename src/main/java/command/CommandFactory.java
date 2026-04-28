@@ -13,6 +13,7 @@ import command.handlers.geospatial.GEODISTHandler;
 import command.handlers.geospatial.GEOPOSHandler;
 import command.handlers.geospatial.GEOSEARCHHandler;
 import command.handlers.list.*;
+import command.handlers.optimistic_locking.WatchHandler;
 import command.handlers.pubsub.*;
 import command.handlers.replication.*;
 import command.handlers.sortedset.*;
@@ -86,6 +87,7 @@ public class CommandFactory {
             case "ACLGETUSER" -> new ACLGetUser(dataStore);
             case "ACLSETUSER" -> new ACLSetUser(dataStore);
             case "AUTH" -> new AUTHHandler(dataStore);
+            case "WATCH" -> new WatchHandler();
             default -> null;
         };
     }

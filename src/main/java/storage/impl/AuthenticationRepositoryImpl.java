@@ -67,8 +67,6 @@ public class AuthenticationRepositoryImpl implements AuthenticationRepository {
             return true; // No password required for this user
         }
         List<String> passwords = userProperties.getValue().get("passwords");
-        System.out.println("passwords = " + passwords);
-        System.out.println(SHA256Util.hashToHex(password));
         ClientConnection clientConnection = ClientConnection.getInstance();
         logger.info("current client: "+ clientConnection.toString());
         for(String storedPassword:passwords){
